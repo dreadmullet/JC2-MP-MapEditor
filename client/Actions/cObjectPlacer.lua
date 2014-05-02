@@ -4,24 +4,24 @@ function Actions.ObjectPlacer:__init(objectClass)
 	EGUSM.SubscribeUtility.__init(self)
 	MapEditor.Action.__init(self)
 	
-	local angle = Camera:GetAngle()
-	local position = Camera:GetPosition() + angle * Vector3.Forward * 5
-	angle.roll = 0
-	angle.pitch = 0
-	self.object = objectClass(position , angle)
+	self.objectClass = objectClass
+	self.position = Camera:GetPosition() + Camera:GetAngle() * Vector3.Forward * 5
+	self.angle = Angle(0 , 0 , 0)
+	self.object = self.objectClass(self.position , self.angle)
 	MapEditor.map:AddObject(self.object)
 	
 	self:EventSubscribe("Render")
 	self:EventSubscribe("MouseDown")
 end
 
-function Actions.ObjectPlacer:Confirm()
-	
+function Actions.ObjectPlacer:Undo()
+	self.object:Destroy()
+	MapEditor.map:RemoveObject(self.object)
 end
 
-function Actions.ObjectPlacer:Cancel()
-	
-	self:Cancel()
+function Actions.ObjectPlacer:Redo()
+	self.object = self.objectClass(self.position , self.angle)
+	MapEditor.map:AddObject(self.object)
 end
 
 -- Events
@@ -29,8 +29,8 @@ end
 function Actions.ObjectPlacer:Render()
 	local dir = Render:ScreenToWorldDirection(Mouse:GetPosition())
 	local result = Physics:Raycast(Camera:GetPosition() , dir , 0.1 , 512)
-	local position = result.position
-	self.object:SetPosition(position)
+	self.position = result.position
+	self.object:SetPosition(self.position)
 end
 
 function Actions.ObjectPlacer:MouseDown(args)

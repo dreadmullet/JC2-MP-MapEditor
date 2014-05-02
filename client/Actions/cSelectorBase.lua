@@ -7,10 +7,7 @@ function Actions.SelectorBase:__init(mouseButton)
 	self.mouseButton = mouseButton
 	self.downPosition = Mouse:GetPosition()
 	self.delta = Vector2(0 , 0)
-	-- Inheritors overwrite these.
 	self.color = Color.White
-	self.objectSelectedFunction = function(object) end
-	
 	self:EventSubscribe("Render" , Actions.SelectorBase.Render)
 	self:EventSubscribe("MouseUp" , Actions.SelectorBase.MouseUp)
 end
@@ -41,6 +38,7 @@ function Actions.SelectorBase:MouseUp(args)
 			-- Iterate through all of the map's objects and call our function on those that are within
 			-- the bounds of our selection rectangle.
 			-- TODO: This won't scale very well...
+			local objects = {}
 			local screenPos , isOnScreen
 			MapEditor.map:IterateObjects(function(object)
 				screenPos , isOnScreen = Render:WorldToScreen(object:GetPosition())
@@ -51,13 +49,19 @@ function Actions.SelectorBase:MouseUp(args)
 						screenPos.y > top and
 						screenPos.y < bottom
 					then
-						self.objectSelectedFunction(object)
+						table.insert(objects , object)
 					end
 				end
 			end)
+			
+			if #objects > 0 then
+				self:ObjectsSelected(objects)
+				self:Confirm()
+			else
+				self:Cancel()
+			end
 		end
 		
-		self:Confirm()
 		self:UnsubscribeAll()
 	end
 end

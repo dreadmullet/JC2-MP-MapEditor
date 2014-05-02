@@ -19,8 +19,8 @@ function MapEditor.Map:__init(initialPosition)
 	
 	self.camera = MapEditor.Camera(initialPosition)
 	
-	-- Actions are kept track of so we can undo and redo them.
-	-- self.actions = {}
+	self.undoableActions = {}
+	self.redoableActions = {}
 	self.currentAction = nil
 	
 	self.selectedObjects = MapEditor.ObjectManager()
@@ -70,12 +70,36 @@ end
 
 function MapEditor.Map:ActionFinish()
 	Events:Fire("ActionEnd" , tostring(self.currentAction))
+	
+	table.insert(self.undoableActions , self.currentAction)
+	self.redoableActions = {}
+	
 	self.currentAction = nil
 end
 
 function MapEditor.Map:ActionCancel()
 	Events:Fire("ActionEnd" , tostring(self.currentAction))
 	self.currentAction = nil
+end
+
+function MapEditor.Map:Undo()
+	local count = #self.undoableActions
+	if count > 0 then
+		local action = self.undoableActions[count]
+		table.remove(self.undoableActions , count)
+		action:Undo()
+		table.insert(self.redoableActions , action)
+	end
+end
+
+function MapEditor.Map:Redo()
+	local count = #self.redoableActions
+	if count > 0 then
+		local action = self.redoableActions[count]
+		table.remove(self.redoableActions , count)
+		action:Redo()
+		table.insert(self.undoableActions , action)
+	end
 end
 
 -- Events
@@ -119,6 +143,10 @@ function MapEditor.Map:ControlDown(args)
 	
 	if args.name == "Rotate/pan camera" then
 		self.camera.isInputEnabled = true
+	elseif args.name == "Undo" then
+		self:Undo()
+	elseif args.name == "Redo" then
+		self:Redo()
 	end
 end
 
