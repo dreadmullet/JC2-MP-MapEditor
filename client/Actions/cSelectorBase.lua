@@ -60,6 +60,8 @@ function Actions.SelectorBase:MouseUp(args)
 			else
 				self:Cancel()
 			end
+		else
+			self:Cancel()
 		end
 		
 		self:UnsubscribeAll()
