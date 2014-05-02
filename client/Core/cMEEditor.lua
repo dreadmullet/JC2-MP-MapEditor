@@ -1,12 +1,18 @@
 class("Editor" , MapEditor)
 
 function MapEditor.Editor:__init(initialPosition) ; EGUSM.SubscribeUtility.__init(self)
+	self.Destroy = MapEditor.Editor.Destroy
+	
+	MapEditor.editor = self
+	
+	self.map = MapEditor.Map()
+	MapEditor.map = self.map
+	
 	Controls.Add("Rotate/pan camera" , "VehicleCam")
 	Controls.Add("Camera pan modifier" , "Shift")
-	Controls.Add("Camera pan up" , "PrevWeapon")
-	Controls.Add("Camera pan down" , "NextWeapon")
-	
 	self.camera = MapEditor.Camera(initialPosition)
+	
+	MapEditor.SpawnMenu()
 	
 	Mouse:SetVisible(true)
 	
@@ -19,8 +25,14 @@ function MapEditor.Editor:Destroy()
 	
 	self.camera:Destroy()
 	
+	self.map:IterateObjects(function(object)
+		object:Destroy()
+	end)
+	
 	Mouse:SetVisible(false)
 end
+
+-- Events
 
 function MapEditor.Editor:ControlDown(args)
 	if args.name == "Rotate/pan camera" then

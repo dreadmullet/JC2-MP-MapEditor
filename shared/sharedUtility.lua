@@ -78,3 +78,13 @@ Utility.PrintTable = function(t , depth , tableList)
 		end
 	end
 end
+
+Utility.PrettifyVariableName = function(name)
+	local words = {}
+	for word in string.gmatch(name , "[%u%l][%l%d]+") do
+		word = word:sub(1 , 1):upper()..word:sub(2)
+		table.insert(words , word)
+	end
+	
+	return table.concat(words , " ")
+end
