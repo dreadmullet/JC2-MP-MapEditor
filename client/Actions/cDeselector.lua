@@ -1,6 +1,6 @@
-class("Deselector" , Tools)
+class("Deselector" , Actions)
 
-function Tools.Deselector:__init(...) ; Tools.SelectorBase.__init(self , ...)
+function Actions.Deselector:__init(...) ; Actions.SelectorBase.__init(self , ...)
 	self.color = Color.DarkRed
 	self.objectSelectedFunction = function(object)
 		MapEditor.map.selectedObjects:RemoveObject(object)

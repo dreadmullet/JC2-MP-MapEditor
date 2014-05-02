@@ -1,8 +1,8 @@
-class("SelectorBase" , Tools)
+class("SelectorBase" , Actions)
 
-function Tools.SelectorBase:__init(mouseButton)
+function Actions.SelectorBase:__init(mouseButton)
 	EGUSM.SubscribeUtility.__init(self)
-	MapEditor.Tool.__init(self)
+	MapEditor.Action.__init(self)
 	
 	self.mouseButton = mouseButton
 	self.downPosition = Mouse:GetPosition()
@@ -11,13 +11,13 @@ function Tools.SelectorBase:__init(mouseButton)
 	self.color = Color.White
 	self.objectSelectedFunction = function(object) end
 	
-	self:EventSubscribe("Render" , Tools.SelectorBase.Render)
-	self:EventSubscribe("MouseUp" , Tools.SelectorBase.MouseUp)
+	self:EventSubscribe("Render" , Actions.SelectorBase.Render)
+	self:EventSubscribe("MouseUp" , Actions.SelectorBase.MouseUp)
 end
 
 -- Events
 
-function Tools.SelectorBase:Render()
+function Actions.SelectorBase:Render()
 	self.delta = Mouse:GetPosition() - self.downPosition
 	
 	MapEditor.Utility.DrawArea(
@@ -28,7 +28,7 @@ function Tools.SelectorBase:Render()
 	)
 end
 
-function Tools.SelectorBase:MouseUp(args)
+function Actions.SelectorBase:MouseUp(args)
 	if args.button == self.mouseButton then
 		if self.delta:Length() > 16 then
 			local pos1 = self.downPosition
@@ -57,7 +57,7 @@ function Tools.SelectorBase:MouseUp(args)
 			end)
 		end
 		
-		self:Finish()
+		self:Confirm()
 		self:UnsubscribeAll()
 	end
 end

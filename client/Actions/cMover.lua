@@ -1,8 +1,8 @@
-class("Mover" , Tools)
+class("Mover" , Actions)
 
-function Tools.Mover:__init(objectClass)
+function Actions.Mover:__init(objectClass)
 	EGUSM.SubscribeUtility.__init(self)
-	MapEditor.Tool.__init(self)
+	MapEditor.Action.__init(self)
 	
 	self.mousePosition = Mouse:GetPosition()
 	self.delta = Vector3(0 , 0 , 0)
@@ -16,7 +16,7 @@ function Tools.Mover:__init(objectClass)
 	end)
 	
 	if table.count(self.objects) == 0 then
-		self:Finish()
+		self:Cancel()
 		return
 	end
 	
@@ -24,7 +24,7 @@ function Tools.Mover:__init(objectClass)
 	self:EventSubscribe("MouseUp")
 end
 
-function Tools.Mover:GetAverageObjectPosition()
+function Actions.Mover:GetAverageObjectPosition()
 	local position = Vector3(0 , 0 , 0)
 	local count = 0
 	for objectId , objectInfo in pairs(self.objects) do
@@ -38,7 +38,7 @@ end
 
 -- Events
 
-function Tools.Mover:Render()
+function Actions.Mover:Render()
 	local mouseDelta = Mouse:GetPosition() - self.mousePosition
 	self.mousePosition = Mouse:GetPosition()
 	
@@ -58,10 +58,10 @@ function Tools.Mover:Render()
 	end
 end
 
-function Tools.Mover:MouseUp(args)
+function Actions.Mover:MouseUp(args)
 	if args.button == 1 then
 		self:UnsubscribeAll()
-		self:Finish()
+		self:Confirm()
 	elseif args.button == 2 then
 		for objectId , objectInfo in pairs(self.objects) do
 			local object = objectInfo[1]
@@ -71,6 +71,6 @@ function Tools.Mover:MouseUp(args)
 		end
 		
 		self:UnsubscribeAll()
-		self:Finish()
+		self:Cancel()
 	end
 end

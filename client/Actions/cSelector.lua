@@ -1,6 +1,6 @@
-class("Selector" , Tools)
+class("Selector" , Actions)
 
-function Tools.Selector:__init(...) ; Tools.SelectorBase.__init(self , ...)
+function Actions.Selector:__init(...) ; Actions.SelectorBase.__init(self , ...)
 	self.color = Color.LimeGreen
 	self.objectSelectedFunction = function(object)
 		MapEditor.map.selectedObjects:AddObject(object)

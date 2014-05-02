@@ -2,4 +2,4 @@ MapEditor = {}
 
 Objects = {}
 
-Tools = {}
+Actions = {}
