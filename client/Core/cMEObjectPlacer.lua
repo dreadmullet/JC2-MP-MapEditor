@@ -8,18 +8,29 @@ function MapEditor.ObjectPlacer:__init(objectClass) ; EGUSM.SubscribeUtility.__i
 	self.object = objectClass(position , angle)
 	MapEditor.map:AddObject(self.object)
 	
+	MapEditor.map.spawnMenu:SetEnabled(false)
+	MapEditor.map:SetCanSelect(false)
+	
 	self:EventSubscribe("Render")
 	self:EventSubscribe("MouseDown")
 end
 
 function MapEditor.ObjectPlacer:Confirm()
-	self:UnsubscribeAll()
+	self:Done()
 end
 
 function MapEditor.ObjectPlacer:Cancel()
-	self:UnsubscribeAll()
 	self.object:Destroy()
 	MapEditor.map:RemoveObject(self.object)
+	
+	self:Done()
+end
+
+function MapEditor.ObjectPlacer:Done()
+	self:UnsubscribeAll()
+	
+	MapEditor.map.spawnMenu:SetEnabled(true)
+	MapEditor.map:SetCanSelect(true)
 end
 
 -- Events

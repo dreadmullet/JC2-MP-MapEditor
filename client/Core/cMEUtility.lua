@@ -31,3 +31,23 @@ MapEditor.Utility.DrawBounds = function(position , bounds , color)
 	
 	Render:ResetTransform()
 end
+
+MapEditor.Utility.DrawArea = function(position , size , thickness , color)
+	local tVec = Vector2(thickness , thickness) * 0.5
+	local Draw = function(a , b)
+		if size.x < 0 and size.y < 0 then
+			Render:FillArea(a + tVec , b - tVec - (a + tVec) , color)
+		else
+			Render:FillArea(a - tVec , b + tVec - (a - tVec) , color)
+		end
+	end
+	
+	local topLeft = position
+	local topRight = position + Vector2(size.x , 0)
+	local bottomLeft = position + Vector2(0 , size.y)
+	local bottomRight = position + size
+	Draw(topLeft , topRight , color)
+	Draw(topLeft , bottomLeft , color)
+	Draw(topRight , bottomRight , color)
+	Draw(bottomLeft , bottomRight , color)
+end

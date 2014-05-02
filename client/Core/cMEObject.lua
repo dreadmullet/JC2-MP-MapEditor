@@ -27,8 +27,6 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	
 	self.cursor = MapEditor.Cursor(self.position)
 	self.bounds = {Vector3(-2 , -2 , -2) , Vector3(2 , 2 , 2)}
-	
-	self.renderSub = Events:Subscribe("Render" , self , MapEditor.Object.Render)
 end
 
 function MapEditor.Object:Destroy()
@@ -38,10 +36,6 @@ function MapEditor.Object:Destroy()
 	
 	if self.cursor then
 		self.cursor:Destroy()
-	end
-	
-	if IsValid(self.renderSub) then
-		Events:Unsubscribe(self.renderSub)
 	end
 end
 
@@ -79,16 +73,4 @@ end
 
 function MapEditor.Object:GetAngle()
 	return self.angle
-end
-
--- Events
-
-function MapEditor.Object:Render()
-	if self.bounds then
-		MapEditor.Utility.DrawBounds(self.position , self.bounds , Color(127 , 127 , 127 , 127))
-	end
-	
-	if self.OnRender then
-		self:OnRender()
-	end
 end
