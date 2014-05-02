@@ -1,3 +1,5 @@
 MapEditor = {}
 
 Objects = {}
+
+Tools = {}

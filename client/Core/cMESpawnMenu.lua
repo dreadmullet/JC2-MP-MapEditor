@@ -8,11 +8,11 @@ function MapEditor.SpawnMenu:__init() ; EGUSM.SubscribeUtility.__init(self)
 	end
 	table.sort(self.objectNames)
 	
-	self.objectPlacer = nil
-	
 	self:CreateWindow()
 	
 	self:EventSubscribe("ResolutionChange")
+	self:EventSubscribe("ToolSet")
+	self:EventSubscribe("ToolFinish")
 end
 
 function MapEditor.SpawnMenu:CreateWindow()
@@ -48,11 +48,19 @@ end
 function MapEditor.SpawnMenu:SpawnButtonPressed(button)
 	local objectName = button:GetDataString("objectName")
 	local objectClass = Objects[objectName]
-	self.objectPlacer = MapEditor.ObjectPlacer(objectClass)
+	MapEditor.map:SetTool(ObjectPlacer , objectClass)
 end
 
 -- Events
 
 function MapEditor.SpawnMenu:ResolutionChange(args)
 	self.window:SetPosition(Vector2(args.size.x - self.window:GetWidth() - 5 , 200))
+end
+
+function MapEditor.SpawnMenu:ToolSet(toolName)
+	self:SetEnabled(false)
+end
+
+function MapEditor.SpawnMenu:ToolFinish(toolName)
+	self:SetEnabled(true)
 end

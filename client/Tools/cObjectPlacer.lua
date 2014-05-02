@@ -1,6 +1,9 @@
-class("ObjectPlacer" , MapEditor)
+class("ObjectPlacer")
 
-function MapEditor.ObjectPlacer:__init(objectClass) ; EGUSM.SubscribeUtility.__init(self)
+function ObjectPlacer:__init(objectClass)
+	EGUSM.SubscribeUtility.__init(self)
+	MapEditor.Tool.__init(self)
+	
 	local angle = Camera:GetAngle()
 	local position = Camera:GetPosition() + angle * Vector3.Forward * 5
 	angle.roll = 0
@@ -8,41 +11,33 @@ function MapEditor.ObjectPlacer:__init(objectClass) ; EGUSM.SubscribeUtility.__i
 	self.object = objectClass(position , angle)
 	MapEditor.map:AddObject(self.object)
 	
-	MapEditor.map.spawnMenu:SetEnabled(false)
-	MapEditor.map:SetCanSelect(false)
-	
 	self:EventSubscribe("Render")
 	self:EventSubscribe("MouseDown")
 end
 
-function MapEditor.ObjectPlacer:Confirm()
-	self:Done()
+function ObjectPlacer:Confirm()
+	self:UnsubscribeAll()
+	self:Finish()
 end
 
-function MapEditor.ObjectPlacer:Cancel()
+function ObjectPlacer:Cancel()
 	self.object:Destroy()
 	MapEditor.map:RemoveObject(self.object)
 	
-	self:Done()
-end
-
-function MapEditor.ObjectPlacer:Done()
 	self:UnsubscribeAll()
-	
-	MapEditor.map.spawnMenu:SetEnabled(true)
-	MapEditor.map:SetCanSelect(true)
+	self:Finish()
 end
 
 -- Events
 
-function MapEditor.ObjectPlacer:Render()
+function ObjectPlacer:Render()
 	local dir = Render:ScreenToWorldDirection(Mouse:GetPosition())
 	local result = Physics:Raycast(Camera:GetPosition() , dir , 0.1 , 512)
 	local position = result.position
 	self.object:SetPosition(position)
 end
 
-function MapEditor.ObjectPlacer:MouseDown(args)
+function ObjectPlacer:MouseDown(args)
 	if args.button == 1 then
 		self:Confirm()
 	elseif args.button == 2 then
