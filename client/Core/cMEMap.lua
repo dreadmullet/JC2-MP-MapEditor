@@ -12,7 +12,7 @@ function MapEditor.Map:__init(initialPosition)
 	
 	Controls.Add("Rotate/pan camera" , "VehicleCam")
 	Controls.Add("Camera pan modifier" , "Shift")
-	-- Controls.Add("Move object" , "G")
+	Controls.Add("Move object" , "G")
 	-- Controls.Add("Rotate object" , "R")
 	
 	self.camera = MapEditor.Camera(initialPosition)
@@ -49,14 +49,23 @@ function MapEditor.Map:SetTool(toolClass , ...)
 		return
 	end
 	
+	local finishedImmediately = false
+	
+	self.ToolFinish = function() finishedImmediately = true end
+	
 	self.tool = toolClass(...)
 	
-	Events:Fire("ToolSet" , tostring(self.tool))
+	self.ToolFinish = MapEditor.Map.ToolFinish
+	
+	if finishedImmediately then
+		self.tool = nil
+	else
+		Events:Fire("ToolSet" , tostring(self.tool))
+	end
 end
 
 function MapEditor.Map:ToolFinish()
 	Events:Fire("ToolFinish" , tostring(self.tool))
-	
 	self.tool = nil
 end
 
@@ -91,6 +100,14 @@ function MapEditor.Map:MouseDown(args)
 end
 
 function MapEditor.Map:ControlDown(args)
+	if self.tool == nil then
+		if args.name == "Move object" then
+			self:SetTool(Tools.Mover)
+		elseif args.name == "Rotate object" then
+			-- self:SetTool(Tools.Rotator)
+		end
+	end
+	
 	if args.name == "Rotate/pan camera" then
 		self.camera.isInputEnabled = true
 	end
