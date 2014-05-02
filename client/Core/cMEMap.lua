@@ -13,13 +13,15 @@ function MapEditor.Map:__init(initialPosition)
 	Controls.Add("Rotate/pan camera" , "VehicleCam")
 	Controls.Add("Camera pan modifier" , "Shift")
 	Controls.Add("Move object" , "G")
-	-- Controls.Add("Rotate object" , "R")
+	Controls.Add("Rotate object" , "R")
 	Controls.Add("Undo" , "Z")
 	Controls.Add("Redo" , "Y")
 	
 	self.camera = MapEditor.Camera(initialPosition)
 	
-	self.action = nil
+	-- Actions are kept track of so we can undo and redo them.
+	-- self.actions = {}
+	self.currentAction = nil
 	
 	self.selectedObjects = MapEditor.ObjectManager()
 	
@@ -46,7 +48,7 @@ function MapEditor.Map:Destroy()
 end
 
 function MapEditor.Map:SetAction(actionClass , ...)
-	if self.action ~= nil then
+	if self.currentAction ~= nil then
 		warn("Already have an Action!")
 		return
 	end
@@ -55,25 +57,25 @@ function MapEditor.Map:SetAction(actionClass , ...)
 	
 	self.ActionFinish = function() finishedImmediately = true end
 	
-	self.action = actionClass(...)
+	self.currentAction = actionClass(...)
 	
 	self.ActionFinish = MapEditor.Map.ActionFinish
 	
 	if finishedImmediately then
-		self.action = nil
+		self.currentAction = nil
 	else
-		Events:Fire("ActionStart" , tostring(self.action))
+		Events:Fire("ActionStart" , tostring(self.currentAction))
 	end
 end
 
 function MapEditor.Map:ActionFinish()
-	Events:Fire("ActionEnd" , tostring(self.action))
-	self.action = nil
+	Events:Fire("ActionEnd" , tostring(self.currentAction))
+	self.currentAction = nil
 end
 
 function MapEditor.Map:ActionCancel()
-	Events:Fire("ActionEnd" , tostring(self.action))
-	self.action = nil
+	Events:Fire("ActionEnd" , tostring(self.currentAction))
+	self.currentAction = nil
 end
 
 -- Events
@@ -97,7 +99,7 @@ function MapEditor.Map:Render()
 end
 
 function MapEditor.Map:MouseDown(args)
-	if self.action == nil then
+	if self.currentAction == nil then
 		if args.button == 1 then
 			self:SetAction(Actions.Selector , args.button)
 		elseif args.button == 2 then
@@ -107,7 +109,7 @@ function MapEditor.Map:MouseDown(args)
 end
 
 function MapEditor.Map:ControlDown(args)
-	if self.action == nil then
+	if self.currentAction == nil then
 		if args.name == "Move object" then
 			self:SetAction(Actions.Mover)
 		elseif args.name == "Rotate object" then
