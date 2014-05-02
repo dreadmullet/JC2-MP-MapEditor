@@ -20,7 +20,7 @@ function Actions.ObjectPlacer:Undo()
 end
 
 function Actions.ObjectPlacer:Redo()
-	self.object = self.objectClass(self.position , self.angle)
+	self.object:Recreate()
 	MapEditor.map:AddObject(self.object)
 end
 

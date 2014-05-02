@@ -4,6 +4,7 @@ MapEditor.Object.idCounter = 1
 
 function MapEditor.Object:__init(initialPosition , initialAngle)
 	self.Destroy = MapEditor.Object.Destroy
+	self.Recreate = MapEditor.Object.Recreate
 	self.SetPosition = MapEditor.Object.SetPosition
 	self.SetAngle = MapEditor.Object.SetAngle
 	self.GetId = MapEditor.Object.GetId
@@ -37,6 +38,14 @@ function MapEditor.Object:Destroy()
 	if self.cursor then
 		self.cursor:Destroy()
 	end
+end
+
+function MapEditor.Object:Recreate()
+	if self.OnRecreate then
+		self:OnRecreate()
+	end
+	
+	self.cursor = MapEditor.Cursor(self.position)
 end
 
 function MapEditor.Object:SetPosition(position)

@@ -8,6 +8,10 @@ function Objects.RaceCheckpoint:__init(...) ; MapEditor.Object.__init(self , ...
 	
 	self.bounds = {Vector3.One * -6 , Vector3.One * 6}
 	
+	self:OnRecreate()
+end
+
+function Objects.RaceCheckpoint:OnRecreate()
 	self.ring = ClientParticleSystem.Create(
 		AssetLocation.Game ,
 		{
@@ -18,14 +22,14 @@ function Objects.RaceCheckpoint:__init(...) ; MapEditor.Object.__init(self , ...
 	)
 end
 
+function Objects.RaceCheckpoint:OnDestroy()
+	self.ring:Remove()
+end
+
 function Objects.RaceCheckpoint:OnRender()
 	self.ring:SetAngle(Camera:GetAngle())
 end
 
 function Objects.RaceCheckpoint:OnPositionChange(position)
 	self.ring:SetPosition(position)
-end
-
-function Objects.RaceCheckpoint:OnDestroy()
-	self.ring:Remove()
 end
