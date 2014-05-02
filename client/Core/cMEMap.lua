@@ -16,6 +16,7 @@ function MapEditor.Map:__init(initialPosition)
 	Controls.Add("Rotate object" , "R")
 	Controls.Add("Undo" , "Z")
 	Controls.Add("Redo" , "Y")
+	Controls.Add("Delete" , "X")
 	
 	self.camera = MapEditor.Camera(initialPosition)
 	
@@ -53,15 +54,22 @@ function MapEditor.Map:SetAction(actionClass , ...)
 		return
 	end
 	
-	local finishedImmediately = false
+	local finished = false
+	local cancelled = false
 	
-	self.ActionFinish = function() finishedImmediately = true end
+	self.ActionFinish = function() finished = true end
+	self.ActionCancel = function() cancelled = true end
 	
 	self.currentAction = actionClass(...)
 	
 	self.ActionFinish = MapEditor.Map.ActionFinish
+	self.ActionCancel = MapEditor.Map.ActionCancel
 	
-	if finishedImmediately then
+	if finished then
+		table.insert(self.undoableActions , self.currentAction)
+		self.redoableActions = {}
+		self.currentAction = nil
+	elseif cancelled then
 		self.currentAction = nil
 	else
 		Events:Fire("ActionStart" , tostring(self.currentAction))
@@ -138,6 +146,8 @@ function MapEditor.Map:ControlDown(args)
 			self:SetAction(Actions.Mover)
 		elseif args.name == "Rotate object" then
 			-- self:SetAction(Actions.Rotator)
+		elseif args.name == "Delete" then
+			self:SetAction(Actions.Deleter)
 		end
 	end
 	
