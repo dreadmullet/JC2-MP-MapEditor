@@ -48,7 +48,7 @@ end
 function MapEditor.SpawnMenu:SpawnButtonPressed(button)
 	local objectName = button:GetDataString("objectName")
 	local objectClass = Objects[objectName]
-	MapEditor.map:SetTool(ObjectPlacer , objectClass)
+	MapEditor.map:SetTool(Tools.ObjectPlacer , objectClass)
 end
 
 -- Events

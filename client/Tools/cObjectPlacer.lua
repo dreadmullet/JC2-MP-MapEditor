@@ -1,6 +1,6 @@
-class("ObjectPlacer")
+class("ObjectPlacer" , Tools)
 
-function ObjectPlacer:__init(objectClass)
+function Tools.ObjectPlacer:__init(objectClass)
 	EGUSM.SubscribeUtility.__init(self)
 	MapEditor.Tool.__init(self)
 	
@@ -15,12 +15,12 @@ function ObjectPlacer:__init(objectClass)
 	self:EventSubscribe("MouseDown")
 end
 
-function ObjectPlacer:Confirm()
+function Tools.ObjectPlacer:Confirm()
 	self:UnsubscribeAll()
 	self:Finish()
 end
 
-function ObjectPlacer:Cancel()
+function Tools.ObjectPlacer:Cancel()
 	self.object:Destroy()
 	MapEditor.map:RemoveObject(self.object)
 	
@@ -30,14 +30,14 @@ end
 
 -- Events
 
-function ObjectPlacer:Render()
+function Tools.ObjectPlacer:Render()
 	local dir = Render:ScreenToWorldDirection(Mouse:GetPosition())
 	local result = Physics:Raycast(Camera:GetPosition() , dir , 0.1 , 512)
 	local position = result.position
 	self.object:SetPosition(position)
 end
 
-function ObjectPlacer:MouseDown(args)
+function Tools.ObjectPlacer:MouseDown(args)
 	if args.button == 1 then
 		self:Confirm()
 	elseif args.button == 2 then
