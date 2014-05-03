@@ -113,19 +113,29 @@ end
 -- Events
 
 function MapEditor.Map:Render()
-	-- Highlight all selected objects.
 	self:IterateObjects(function(object)
-		MapEditor.Utility.DrawBounds(object.position , object.bounds , Color.White * 0.5)
+		MapEditor.Utility.DrawBounds(
+			object.position ,
+			object.angle ,
+			object.bounds ,
+			Color.White * 0.5
+		)
 		
 		if object.OnRender then
 			object:OnRender()
 		end
 		
+		-- Highlight all selected objects.
 		if self.selectedObjects:HasObject(object) then
 			local boundsEnlarged = {}
 			boundsEnlarged[1] = object.bounds[1] * 1.1
 			boundsEnlarged[2] = object.bounds[2] * 1.1
-			MapEditor.Utility.DrawBounds(object.position , boundsEnlarged , Color.LimeGreen * 0.8)
+			MapEditor.Utility.DrawBounds(
+				object.position ,
+				object.angle ,
+				boundsEnlarged ,
+				Color.LimeGreen * 0.8
+			)
 		end
 	end)
 end
@@ -145,14 +155,16 @@ function MapEditor.Map:ControlDown(args)
 		if args.name == "Move object" then
 			self:SetAction(Actions.Mover)
 		elseif args.name == "Rotate object" then
-			-- self:SetAction(Actions.Rotator)
+			self:SetAction(Actions.Rotator)
 		elseif args.name == "Delete" then
 			self:SetAction(Actions.Deleter)
 		end
 	end
 	
 	if args.name == "Rotate/pan camera" then
-		self.camera.isInputEnabled = true
+		if self.currentAction == nil then
+			self.camera.isInputEnabled = true
+		end
 	elseif args.name == "Undo" then
 		self:Undo()
 	elseif args.name == "Redo" then

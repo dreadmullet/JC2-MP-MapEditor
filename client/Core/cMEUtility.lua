@@ -1,6 +1,6 @@
 MapEditor.Utility = {}
 
-MapEditor.Utility.DrawBounds = function(position , bounds , color)
+MapEditor.Utility.DrawBounds = function(position , angle , bounds , color)
 	local b1 = bounds[1]
 	local b2 = bounds[2]
 	local lines = {
@@ -23,6 +23,7 @@ MapEditor.Utility.DrawBounds = function(position , bounds , color)
 	
 	local transform = Transform3()
 	transform:Translate(position)
+	transform:Rotate(angle)
 	Render:SetTransform(transform)
 	
 	for index , line in ipairs(lines) do
