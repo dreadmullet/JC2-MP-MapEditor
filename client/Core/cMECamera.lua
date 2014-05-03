@@ -11,8 +11,8 @@ function MapEditor.Camera:__init(position , angle)
 	self.maxDistance = 32768
 	self.collision = false
 	self.sensitivityRot = 4.5
-	self.sensitivityZoom = 0.04
-	self.sensitivityPan = 2.5
+	self.sensitivityZoom = 0.07
+	self.sensitivityPan = 5
 	self.isInputEnabled = true
 	-- Private properties
 	self.position = position or Vector3(0 , 10000 , 0)
@@ -149,7 +149,7 @@ end
 
 function MapEditor.Camera:MouseScroll(args)
 	if Controls.GetIsHeld("Camera pan modifier") then
-		self.panBuffer.y = args.delta
+		self.panBuffer.y = args.delta * 0.5
 	else
 		self.distanceDeltaBuffer = args.delta
 	end
