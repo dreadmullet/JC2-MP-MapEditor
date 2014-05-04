@@ -1,11 +1,12 @@
 class("Property" , MapEditor)
 
-function MapEditor.Property:__init(name , value)
-	self.name = name
-	self.value = value
+function MapEditor.Property:__init(args)
+	self.name = args.name
+	self.type = args.type
+	self.subtype = args.subtype
+	self.defaultValue = args.default
 	
-	self.type = type(value)
-	if self.type == "userdata" then
-		self.type = value.__type or class_info(value).name
-	end
+	self.value = self.defaultValue
 end
+
+-- AddToPropertyMenu et al?

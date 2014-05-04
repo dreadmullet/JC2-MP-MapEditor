@@ -1,6 +1,16 @@
 class("RaceVehicleInfo" , Objects)
 
 function Objects.RaceVehicleInfo:__init(...) ; MapEditor.Object.__init(self , ...)
-	self:SetProperty("modelId" , -1)
-	self:SetProperty("templates" , {""})
+	self:AddProperty{
+		name = "modelId" ,
+		type = "number" ,
+		-- range = {-1 , 91} ,
+		default = -1 ,
+	}
+	self:AddProperty{
+		name = "templates" ,
+		type = "table" ,
+		subtype = "string" ,
+		default = {""} ,
+	}
 end

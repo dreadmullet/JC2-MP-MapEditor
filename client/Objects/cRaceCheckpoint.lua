@@ -2,9 +2,22 @@ class("RaceCheckpoint" , Objects)
 
 function Objects.RaceCheckpoint:__init(...) ; MapEditor.Object.__init(self , ...)
 	-- Array of vehicle model ids.
-	self:SetProperty("validVehicles" , {})
-	self:SetProperty("allowAllVehicles" , false)
-	self:SetProperty("isRespawnable" , true)
+	self:AddProperty{
+		name = "validVehicles" ,
+		type = "table" ,
+		subtype = "number" ,
+		default = {} ,
+	}
+	self:AddProperty{
+		name = "allowAllVehicles" ,
+		type = "boolean" ,
+		default = false ,
+	}
+	self:AddProperty{
+		name = "isRespawnable" ,
+		type = "boolean" ,
+		default = true ,
+	}
 	
 	self.bounds = {Vector3.One * -6 , Vector3.One * 6}
 	

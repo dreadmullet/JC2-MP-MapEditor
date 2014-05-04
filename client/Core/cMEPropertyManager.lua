@@ -3,28 +3,36 @@ class("PropertyManager" , MapEditor)
 function MapEditor.PropertyManager:__init()
 	MapEditor.Marshallable.__init(self)
 	
-	self.Marshal = MapEditor.PropertyManager.Marshal
-	
+	self.AddProperty = MapEditor.PropertyManager.AddProperty
 	self.SetProperty = MapEditor.PropertyManager.SetProperty
 	self.RemoveProperty = MapEditor.PropertyManager.RemoveProperty
 	self.HasProperty = MapEditor.PropertyManager.HasProperty
+	self.Marshal = MapEditor.PropertyManager.Marshal
 	
 	self.properties = {}
 end
 
+function MapEditor.PropertyManager:AddProperty(args)
+	local property = MapEditor.Property(args)
+	self.properties[property.name] = property
+end
+
 function MapEditor.PropertyManager:SetProperty(name , value)
-	local oldProperty = self.properties[name]
+	local property = self.properties[name]
+	if property == nil then
+		error("Property doesn't exist: "..tostring(name))
+		return
+	end
 	
-	self.properties[name] = MapEditor.Property(name , value)
+	local oldValue = property.value
+	property.value = value
 	
 	if self.OnPropertyChange then
 		local args = {
-			name = name ,
-			newValue = value ,
+			name = property.name ,
+			newValue = property.value ,
+			oldValue = oldValue ,
 		}
-		if oldProperty then
-			args.oldValue = oldProperty.value
-		end
 		self:OnPropertyChange(args)
 	end
 end
