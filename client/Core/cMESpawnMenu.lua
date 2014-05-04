@@ -27,10 +27,11 @@ function MapEditor.SpawnMenu:CreateWindow()
 	self.spawnButtons = {}
 	for index , objectName in ipairs(self.objectNames) do
 		local button = Button.Create(self.window)
-		button:SetPadding(Vector2(8 , 0) , Vector2(8 , 0))
+		button:SetPadding(Vector2(8 , 5) , Vector2(8 , 5))
 		button:SetMargin(Vector2(0 , 1) , Vector2(0 , 1))
 		button:SetDock(GwenPosition.Top)
 		button:SetText(Utility.PrettifyVariableName(objectName))
+		button:SizeToContents()
 		button:SetDataString("objectName" , objectName)
 		button:Subscribe("Press" , self , self.SpawnButtonPressed)
 		table.insert(self.spawnButtons , button)
@@ -54,7 +55,7 @@ end
 -- Events
 
 function MapEditor.SpawnMenu:ResolutionChange(args)
-	self.window:SetPosition(Vector2(args.size.x - self.window:GetWidth() - 5 , 200))
+	self.window:SetPosition(Vector2(args.size.x - self.window:GetWidth() - 5 , args.size.y * 0.25))
 end
 
 function MapEditor.SpawnMenu:ActionStart(actionName)
