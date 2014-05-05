@@ -7,9 +7,11 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	self.Recreate = MapEditor.Object.Recreate
 	self.SetPosition = MapEditor.Object.SetPosition
 	self.SetAngle = MapEditor.Object.SetAngle
+	self.SetSelected = MapEditor.Object.SetSelected
 	self.GetId = MapEditor.Object.GetId
 	self.GetPosition = MapEditor.Object.GetPosition
 	self.GetAngle = MapEditor.Object.GetAngle
+	self.GetIsSelected = MapEditor.Object.GetIsSelected
 	
 	local memberNames = {
 		"id" ,
@@ -26,6 +28,7 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	self.position = initialPosition or Vector3(0 , 208 , 0)
 	self.angle = initialAngle or Angle(0 , 0 , 0)
 	
+	self.isSelected = false
 	self.cursor = MapEditor.Cursor(self.position)
 	self.bounds = {Vector3(-2 , -2 , -2) , Vector3(2 , 2 , 2)}
 end
@@ -72,6 +75,26 @@ function MapEditor.Object:SetAngle(angle)
 	end
 end
 
+function MapEditor.Object:SetSelected(selected)
+	if self.isSelected == selected then
+		return
+	end
+	
+	self.isSelected = selected
+	
+	if self.isSelected then
+		MapEditor.map.selectedObjects:AddObject(self)
+		if self.OnSelect then
+			self:OnSelect()
+		end
+	else
+		MapEditor.map.selectedObjects:RemoveObject(self)
+		if self.OnDeselect then
+			self:OnDeselect()
+		end
+	end
+end
+
 function MapEditor.Object:GetId()
 	return self.id
 end
@@ -82,4 +105,8 @@ end
 
 function MapEditor.Object:GetAngle()
 	return self.angle
+end
+
+function MapEditor.Object:GetIsSelected()
+	return self.isSelected
 end

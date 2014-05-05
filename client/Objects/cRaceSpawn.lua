@@ -5,7 +5,7 @@ function Objects.RaceSpawn:__init(...) ; MapEditor.Object.__init(self , ...)
 	self:AddProperty{
 		name = "vehicles" ,
 		type = "table" ,
-		subtype = "Object" ,
+		subtype = "RaceVehicleInfo" ,
 		default = {} ,
 	}
 	

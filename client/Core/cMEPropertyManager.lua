@@ -5,8 +5,10 @@ function MapEditor.PropertyManager:__init()
 	
 	self.AddProperty = MapEditor.PropertyManager.AddProperty
 	self.SetProperty = MapEditor.PropertyManager.SetProperty
+	self.GetProperty = MapEditor.PropertyManager.GetProperty
 	self.RemoveProperty = MapEditor.PropertyManager.RemoveProperty
 	self.HasProperty = MapEditor.PropertyManager.HasProperty
+	self.IterateProperties = MapEditor.PropertyManager.IterateProperties
 	self.Marshal = MapEditor.PropertyManager.Marshal
 	
 	self.properties = {}
@@ -37,12 +39,22 @@ function MapEditor.PropertyManager:SetProperty(name , value)
 	end
 end
 
+function MapEditor.PropertyManager:GetProperty(propertyName)
+	return self.properties[propertyName]
+end
+
 function MapEditor.PropertyManager:RemoveProperty(propertyName)
 	self.properties[propertyName] = nil
 end
 
 function MapEditor.PropertyManager:HasProperty(propertyName)
 	return self.properties[propertyName] ~= nil
+end
+
+function MapEditor.PropertyManager:IterateProperties(func)
+	for name , property in pairs(self.properties) do
+		func(property)
+	end
 end
 
 function MapEditor.PropertyManager:Marshal()

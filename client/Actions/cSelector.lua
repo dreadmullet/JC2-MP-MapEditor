@@ -9,7 +9,7 @@ function Actions.Selector:ObjectsSelected(objects)
 	self.objects = objects
 	-- Remove from the array all objects that are already selected.
 	for n = #self.objects , 1 , -1 do
-		if MapEditor.map.selectedObjects:HasObject(self.objects[n]) then
+		if self.objects[n]:GetIsSelected() then
 			table.remove(self.objects , n)
 		end
 	end
@@ -19,12 +19,16 @@ end
 
 function Actions.Selector:Undo()
 	for index , object in ipairs(self.objects) do
-		MapEditor.map.selectedObjects:RemoveObject(object)
+		object:SetSelected(false)
 	end
+	
+	MapEditor.map:SelectionChanged()
 end
 
 function Actions.Selector:Redo()
 	for index , object in ipairs(self.objects) do
-		MapEditor.map.selectedObjects:AddObject(object)
+		object:SetSelected(true)
 	end
+	
+	MapEditor.map:SelectionChanged()
 end

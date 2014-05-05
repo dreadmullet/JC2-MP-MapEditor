@@ -8,5 +8,3 @@ function MapEditor.Property:__init(args)
 	
 	self.value = self.defaultValue
 end
-
--- AddToPropertyMenu et al?

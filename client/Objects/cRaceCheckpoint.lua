@@ -18,6 +18,15 @@ function Objects.RaceCheckpoint:__init(...) ; MapEditor.Object.__init(self , ...
 		type = "boolean" ,
 		default = true ,
 	}
+	self:AddProperty{
+		name = "testString" ,
+		type = "string" ,
+		default = "I'm the default value!" ,
+	}
+	self:AddProperty{
+		name = "testObject" ,
+		type = "Object" ,
+	}
 	
 	self.bounds = {Vector3.One * -6 , Vector3.One * 6}
 	

@@ -27,6 +27,7 @@ function MapEditor.Map:__init(initialPosition)
 	self.selectedObjects = MapEditor.ObjectManager()
 	
 	self.spawnMenu = MapEditor.SpawnMenu()
+	self.propertiesMenu = nil
 	
 	Mouse:SetVisible(true)
 	
@@ -97,6 +98,27 @@ function MapEditor.Map:Undo()
 		table.remove(self.undoableActions , count)
 		action:Undo()
 		table.insert(self.redoableActions , action)
+	end
+end
+
+function MapEditor.Map:SelectionChanged()
+	-- TODO: Support multiple objects for PropertiesMenu.
+	local object = nil
+	self.selectedObjects:IterateObjects(function(o)
+		object = o
+	end)
+	
+	if object then
+		if self.propertiesMenu then
+			self.propertiesMenu:Destroy()
+		end
+		
+		self.propertiesMenu = MapEditor.PropertiesMenu(object)
+	else
+		if self.propertiesMenu then
+			self.propertiesMenu:Destroy()
+			self.propertiesMenu = nil
+		end
 	end
 end
 
