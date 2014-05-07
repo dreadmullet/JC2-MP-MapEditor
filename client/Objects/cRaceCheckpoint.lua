@@ -27,6 +27,13 @@ function Objects.RaceCheckpoint:__init(...) ; MapEditor.Object.__init(self , ...
 		name = "testObject" ,
 		type = "Object" ,
 	}
+	self:AddProperty{
+		name = "testTable" ,
+		type = "table" ,
+		subtype = "boolean" ,
+		default = {true , false , true , false , true} ,
+		-- defaultElement = true ,
+	}
 	
 	self.bounds = {Vector3.One * -6 , Vector3.One * 6}
 	
