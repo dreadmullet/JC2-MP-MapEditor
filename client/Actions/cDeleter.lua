@@ -22,6 +22,8 @@ function Actions.Deleter:Undo()
 		MapEditor.map:AddObject(object)
 		MapEditor.map.selectedObjects:AddObject(object)
 	end
+	
+	MapEditor.map:SelectionChanged()
 end
 
 function Actions.Deleter:Redo()
@@ -30,4 +32,6 @@ function Actions.Deleter:Redo()
 		MapEditor.map.selectedObjects:RemoveObject(object)
 		MapEditor.map:RemoveObject(object)
 	end
+	
+	MapEditor.map:SelectionChanged()
 end
