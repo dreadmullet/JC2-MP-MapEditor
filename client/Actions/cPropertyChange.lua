@@ -11,7 +11,7 @@ function Actions.PropertyChange:__init(args)
 	
 	self.previousValues = {}
 	
-	self:Redo()
+	self:Apply()
 	
 	self:Confirm()
 	
@@ -21,6 +21,25 @@ function Actions.PropertyChange:__init(args)
 		-- self:EventSubscribe("Render")
 		-- self:EventSubscribe("MouseUp")
 	-- end
+end
+
+function Actions.PropertyChange:Apply()
+	for index , property in ipairs(self.properties) do
+		if property.type == "table" then
+			if self.tableActionType == "Set" then
+				self.previousValues[index] = property.value[self.index]
+				property.value[self.index] = self.value
+			elseif self.tableActionType == "Remove" then
+				self.previousValues[index] = property.value[self.index]
+				table.remove(property.value , self.index)
+			elseif self.tableActionType == "Add" then
+				table.insert(property.value , property.defaultElement)
+			end
+		else
+			self.previousValues[index] = property.value
+			property.value = self.value
+		end
+	end
 end
 
 function Actions.PropertyChange:Undo()
@@ -43,22 +62,7 @@ function Actions.PropertyChange:Undo()
 end
 
 function Actions.PropertyChange:Redo()
-	for index , property in ipairs(self.properties) do
-		if property.type == "table" then
-			if self.tableActionType == "Set" then
-				self.previousValues[index] = property.value[self.index]
-				property.value[self.index] = self.value
-			elseif self.tableActionType == "Remove" then
-				self.previousValues[index] = property.value[self.index]
-				table.remove(property.value , self.index)
-			elseif self.tableActionType == "Add" then
-				table.insert(property.value , property.defaultElement)
-			end
-		else
-			self.previousValues[index] = property.value
-			property.value = self.value
-		end
-	end
+	self:Apply()
 	
 	MapEditor.map:SelectionChanged()
 end

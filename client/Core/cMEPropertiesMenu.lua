@@ -334,14 +334,14 @@ function MapEditor.PropertiesMenu:TableRemoveElement(button)
 	
 	propertyProprietor:RemoveTableValue(propertyCount)
 	
-	-- gwenInfo.label:SetText(string.format("%i elements" , propertyCount - 1))
-	-- 
-	-- gwenInfo.propertyControls[propertyCount]:Hide()
-	-- gwenInfo.propertyControls[propertyCount]:Remove()
-	-- table.remove(gwenInfo.propertyControls , propertyCount)
-	-- 
-	-- gwenInfo.base:SetHeight(0)
-	-- gwenInfo.base:SizeToChildren(false , true)
+	gwenInfo.label:SetText(string.format("%i elements" , propertyCount - 1))
+	
+	gwenInfo.propertyControls[propertyCount]:Hide()
+	gwenInfo.propertyControls[propertyCount]:Remove()
+	table.remove(gwenInfo.propertyControls , propertyCount)
+	
+	gwenInfo.base:SetHeight(0)
+	gwenInfo.base:SizeToChildren(false , true)
 end
 
 function MapEditor.PropertiesMenu:TableAddElement(button)
@@ -350,17 +350,17 @@ function MapEditor.PropertiesMenu:TableAddElement(button)
 	
 	propertyProprietor:AddTableValue()
 	
-	-- gwenInfo.label:SetText(string.format("%i elements" , #propertyProprietor.value))
-	-- 
-	-- local base = BaseWindow.Create(gwenInfo.base)
-	-- base:SetMargin(Vector2(54 , 2) , Vector2(0 , 2))
-	-- base:SetDock(GwenPosition.Top)
-	-- base:SetHeight(0)
-	-- self:CreateEditControl(propertyProprietor , base , #propertyProprietor.value)
-	-- table.insert(gwenInfo.propertyControls , base)
-	-- 
-	-- gwenInfo.base:SetHeight(0)
-	-- gwenInfo.base:SizeToChildren(false , true)
+	gwenInfo.label:SetText(string.format("%i elements" , #propertyProprietor.value))
+	
+	local base = BaseWindow.Create(gwenInfo.base)
+	base:SetMargin(Vector2(54 , 2) , Vector2(0 , 2))
+	base:SetDock(GwenPosition.Top)
+	base:SetHeight(0)
+	self:CreateEditControl(propertyProprietor , base , #propertyProprietor.value)
+	table.insert(gwenInfo.propertyControls , base)
+	
+	gwenInfo.base:SetHeight(0)
+	gwenInfo.base:SizeToChildren(false , true)
 end
 
 -- Events
