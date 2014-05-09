@@ -5,7 +5,7 @@ function Actions.Deselector:__init(...) ; Actions.SelectorBase.__init(self , ...
 	self.objects = {}
 end
 
-function Actions.Deselector:ObjectsSelected(objects)
+function Actions.Deselector:OnObjectsChosen(objects)
 	self.objects = objects
 	-- Remove from the array all objects that aren't selected.
 	for n = #self.objects , 1 , -1 do
@@ -15,6 +15,12 @@ function Actions.Deselector:ObjectsSelected(objects)
 	end
 	
 	self:Redo()
+	
+	self:Confirm()
+end
+
+function Actions.Deselector:OnNothingChosen()
+	self:Cancel()
 end
 
 function Actions.Deselector:Undo()

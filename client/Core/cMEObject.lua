@@ -12,6 +12,7 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	self.GetPosition = MapEditor.Object.GetPosition
 	self.GetAngle = MapEditor.Object.GetAngle
 	self.GetIsSelected = MapEditor.Object.GetIsSelected
+	self.GetBoundingBoxScreenPoints = MapEditor.Object.GetBoundingBoxScreenPoints
 	
 	local memberNames = {
 		"id" ,
@@ -109,4 +110,28 @@ end
 
 function MapEditor.Object:GetIsSelected()
 	return self.isSelected
+end
+
+function MapEditor.Object:GetBoundingBoxScreenPoints()
+	local points = {}
+	
+	local positionsToCheck = {
+		self.position + Vector3(self.bounds[1].x , self.bounds[1].y , self.bounds[1].z) ,
+		self.position + Vector3(self.bounds[2].x , self.bounds[1].y , self.bounds[1].z) ,
+		self.position + Vector3(self.bounds[1].x , self.bounds[1].y , self.bounds[2].z) ,
+		self.position + Vector3(self.bounds[2].x , self.bounds[1].y , self.bounds[2].z) ,
+		self.position + Vector3(self.bounds[1].x , self.bounds[2].y , self.bounds[1].z) ,
+		self.position + Vector3(self.bounds[2].x , self.bounds[2].y , self.bounds[1].z) ,
+		self.position + Vector3(self.bounds[1].x , self.bounds[2].y , self.bounds[2].z) ,
+		self.position + Vector3(self.bounds[2].x , self.bounds[2].y , self.bounds[2].z) ,
+	}
+	
+	for index , positionToCheck in ipairs(positionsToCheck) do
+		local screenPos , success = Render:WorldToScreen(positionToCheck)
+		if success then
+			table.insert(points , screenPos)
+		end
+	end
+	
+	return points
 end
