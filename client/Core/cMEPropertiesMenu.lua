@@ -152,10 +152,10 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		if tableIndex then
 			control:SetText(tostring(propertyProprietor.value[tableIndex]))
 			control:SetDataNumber("tableIndex" , tableIndex)
-			control:Subscribe("TextChanged" , self , self.TableNumberChanged)
+			control:Subscribe("ReturnPressed" , self , self.TableNumberChanged)
 		else
 			control:SetText(tostring(propertyProprietor.value))
-			control:Subscribe("TextChanged" , self , self.NumberChanged)
+			control:Subscribe("ReturnPressed" , self , self.NumberChanged)
 		end
 		
 		table.insert(self.controls , control)
