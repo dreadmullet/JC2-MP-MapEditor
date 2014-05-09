@@ -16,6 +16,8 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	-- Value: PropertyProprietor
 	self.propertyProprietors = {}
 	
+	self.controls = {}
+	
 	--
 	-- Create window
 	--
@@ -110,6 +112,8 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	--
 	
 	self:EventSubscribe("ResolutionChange")
+	self:EventSubscribe("ActionStart")
+	self:EventSubscribe("ActionEnd")
 end
 
 function MapEditor.PropertiesMenu:CreatePropertyControl(propertyProprietor)
@@ -154,6 +158,8 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 			control:Subscribe("TextChanged" , self , self.NumberChanged)
 		end
 		
+		table.insert(self.controls , control)
+		
 		return control
 	elseif propertyType == "string" then
 		parent:SetHeight(parent:GetHeight() + self.textSize + 6)
@@ -170,6 +176,8 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 			textBox:SetText(propertyProprietor.value)
 			textBox:Subscribe("ReturnPressed" , self , self.StringChanged)
 		end
+		
+		table.insert(self.controls , textBox)
 		
 		return textBox
 	elseif propertyType == "boolean" then
@@ -191,6 +199,8 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 			button:Subscribe("Toggle" , self , self.BooleanChanged)
 		end
 		
+		table.insert(self.controls , button)
+		
 		return button
 	elseif propertyType == "table" then
 		if tableIndex then
@@ -210,6 +220,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		button:SetWidth(26)
 		button:SetDataObject("propertyProprietor" , propertyProprietor)
 		button:Subscribe("Press" , self , self.TableRemoveElement)
+		table.insert(self.controls , button)
 		local buttonRemove = button
 		
 		local button = Button.Create(base)
@@ -219,6 +230,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		button:SetWidth(26)
 		button:SetDataObject("propertyProprietor" , propertyProprietor)
 		button:Subscribe("Press" , self , self.TableAddElement)
+		table.insert(self.controls , button)
 		local buttonAdd = button
 		
 		local label = Label.Create(base)
@@ -322,14 +334,14 @@ function MapEditor.PropertiesMenu:TableRemoveElement(button)
 	
 	propertyProprietor:RemoveTableValue(propertyCount)
 	
-	gwenInfo.label:SetText(string.format("%i elements" , propertyCount - 1))
-	
-	gwenInfo.propertyControls[propertyCount]:Hide()
-	gwenInfo.propertyControls[propertyCount]:Remove()
-	table.remove(gwenInfo.propertyControls , propertyCount)
-	
-	gwenInfo.base:SetHeight(0)
-	gwenInfo.base:SizeToChildren(false , true)
+	-- gwenInfo.label:SetText(string.format("%i elements" , propertyCount - 1))
+	-- 
+	-- gwenInfo.propertyControls[propertyCount]:Hide()
+	-- gwenInfo.propertyControls[propertyCount]:Remove()
+	-- table.remove(gwenInfo.propertyControls , propertyCount)
+	-- 
+	-- gwenInfo.base:SetHeight(0)
+	-- gwenInfo.base:SizeToChildren(false , true)
 end
 
 function MapEditor.PropertiesMenu:TableAddElement(button)
@@ -338,17 +350,17 @@ function MapEditor.PropertiesMenu:TableAddElement(button)
 	
 	propertyProprietor:AddTableValue()
 	
-	gwenInfo.label:SetText(string.format("%i elements" , #propertyProprietor.value))
-	
-	local base = BaseWindow.Create(gwenInfo.base)
-	base:SetMargin(Vector2(54 , 2) , Vector2(0 , 2))
-	base:SetDock(GwenPosition.Top)
-	base:SetHeight(0)
-	self:CreateEditControl(propertyProprietor , base , #propertyProprietor.value)
-	table.insert(gwenInfo.propertyControls , base)
-	
-	gwenInfo.base:SetHeight(0)
-	gwenInfo.base:SizeToChildren(false , true)
+	-- gwenInfo.label:SetText(string.format("%i elements" , #propertyProprietor.value))
+	-- 
+	-- local base = BaseWindow.Create(gwenInfo.base)
+	-- base:SetMargin(Vector2(54 , 2) , Vector2(0 , 2))
+	-- base:SetDock(GwenPosition.Top)
+	-- base:SetHeight(0)
+	-- self:CreateEditControl(propertyProprietor , base , #propertyProprietor.value)
+	-- table.insert(gwenInfo.propertyControls , base)
+	-- 
+	-- gwenInfo.base:SetHeight(0)
+	-- gwenInfo.base:SizeToChildren(false , true)
 end
 
 -- Events
@@ -356,4 +368,16 @@ end
 function MapEditor.PropertiesMenu:ResolutionChange(args)
 	local position = MapEditor.PropertiesMenu.position
 	self.window:SetPosition(Vector2(position.x , position.y * args.size.y))
+end
+
+function MapEditor.PropertiesMenu:ActionStart(actionName)
+	for index , control in ipairs(self.controls) do
+		control:SetEnabled(false)
+	end
+end
+
+function MapEditor.PropertiesMenu:ActionEnd(actionName)
+	for index , control in ipairs(self.controls) do
+		control:SetEnabled(true)
+	end
 end
