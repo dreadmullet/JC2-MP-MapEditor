@@ -64,8 +64,6 @@ function Actions.SelectorBase:MouseUp(args)
 			end
 		-- Otherwise, select a single object that we clicked on.
 		else
-			Chat:Print("Selecting point" , Color.White)
-			
 			-- Iterate through all of the map's objects and determine if we clicked on one. Choose the
 			-- nearest.
 			-- TODO: This won't scale very well.
