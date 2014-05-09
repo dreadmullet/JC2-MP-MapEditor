@@ -112,8 +112,7 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	--
 	
 	self:EventSubscribe("ResolutionChange")
-	self:EventSubscribe("ActionStart")
-	self:EventSubscribe("ActionEnd")
+	self:EventSubscribe("SetMenusEnabled")
 end
 
 function MapEditor.PropertiesMenu:CreatePropertyControl(propertyProprietor)
@@ -370,14 +369,8 @@ function MapEditor.PropertiesMenu:ResolutionChange(args)
 	self.window:SetPosition(Vector2(position.x , position.y * args.size.y))
 end
 
-function MapEditor.PropertiesMenu:ActionStart(actionName)
+function MapEditor.PropertiesMenu:SetMenusEnabled(enabled)
 	for index , control in ipairs(self.controls) do
-		control:SetEnabled(false)
-	end
-end
-
-function MapEditor.PropertiesMenu:ActionEnd(actionName)
-	for index , control in ipairs(self.controls) do
-		control:SetEnabled(true)
+		control:SetEnabled(enabled)
 	end
 end

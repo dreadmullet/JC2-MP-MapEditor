@@ -73,12 +73,12 @@ function MapEditor.Map:SetAction(actionClass , ...)
 	elseif cancelled then
 		self.currentAction = nil
 	else
-		Events:Fire("ActionStart" , tostring(self.currentAction))
+		Events:Fire("SetMenusEnabled" , false)
 	end
 end
 
 function MapEditor.Map:ActionFinish()
-	Events:Fire("ActionEnd" , tostring(self.currentAction))
+	Events:Fire("SetMenusEnabled" , true)
 	
 	table.insert(self.undoableActions , self.currentAction)
 	self.redoableActions = {}
@@ -87,7 +87,7 @@ function MapEditor.Map:ActionFinish()
 end
 
 function MapEditor.Map:ActionCancel()
-	Events:Fire("ActionEnd" , tostring(self.currentAction))
+	Events:Fire("SetMenusEnabled" , true)
 	self.currentAction = nil
 end
 

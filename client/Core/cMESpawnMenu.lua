@@ -11,8 +11,7 @@ function MapEditor.SpawnMenu:__init() ; EGUSM.SubscribeUtility.__init(self)
 	self:CreateWindow()
 	
 	self:EventSubscribe("ResolutionChange")
-	self:EventSubscribe("ActionStart")
-	self:EventSubscribe("ActionEnd")
+	self:EventSubscribe("SetMenusEnabled")
 end
 
 function MapEditor.SpawnMenu:CreateWindow()
@@ -58,10 +57,6 @@ function MapEditor.SpawnMenu:ResolutionChange(args)
 	self.window:SetPosition(Vector2(args.size.x - self.window:GetWidth() - 5 , args.size.y * 0.25))
 end
 
-function MapEditor.SpawnMenu:ActionStart(actionName)
-	self:SetEnabled(false)
-end
-
-function MapEditor.SpawnMenu:ActionEnd(actionName)
-	self:SetEnabled(true)
+function MapEditor.SpawnMenu:SetMenusEnabled(enabled)
+	self:SetEnabled(enabled)
 end
