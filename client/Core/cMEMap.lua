@@ -103,17 +103,17 @@ end
 
 function MapEditor.Map:SelectionChanged()
 	-- TODO: Support multiple objects for PropertiesMenu.
-	local object = nil
-	self.selectedObjects:IterateObjects(function(o)
-		object = o
+	local objects = {}
+	self.selectedObjects:IterateObjects(function(object)
+		table.insert(objects , object)
 	end)
 	
-	if object then
+	if #objects > 0 then
 		if self.propertiesMenu then
 			self.propertiesMenu:Destroy()
 		end
 		
-		self.propertiesMenu = MapEditor.PropertiesMenu(object)
+		self.propertiesMenu = MapEditor.PropertiesMenu(objects)
 	else
 		if self.propertiesMenu then
 			self.propertiesMenu:Destroy()

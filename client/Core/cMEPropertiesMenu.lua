@@ -4,17 +4,22 @@ class("PropertiesMenu" , MapEditor)
 MapEditor.PropertiesMenu.position = Vector2(5 , 0.25)
 MapEditor.PropertiesMenu.size = Vector2(340 , 210)
 
-function MapEditor.PropertiesMenu:__init(object) ; EGUSM.SubscribeUtility.__init(self)
+function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtility.__init(self)
 	self.Destroy = MapEditor.PropertiesMenu.Destroy
 	
-	self.object = object
+	self.propertyManagers = {}
+	for key , propertyManager in pairs(propertyManagers) do
+		table.insert(self.propertyManagers , propertyManager)
+	end
 	
-	self:CreateWindow()
+	-- Key: property name (string)
+	-- Value: PropertyProprietor
+	self.propertyProprietors = {}
 	
-	self:EventSubscribe("ResolutionChange")
-end
-
-function MapEditor.PropertiesMenu:CreateWindow()
+	--
+	-- Create window
+	--
+	
 	local window = Window.Create()
 	window:SetTitle("Properties menu")
 	window:SetSize(MapEditor.PropertiesMenu.size)
@@ -38,28 +43,76 @@ function MapEditor.PropertiesMenu:CreateWindow()
 	
 	self:ResolutionChange({size = Render.Size})
 	
-	propertiesSorted = {}
+	-- Gather a list of common property names.
+	-- Key: Property name (string)
+	-- Value: array of Propertys
+	local propertyMap = {}
+	local propertyNameCount = 0
+	for index , propertyManager in ipairs(self.propertyManagers) do
+		propertyManager:IterateProperties(function(property)
+			local existingArray = propertyMap[property.name]
+			if existingArray then
+				table.insert(existingArray , property)
+			else
+				propertyMap[property.name] = {property}
+				propertyNameCount = propertyNameCount + 1
+			end
+		end)
+	end
+	
+	local namesToRemove = {}
+	-- Filter out Propertys that are not common or have different types or subtypes.
+	for propertyName , propertyArray in pairs(propertyMap) do
+		local type = propertyArray[1].type
+		local subtype = propertyArray[1].subtype
+		
+		if #propertyArray == #self.propertyManagers then
+			for index , property in ipairs(propertyArray) do
+				if property.type ~= type or property.subtype ~= subtype then
+					table.insert(namesToRemove , propertyName)
+					break
+				end
+			end
+		else
+			table.insert(namesToRemove , propertyName)
+		end
+	end
+	for index , propertyName in ipairs(namesToRemove) do
+		propertyMap[propertyName] = nil
+	end
+	
+	-- Populate self.propertyProprietors.
+	for propertyName , propertyArray in pairs(propertyMap) do
+		table.insert(self.propertyProprietors , MapEditor.PropertyProprietor(propertyArray))
+	end
+	table.sort(self.propertyProprietors , function(a , b) return a.name < b.name end)
+	
+	-- Get self.nameColumnWidth.
 	self.nameColumnWidth = 0
-	self.object:IterateProperties(function(property)
-		table.insert(propertiesSorted , property)
+	for index , propertyProprietor in ipairs(self.propertyProprietors) do
 		local textWidth = Render:GetTextWidth(
-			Utility.PrettifyVariableName(property.name) ,
+			Utility.PrettifyVariableName(propertyProprietor.name) ,
 			self.textSize
 		)
 		if textWidth > self.nameColumnWidth then
 			self.nameColumnWidth = textWidth
 		end
-	end)
-	table.sort(propertiesSorted , function(a , b) return a.name < b.name end)
-	
+	end
 	self.nameColumnWidth = self.nameColumnWidth + 6
 	
-	for index , property in ipairs(propertiesSorted) do
-		self:CreatePropertyControl(property)
+	-- Create the property controls.
+	for index , propertyProprietor in ipairs(self.propertyProprietors) do
+		self:CreatePropertyControl(propertyProprietor)
 	end
+	
+	--
+	-- Event subs
+	--
+	
+	self:EventSubscribe("ResolutionChange")
 end
 
-function MapEditor.PropertiesMenu:CreatePropertyControl(property)
+function MapEditor.PropertiesMenu:CreatePropertyControl(propertyProprietor)
 	local base = BaseWindow.Create(self.scrollControl)
 	base:SetMargin(Vector2(0 , 2) , Vector2(0 , 2))
 	base:SetDock(GwenPosition.Top)
@@ -69,21 +122,21 @@ function MapEditor.PropertiesMenu:CreatePropertyControl(property)
 	label:SetDock(GwenPosition.Left)
 	label:SetAlignment(GwenPosition.CenterV)
 	label:SetTextSize(self.textSize)
-	label:SetText(Utility.PrettifyVariableName(property.name))
+	label:SetText(Utility.PrettifyVariableName(propertyProprietor.name))
 	label:SizeToContents()
 	label:SetMargin(Vector2(0 , 0) , Vector2(self.nameColumnWidth - label:GetWidth() , 0))
 	
-	self:CreateEditControl(property , base)
+	self:CreateEditControl(propertyProprietor , base)
 	
 	return base
 end
 
-function MapEditor.PropertiesMenu:CreateEditControl(property , parent , tableIndex)
+function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent , tableIndex)
 	local propertyType
 	if tableIndex then
-		propertyType = property.subtype
+		propertyType = propertyProprietor.subtype
 	else
-		propertyType = property.type
+		propertyType = propertyProprietor.type
 	end
 	
 	if propertyType == "number" then
@@ -91,13 +144,13 @@ function MapEditor.PropertiesMenu:CreateEditControl(property , parent , tableInd
 		
 		local control = TextBoxNumeric.Create(parent)
 		control:SetDock(GwenPosition.Fill)
-		control:SetDataObject("property" , property)
+		control:SetDataObject("propertyProprietor" , propertyProprietor)
 		if tableIndex then
-			control:SetText(tostring(property.value[tableIndex]))
+			control:SetText(tostring(propertyProprietor.value[tableIndex]))
 			control:SetDataNumber("tableIndex" , tableIndex)
 			control:Subscribe("TextChanged" , self , self.TableNumberChanged)
 		else
-			control:SetText(tostring(property.value))
+			control:SetText(tostring(propertyProprietor.value))
 			control:Subscribe("TextChanged" , self , self.NumberChanged)
 		end
 		
@@ -108,13 +161,13 @@ function MapEditor.PropertiesMenu:CreateEditControl(property , parent , tableInd
 		local textBox = TextBox.Create(parent)
 		textBox:SetDock(GwenPosition.Fill)
 		textBox:SetTextSize(self.textSize)
-		textBox:SetDataObject("property" , property)
+		textBox:SetDataObject("propertyProprietor" , propertyProprietor)
 		if tableIndex then
-			textBox:SetText(property.value[tableIndex])
+			textBox:SetText(propertyProprietor.value[tableIndex])
 			textBox:SetDataNumber("tableIndex" , tableIndex)
 			textBox:Subscribe("TextChanged" , self , self.TableStringChanged)
 		else
-			textBox:SetText(property.value)
+			textBox:SetText(propertyProprietor.value)
 			textBox:Subscribe("TextChanged" , self , self.StringChanged)
 		end
 		
@@ -128,20 +181,20 @@ function MapEditor.PropertiesMenu:CreateEditControl(property , parent , tableInd
 		button:SetTextSize(self.textSize)
 		button:SetText("")
 		button:SetToggleable(true)
-		button:SetDataObject("property" , property)
+		button:SetDataObject("propertyProprietor" , propertyProprietor)
 		if tableIndex then
-			button:SetToggleState(property.value[tableIndex])
+			button:SetToggleState(propertyProprietor.value[tableIndex])
 			button:SetDataNumber("tableIndex" , tableIndex)
 			button:Subscribe("Toggle" , self , self.TableBooleanChanged)
 		else
-			button:SetToggleState(property.value)
+			button:SetToggleState(propertyProprietor.value)
 			button:Subscribe("Toggle" , self , self.BooleanChanged)
 		end
 		
 		return button
 	elseif propertyType == "table" then
 		if tableIndex then
-			error("Property value cannot contain nested tables ("..property.name..")")
+			error("Property value cannot contain nested tables ("..propertyProprietor.name..")")
 		end
 		
 		local base = BaseWindow.Create(parent)
@@ -155,7 +208,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(property , parent , tableInd
 		button:SetTextSize(self.textSize)
 		button:SetText("-")
 		button:SetWidth(26)
-		button:SetDataObject("property" , property)
+		button:SetDataObject("propertyProprietor" , propertyProprietor)
 		button:Subscribe("Press" , self , self.TableRemoveElement)
 		local buttonRemove = button
 		
@@ -164,7 +217,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(property , parent , tableInd
 		button:SetTextSize(self.textSize)
 		button:SetText("+")
 		button:SetWidth(26)
-		button:SetDataObject("property" , property)
+		button:SetDataObject("propertyProprietor" , propertyProprietor)
 		button:Subscribe("Press" , self , self.TableAddElement)
 		local buttonAdd = button
 		
@@ -173,7 +226,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(property , parent , tableInd
 		label:SetDock(GwenPosition.Fill)
 		label:SetAlignment(GwenPosition.CenterV)
 		label:SetTextSize(self.textSize)
-		label:SetText(string.format("%i elements" , #property.value))
+		label:SetText(string.format("%i elements" , #propertyProprietor.value))
 		
 		local gwenInfo = {}
 		gwenInfo.label = label
@@ -185,12 +238,12 @@ function MapEditor.PropertiesMenu:CreateEditControl(property , parent , tableInd
 		
 		local height = base:GetHeight() + 4
 		
-		for index , value in ipairs(property.value) do
+		for index , value in ipairs(propertyProprietor.value) do
 			local base = BaseWindow.Create(parent)
 			base:SetMargin(Vector2(54 , 2) , Vector2(0 , 2))
 			base:SetDock(GwenPosition.Top)
 			base:SetHeight(0)
-			self:CreateEditControl(property , base , index)
+			self:CreateEditControl(propertyProprietor , base , index)
 			
 			table.insert(gwenInfo.propertyControls , base)
 			
@@ -225,49 +278,49 @@ end
 -- GWEN events
 
 function MapEditor.PropertiesMenu:NumberChanged(control)
-	local property = control:GetDataObject("property")
-	property.value = control:GetValue()
+	local propertyProprietor = control:GetDataObject("propertyProprietor")
+	propertyProprietor:SetValue(control:GetValue())
 end
 
 function MapEditor.PropertiesMenu:TableNumberChanged(control)
-	local property = control:GetDataObject("property")
+	local propertyProprietor = control:GetDataObject("propertyProprietor")
 	local tableIndex = control:GetDataNumber("tableIndex")
-	property.value[tableIndex] = control:GetValue()
+	propertyProprietor:SetTableValue(tableIndex , control:GetValue())
 end
 
 function MapEditor.PropertiesMenu:StringChanged(textBox)
-	local property = textBox:GetDataObject("property")
-	property.value = textBox:GetText()
+	local propertyProprietor = textBox:GetDataObject("propertyProprietor")
+	propertyProprietor:SetValue(textBox:GetText())
 end
 
 function MapEditor.PropertiesMenu:TableStringChanged(textBox)
-	local property = textBox:GetDataObject("property")
+	local propertyProprietor = textBox:GetDataObject("propertyProprietor")
 	local tableIndex = textBox:GetDataNumber("tableIndex")
-	property.value[tableIndex] = textBox:GetText()
+	propertyProprietor:SetTableValue(tableIndex , textBox:GetText())
 end
 
 function MapEditor.PropertiesMenu:BooleanChanged(button)
-	local property = button:GetDataObject("property")
-	property.value = button:GetToggleState()
+	local propertyProprietor = button:GetDataObject("propertyProprietor")
+	propertyProprietor:SetValue(button:GetToggleState())
 end
 
 function MapEditor.PropertiesMenu:TableBooleanChanged(button)
-	local property = button:GetDataObject("property")
+	local propertyProprietor = button:GetDataObject("propertyProprietor")
 	local tableIndex = button:GetDataNumber("tableIndex")
-	property.value[tableIndex] = button:GetToggleState()
+	propertyProprietor:SetTableValue(tableIndex , button:GetToggleState())
 end
 
 function MapEditor.PropertiesMenu:TableRemoveElement(button)
-	local property = button:GetDataObject("property")
+	local propertyProprietor = button:GetDataObject("propertyProprietor")
 	local gwenInfo = button:GetDataObject("gwenInfo")
 	
-	local propertyCount = #property.value
+	local propertyCount = #propertyProprietor.value
 	
 	if propertyCount == 0 then
 		return
 	end
 	
-	table.remove(property.value , propertyCount)
+	propertyProprietor:RemoveTableValue(propertyCount)
 	
 	gwenInfo.label:SetText(string.format("%i elements" , propertyCount - 1))
 	
@@ -280,18 +333,18 @@ function MapEditor.PropertiesMenu:TableRemoveElement(button)
 end
 
 function MapEditor.PropertiesMenu:TableAddElement(button)
-	local property = button:GetDataObject("property")
+	local propertyProprietor = button:GetDataObject("propertyProprietor")
 	local gwenInfo = button:GetDataObject("gwenInfo")
 	
-	table.insert(property.value , property.defaultElement)
+	propertyProprietor:AddTableValue()
 	
-	gwenInfo.label:SetText(string.format("%i elements" , #property.value))
+	gwenInfo.label:SetText(string.format("%i elements" , #propertyProprietor.value))
 	
 	local base = BaseWindow.Create(gwenInfo.base)
 	base:SetMargin(Vector2(54 , 2) , Vector2(0 , 2))
 	base:SetDock(GwenPosition.Top)
 	base:SetHeight(0)
-	self:CreateEditControl(property , base , #property.value)
+	self:CreateEditControl(propertyProprietor , base , #propertyProprietor.value)
 	table.insert(gwenInfo.propertyControls , base)
 	
 	gwenInfo.base:SetHeight(0)

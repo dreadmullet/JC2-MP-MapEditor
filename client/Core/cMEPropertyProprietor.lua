@@ -1,0 +1,117 @@
+-- Used by MapEditor.PropertiesMenu when selecting multiple objects that have common properties.
+
+class("PropertyProprietor" , MapEditor)
+
+MapEditor.PropertyProprietor.CompareTables = function(a , b)
+	if #a == #b then
+		for index = 1 , #a do
+			if a[index] ~= b[index] then
+				return false
+			end
+		end
+		
+		return true
+	else
+		return false
+	end
+end
+
+function MapEditor.PropertyProprietor:__init(properties)
+	-- array of Propertys with the same name that are part of different PropertyManagers.
+	self.properties = properties
+	self.name = self.properties[1].name
+	self.type = self.properties[1].type
+	self.subtype = self.properties[1].subtype
+	self.defaultElement = self.properties[1].defaultElement
+	-- If commonValue ends up nil, there is a conflict. Otherwise, all Propertys have the same value.
+	commonValue = nil
+	
+	for index , property in ipairs(self.properties) do
+		if property.type == "table" then
+			if commonValue == nil then
+				commonValue = property.value
+			else
+				local isIdentical = self.CompareTables(commonValue , property.value)
+				if isIdentical == false then
+					commonValue = nil
+					break
+				end
+			end
+		else
+			if commonValue == nil then
+				commonValue = property.value
+			else
+				if property.value ~= commonValue then
+					commonValue = nil
+					break
+				end
+			end
+		end
+	end
+	
+	if commonValue then
+		if self.type == "table" then
+			self.value = {}
+			for index , value in ipairs(commonValue) do
+				table.insert(self.value , value)
+			end
+		else
+			self.value = commonValue
+		end
+	else
+		if self.type == "table" then
+			self.value = {}
+		else
+			self.value = MapEditor.Property.GetDefaultValue(self.type)
+		end
+	end
+end
+
+function MapEditor.PropertyProprietor:SetValue(value)
+	for index , property in ipairs(self.properties) do
+		property.value = value
+	end
+	
+	self.value = value
+end
+
+function MapEditor.PropertyProprietor:SetTableValue(indexToSet , value)
+	self:SyncTables()
+	
+	for index , property in ipairs(self.properties) do
+		property.value[indexToSet] = value
+	end
+	
+	self.value[indexToSet] = value
+end
+
+function MapEditor.PropertyProprietor:RemoveTableValue(indexToRemove)
+	self:SyncTables()
+	
+	for index , property in ipairs(self.properties) do
+		table.remove(property.value , indexToRemove)
+	end
+	
+	table.remove(self.value , indexToRemove)
+end
+
+function MapEditor.PropertyProprietor:AddTableValue()
+	self:SyncTables()
+	
+	for index , property in ipairs(self.properties) do
+		table.insert(property.value , self.defaultElement)
+	end
+	
+	table.insert(self.value , self.defaultElement)
+end
+
+function MapEditor.PropertyProprietor:SyncTables()
+	for index , property in ipairs(self.properties) do
+		if self.CompareTables(self.value , property.value) == false then
+			property.value = {}
+			for index , value in ipairs(self.value) do
+				property.value[index] = value
+			end
+		end
+	end
+end
