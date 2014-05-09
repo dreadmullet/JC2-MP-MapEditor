@@ -165,10 +165,10 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		if tableIndex then
 			textBox:SetText(propertyProprietor.value[tableIndex])
 			textBox:SetDataNumber("tableIndex" , tableIndex)
-			textBox:Subscribe("TextChanged" , self , self.TableStringChanged)
+			textBox:Subscribe("ReturnPressed" , self , self.TableStringChanged)
 		else
 			textBox:SetText(propertyProprietor.value)
-			textBox:Subscribe("TextChanged" , self , self.StringChanged)
+			textBox:Subscribe("ReturnPressed" , self , self.StringChanged)
 		end
 		
 		return textBox

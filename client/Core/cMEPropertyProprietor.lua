@@ -68,39 +68,50 @@ function MapEditor.PropertyProprietor:__init(properties)
 end
 
 function MapEditor.PropertyProprietor:SetValue(value)
-	for index , property in ipairs(self.properties) do
-		property.value = value
-	end
+	local args = {
+		properties = self.properties ,
+		value = value ,
+	}
+	MapEditor.map:SetAction(Actions.PropertyChange , args)
 	
 	self.value = value
 end
 
-function MapEditor.PropertyProprietor:SetTableValue(indexToSet , value)
+function MapEditor.PropertyProprietor:SetTableValue(index , value)
 	self:SyncTables()
 	
-	for index , property in ipairs(self.properties) do
-		property.value[indexToSet] = value
-	end
+	local args = {
+		properties = self.properties ,
+		value = value ,
+		index = index ,
+		tableActionType = "Set" ,
+	}
+	MapEditor.map:SetAction(Actions.PropertyChange , args)
 	
-	self.value[indexToSet] = value
+	self.value[index] = value
 end
 
-function MapEditor.PropertyProprietor:RemoveTableValue(indexToRemove)
+function MapEditor.PropertyProprietor:RemoveTableValue(index)
 	self:SyncTables()
 	
-	for index , property in ipairs(self.properties) do
-		table.remove(property.value , indexToRemove)
-	end
+	local args = {
+		properties = self.properties ,
+		index = index ,
+		tableActionType = "Remove" ,
+	}
+	MapEditor.map:SetAction(Actions.PropertyChange , args)
 	
-	table.remove(self.value , indexToRemove)
+	table.remove(self.value , index)
 end
 
 function MapEditor.PropertyProprietor:AddTableValue()
 	self:SyncTables()
 	
-	for index , property in ipairs(self.properties) do
-		table.insert(property.value , self.defaultElement)
-	end
+	local args = {
+		properties = self.properties ,
+		tableActionType = "Add" ,
+	}
+	MapEditor.map:SetAction(Actions.PropertyChange , args)
 	
 	table.insert(self.value , self.defaultElement)
 end
