@@ -8,19 +8,32 @@ function Actions.PropertyChange:__init(args)
 	self.value = args.value
 	self.index = args.index
 	self.tableActionType = args.tableActionType
+	if self.index then
+		self.type = self.properties[1].subtype
+	else
+		self.type = self.properties[1].type
+	end
 	
 	self.previousValues = {}
+	self.oldButtonText = nil
+	self.newButtonText = nil
 	
-	self:Apply()
+	self.objectClass = Objects[self.type] ~= nil
 	
-	self:Confirm()
-	
-	-- local isObject = 
-	
-	-- if isObject then
-		-- self:EventSubscribe("Render")
-		-- self:EventSubscribe("MouseUp")
-	-- end
+	if self.objectClass and self.tableActionType ~= "Add" and self.tableActionType ~= "Remove" then
+		Events:Fire("SetMenusEnabled" , false)
+		-- Reusing self.value like this is questionable but makes it really convenient.
+		self.objectChooseButton = self.value
+		self.value = nil
+		
+		self.oldButtonText = self.objectChooseButton:GetText()
+		
+		self:EventSubscribe("Render")
+		self:EventSubscribe("MouseUp")
+	else
+		self:Apply()
+		self:Confirm()
+	end
 end
 
 function Actions.PropertyChange:Apply()
@@ -58,29 +71,69 @@ function Actions.PropertyChange:Undo()
 		end
 	end
 	
+	if IsValid(self.objectChooseButton) then
+		self.objectChooseButton:SetText(self.oldButtonText)
+	end
+	
 	MapEditor.map:SelectionChanged()
 end
 
 function Actions.PropertyChange:Redo()
 	self:Apply()
 	
+	if IsValid(self.objectChooseButton) then
+		self.objectChooseButton:SetText(self.newButtonText)
+	end
+	
 	MapEditor.map:SelectionChanged()
 end
 
 -- Events
 
--- function Actions.PropertyChange:Render()
-	
--- end
+function Actions.PropertyChange:Render()
+	-- Draw a simple cursor thing on the mouse.
+	local mousePos = Mouse:GetPosition()
+	local size = 60
+	Render:DrawLine(
+		mousePos + Vector2(-size , 0) ,
+		mousePos + Vector2(size , 0) ,
+		Color(127 , 127 , 127 , 127)
+	)
+	Render:DrawLine(
+		mousePos + Vector2(0 , -size) ,
+		mousePos + Vector2(0 , size) ,
+		Color(127 , 127 , 127 , 127)
+	)
+end
 
--- function Actions.PropertyChange:MouseUp(args)
-	-- if args.button == 1 then
-		-- self:UnsubscribeAll()
-		-- self:Confirm()
-	-- elseif args.button == 2 then
-		-- self:Undo()
+function Actions.PropertyChange:MouseUp(args)
+	if args.button == 1 then
+		local object = MapEditor.map:GetObjectFromScreenPoint(Mouse:GetPosition())
+		if object and class_info(object).name == self.type then
+			self.value = object
+			self:Apply()
+			
+			self.newButtonText = string.format("Object: %s (id: %i)" , self.type , object:GetId())
+			self.objectChooseButton:SetText(self.newButtonText)
+			
+			self:UnsubscribeAll()
+			self:Confirm()
+		else
+			self.value = MapEditor.Property.NoObject
+			self:Apply()
+			
+			self.newButtonText = string.format("Object: (None)")
+			self.objectChooseButton:SetText(self.newButtonText)
+			
+			self:UnsubscribeAll()
+			self:Confirm()
+		end
 		
-		-- self:UnsubscribeAll()
-		-- self:Cancel()
-	-- end
--- end
+		Events:Fire("SetMenusEnabled" , true)
+	elseif args.button == 2 then
+		self:UnsubscribeAll()
+		self:Cancel()
+		
+		Events:Fire("SetMenusEnabled" , true)
+	end
+end

@@ -1,5 +1,8 @@
 class("Property" , MapEditor)
 
+-- Having properties that are Object be nil is bad for tables.
+MapEditor.Property.NoObject = {}
+
 MapEditor.Property.GetDefaultValue = function(type)
 	if type == "number" then
 		return 0
@@ -10,7 +13,7 @@ MapEditor.Property.GetDefaultValue = function(type)
 	elseif type == "table" then
 		return {}
 	elseif Objects[type] ~= nil then
-		return -1
+		return MapEditor.Property.NoObject
 	end
 end
 

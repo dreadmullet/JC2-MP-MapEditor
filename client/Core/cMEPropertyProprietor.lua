@@ -23,6 +23,7 @@ function MapEditor.PropertyProprietor:__init(properties)
 	self.type = self.properties[1].type
 	self.subtype = self.properties[1].subtype
 	self.defaultElement = self.properties[1].defaultElement
+	self.isObject = Objects[self.type] ~= nil or Objects[self.subtype] ~= nil
 	-- If commonValue ends up nil, there is a conflict. Otherwise, all Propertys have the same value.
 	commonValue = nil
 	
@@ -74,7 +75,10 @@ function MapEditor.PropertyProprietor:SetValue(value)
 	}
 	MapEditor.map:SetAction(Actions.PropertyChange , args)
 	
-	self.value = value
+	-- Object selection begins now, and value is the object button for some reason.
+	if self.isObject == false then
+		self.value = value
+	end
 end
 
 function MapEditor.PropertyProprietor:SetTableValue(index , value)
@@ -88,7 +92,10 @@ function MapEditor.PropertyProprietor:SetTableValue(index , value)
 	}
 	MapEditor.map:SetAction(Actions.PropertyChange , args)
 	
-	self.value[index] = value
+	-- Object selection begins now, and value is the object button for some reason.
+	if self.isObject == false then
+		self.value[index] = value
+	end
 end
 
 function MapEditor.PropertyProprietor:RemoveTableValue(index)

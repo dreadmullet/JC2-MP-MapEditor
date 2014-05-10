@@ -64,45 +64,10 @@ function Actions.SelectorBase:MouseUp(args)
 			end
 		-- Otherwise, select a single object that we clicked on.
 		else
-			-- Iterate through all of the map's objects and determine if we clicked on one. Choose the
-			-- nearest.
-			-- TODO: This won't scale very well.
-			local nearestObject = nil
-			local nearestObjectDistSquared = nil
-			MapEditor.map:IterateObjects(function(object)
-				local screenPoints = object:GetBoundingBoxScreenPoints()
-				
-				local xMin = 50000
-				local xMax = 0
-				local yMin = 50000
-				local yMax = 0
-				for index , screenPoint in ipairs(screenPoints) do
-					xMin = math.min(xMin , screenPoint.x)
-					xMax = math.max(xMax , screenPoint.x)
-					yMin = math.min(yMin , screenPoint.y)
-					yMax = math.max(yMax , screenPoint.y)
-				end
-				
-				local mousePos = Mouse:GetPosition()
-				local isMouseWithinBounds = (
-					mousePos.x > xMin and
-					mousePos.x < xMax and
-					mousePos.y > yMin and
-					mousePos.y < yMax
-				)
-				
-				if isMouseWithinBounds then
-					local distanceSquared = Camera:GetPosition():DistanceSqr(object:GetPosition())
-					
-					if nearestObject == nil or distanceSquared < nearestObjectDistSquared then
-						nearestObject = object
-						nearestObjectDistSquared = distanceSquared
-					end
-				end
-			end)
+			local object = MapEditor.map:GetObjectFromScreenPoint(Mouse:GetPosition())
 			
-			if nearestObject then
-				self:OnObjectsChosen({nearestObject})
+			if object then
+				self:OnObjectsChosen({object})
 			else
 				self:OnNothingChosen()
 			end

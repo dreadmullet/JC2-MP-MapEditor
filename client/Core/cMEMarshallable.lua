@@ -11,6 +11,8 @@ MapEditor.Marshallable.MarshalValue = function(value)
 			local marshalFunction = MapEditor.Marshallable.MarshalByType[value.__type]
 			if marshalFunction then
 				return marshalFunction(value)
+			elseif Objects[value.__type] then
+				return value:GetId()
 			else
 				error("Cannot marshal value: "..tostring(memberName))
 			end

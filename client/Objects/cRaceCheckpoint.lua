@@ -25,7 +25,7 @@ function Objects.RaceCheckpoint:__init(...) ; MapEditor.Object.__init(self , ...
 	}
 	self:AddProperty{
 		name = "testObject" ,
-		type = "Object" ,
+		type = "RaceVehicleInfo" ,
 	}
 	self:AddProperty{
 		name = "testTable" ,

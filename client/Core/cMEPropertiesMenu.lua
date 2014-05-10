@@ -243,6 +243,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		gwenInfo.label = label
 		gwenInfo.base = parent
 		gwenInfo.propertyControls = {}
+		gwenInfo.editControls = {}
 		
 		buttonRemove:SetDataObject("gwenInfo" , gwenInfo)
 		buttonAdd:SetDataObject("gwenInfo" , gwenInfo)
@@ -254,9 +255,10 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 			base:SetMargin(Vector2(54 , 2) , Vector2(0 , 2))
 			base:SetDock(GwenPosition.Top)
 			base:SetHeight(0)
-			self:CreateEditControl(propertyProprietor , base , index)
-			
 			table.insert(gwenInfo.propertyControls , base)
+			
+			local editControl = self:CreateEditControl(propertyProprietor , base , index)
+			table.insert(gwenInfo.editControls , editControl)
 			
 			height = height + base:GetHeight() + 4
 		end
@@ -264,13 +266,44 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		parent:SetHeight(parent:GetHeight() + height)
 		
 		return header
-	else -- TODO: Objects
+	elseif Objects[propertyType] ~= nil then
+		parent:SetHeight(parent:GetHeight() + self.textSize + 6)
+		
+		local button = Button.Create(parent)
+		button:SetDock(GwenPosition.Fill)
+		button:SetTextSize(self.textSize)
+		button:SetDataObject("propertyProprietor" , propertyProprietor)
+		if tableIndex then
+			if propertyProprietor.value[tableIndex] ~= MapEditor.Property.NoObject then
+				local object = propertyProprietor.value[tableIndex]
+				button:SetText(string.format("Object: %s (id: %i)" , propertyType , object:GetId()))
+			else
+				button:SetText("Object: (None)")
+			end
+			
+			button:SetDataNumber("tableIndex" , tableIndex)
+			button:Subscribe("Press" , self , self.TableObjectChoose)
+		else
+			if propertyProprietor.value ~= MapEditor.Property.NoObject then
+				local object = propertyProprietor.value
+				button:SetText(string.format("Object: %s (id: %i)" , propertyType , object:GetId()))
+			else
+				button:SetText("Object: (None)")
+			end
+			
+			button:Subscribe("Press" , self , self.ObjectChoose)
+		end
+		
+		table.insert(self.controls , button)
+		
+		return button
+	else
 		-- Fall back to just an "(unsupported)" label.
 		local label = Label.Create(parent)
 		label:SetDock(GwenPosition.Fill)
 		label:SetAlignment(GwenPosition.CenterV)
 		label:SetTextSize(self.textSize)
-		label:SetText("(unsupported)")
+		label:SetText("(unsupported) "..tostring(propertyType))
 		label:SetTextColor(Color.DarkRed)
 		label:SizeToContents()
 		
@@ -335,8 +368,13 @@ function MapEditor.PropertiesMenu:TableRemoveElement(button)
 	
 	gwenInfo.label:SetText(string.format("%i elements" , propertyCount - 1))
 	
-	gwenInfo.propertyControls[propertyCount]:Hide()
-	gwenInfo.propertyControls[propertyCount]:Remove()
+	local editControl = gwenInfo.editControls[propertyCount]
+	table.remove(self.controls , table.find(self.controls , editControl))
+	table.remove(gwenInfo.editControls , propertyCount)
+	
+	local propertyControl = gwenInfo.propertyControls[propertyCount]
+	propertyControl:Hide()
+	propertyControl:Remove()
 	table.remove(gwenInfo.propertyControls , propertyCount)
 	
 	gwenInfo.base:SetHeight(0)
@@ -355,11 +393,24 @@ function MapEditor.PropertiesMenu:TableAddElement(button)
 	base:SetMargin(Vector2(54 , 2) , Vector2(0 , 2))
 	base:SetDock(GwenPosition.Top)
 	base:SetHeight(0)
-	self:CreateEditControl(propertyProprietor , base , #propertyProprietor.value)
 	table.insert(gwenInfo.propertyControls , base)
+	
+	local editControl = self:CreateEditControl(propertyProprietor , base , #propertyProprietor.value)
+	table.insert(gwenInfo.editControls , editControl)
 	
 	gwenInfo.base:SetHeight(0)
 	gwenInfo.base:SizeToChildren(false , true)
+end
+
+function MapEditor.PropertiesMenu:ObjectChoose(button)
+	local propertyProprietor = button:GetDataObject("propertyProprietor")
+	propertyProprietor:SetValue(button)
+end
+
+function MapEditor.PropertiesMenu:TableObjectChoose(button)
+	local propertyProprietor = button:GetDataObject("propertyProprietor")
+	local tableIndex = button:GetDataNumber("tableIndex")
+	propertyProprietor:SetTableValue(tableIndex , button)
 end
 
 -- Events

@@ -10,6 +10,7 @@ function MapEditor.ObjectManager:__init()
 	self.RemoveObject = MapEditor.ObjectManager.RemoveObject
 	self.HasObject = MapEditor.ObjectManager.HasObject
 	self.IterateObjects = MapEditor.ObjectManager.IterateObjects
+	self.GetObjectFromScreenPoint = MapEditor.ObjectManager.GetObjectFromScreenPoint
 	
 	self.objects = {}
 end
@@ -30,4 +31,42 @@ function MapEditor.ObjectManager:IterateObjects(func)
 	for id , object in pairs(self.objects) do
 		func(object)
 	end
+end
+
+function MapEditor.ObjectManager:GetObjectFromScreenPoint(screenPointToTest)
+	-- TODO: This won't scale very well.
+	local nearestObject = nil
+	local nearestObjectDistSquared = nil
+	self:IterateObjects(function(object)
+		local screenPoints = object:GetBoundingBoxScreenPoints()
+		
+		local xMin = 50000
+		local xMax = 0
+		local yMin = 50000
+		local yMax = 0
+		for index , screenPoint in ipairs(screenPoints) do
+			xMin = math.min(xMin , screenPoint.x)
+			xMax = math.max(xMax , screenPoint.x)
+			yMin = math.min(yMin , screenPoint.y)
+			yMax = math.max(yMax , screenPoint.y)
+		end
+		
+		local isWithinBounds = (
+			screenPointToTest.x > xMin and
+			screenPointToTest.x < xMax and
+			screenPointToTest.y > yMin and
+			screenPointToTest.y < yMax
+		)
+		
+		if isWithinBounds then
+			local distanceSquared = Camera:GetPosition():DistanceSqr(object:GetPosition())
+			
+			if nearestObject == nil or distanceSquared < nearestObjectDistSquared then
+				nearestObject = object
+				nearestObjectDistSquared = distanceSquared
+			end
+		end
+	end)
+	
+	return nearestObject
 end
