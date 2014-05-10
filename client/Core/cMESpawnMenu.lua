@@ -1,6 +1,8 @@
 class("SpawnMenu" , MapEditor)
 
 function MapEditor.SpawnMenu:__init() ; EGUSM.SubscribeUtility.__init(self)
+	self.Destroy = MapEditor.SpawnMenu.Destroy
+	
 	-- Take all class names in the Objects namespace and add them to self.objectNames.
 	self.objectNames = {}
 	for key , value in pairs(Objects) do
@@ -35,6 +37,11 @@ function MapEditor.SpawnMenu:CreateWindow()
 		button:Subscribe("Press" , self , self.SpawnButtonPressed)
 		table.insert(self.spawnButtons , button)
 	end
+end
+
+function MapEditor.SpawnMenu:Destroy()
+	self:UnsubscribeAll()
+	self.window:Remove()
 end
 
 function MapEditor.SpawnMenu:SetEnabled(enabled)

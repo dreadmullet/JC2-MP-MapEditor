@@ -1,7 +1,9 @@
 Events:Subscribe("ModuleLoad" , function()
-	map = MapEditor.Map(Vector3(-6550 , 215 , -3290))
+	MapEditor.Map(Vector3(-6550 , 215 , -3290))
 end)
 
 Events:Subscribe("ModuleUnload" , function()
-	map:Destroy()
+	if MapEditor.map then
+		MapEditor.map:Destroy()
+	end
 end)

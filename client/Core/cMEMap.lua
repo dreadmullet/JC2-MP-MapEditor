@@ -42,11 +42,18 @@ function MapEditor.Map:Destroy()
 	
 	self.camera:Destroy()
 	
+	self.spawnMenu:Destroy()
+	if self.propertiesMenu then
+		self.propertiesMenu:Destroy()
+	end
+	
 	self:IterateObjects(function(object)
 		object:Destroy()
 	end)
 	
 	Mouse:SetVisible(false)
+	
+	MapEditor.map = nil
 end
 
 function MapEditor.Map:SetAction(actionClass , ...)
@@ -101,6 +108,16 @@ function MapEditor.Map:Undo()
 	end
 end
 
+function MapEditor.Map:Redo()
+	local count = #self.redoableActions
+	if count > 0 then
+		local action = self.redoableActions[count]
+		table.remove(self.redoableActions , count)
+		action:Redo()
+		table.insert(self.undoableActions , action)
+	end
+end
+
 function MapEditor.Map:SelectionChanged()
 	-- TODO: Support multiple objects for PropertiesMenu.
 	local objects = {}
@@ -122,14 +139,12 @@ function MapEditor.Map:SelectionChanged()
 	end
 end
 
-function MapEditor.Map:Redo()
-	local count = #self.redoableActions
-	if count > 0 then
-		local action = self.redoableActions[count]
-		table.remove(self.redoableActions , count)
-		action:Redo()
-		table.insert(self.undoableActions , action)
+function MapEditor.Map:OpenMapProperties()
+	if self.propertiesMenu then
+		self.propertiesMenu:Destroy()
 	end
+	
+	self.propertiesMenu = MapEditor.PropertiesMenu({self})
 end
 
 -- Events
