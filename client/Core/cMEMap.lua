@@ -1,6 +1,6 @@
 class("Map" , MapEditor)
 
-function MapEditor.Map:__init(initialPosition , mapType)
+function MapEditor.Map:__init(initialPosition , mapTypeName)
 	EGUSM.SubscribeUtility.__init(self)
 	MapEditor.Marshallable.__init(self)
 	MapEditor.ObjectManager.__init(self)
@@ -10,7 +10,8 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	
 	MapEditor.map = self
 	
-	self.type = mapType
+	self.mapTypeName = mapTypeName
+	self.mapType = MapTypes[mapTypeName]
 	
 	Controls.Add("Rotate/pan camera" , "VehicleCam")
 	Controls.Add("Camera pan modifier" , "Shift")
@@ -32,7 +33,7 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	self.spawnMenu = MapEditor.SpawnMenu()
 	self.propertiesMenu = nil
 	
-	for index , propertyArgs in ipairs(self.type.properties) do
+	for index , propertyArgs in ipairs(self.mapType.properties) do
 		self:AddProperty(propertyArgs)
 	end
 	
@@ -153,6 +154,16 @@ function MapEditor.Map:OpenMapProperties()
 	end
 	
 	self.propertiesMenu = MapEditor.PropertiesMenu({self})
+end
+
+function MapEditor.Map:Test()
+	local args = {
+		mapType = self.mapTypeName ,
+		marshalledMap = self:Marshal() ,
+	}
+	Network:Send("TestMap" , args)
+	
+	self:Destroy()
 end
 
 -- Events

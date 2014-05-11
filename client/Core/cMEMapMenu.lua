@@ -24,7 +24,7 @@ function MapEditor.MapMenu:CreateWindow()
 		"Properties" ,
 		"Save" ,
 		"Load" ,
-		"test" ,
+		"Test" ,
 	}
 	for index , buttonName in ipairs(buttonNames) do
 		local button = Button.Create(self.window)
@@ -61,8 +61,8 @@ function MapEditor.MapMenu:ButtonPressed(button)
 		
 	elseif name == "Load" then
 		
-	elseif name == "test" then
-		MapEditor.map:Destroy()
+	elseif name == "Test" then
+		MapEditor.map:Test()
 	end
 end
 

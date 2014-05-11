@@ -62,7 +62,19 @@ function MapEditor.PropertyManager:Marshal()
 	t.properties = {}
 	
 	for name , property in pairs(self.properties) do
-		t.properties[name] = MapEditor.Marshallable.MarshalValue(property.value)
+		-- Special handling for Objects - use their id instead.
+		if Objects[property.type] or Objects[property.subtype] then
+			if property.type == "table" then
+				t.properties[name] = {}
+				for key , object in pairs(property.value) do
+					t.properties[name][key] = object:GetId()
+				end
+			elseif property.value then
+				t.properties[name] = property.value:GetId()
+			end
+		else
+			t.properties[name] = MapEditor.Marshallable.MarshalValue(property.value)
+		end
 	end
 	
 	return t
