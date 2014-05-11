@@ -1,5 +1,4 @@
 MapEditor = {}
-
 Objects = {}
-
 Actions = {}
+MapTypes = {}

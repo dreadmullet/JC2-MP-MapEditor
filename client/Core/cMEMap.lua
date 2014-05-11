@@ -1,6 +1,6 @@
 class("Map" , MapEditor)
 
-function MapEditor.Map:__init(initialPosition)
+function MapEditor.Map:__init(initialPosition , mapType)
 	EGUSM.SubscribeUtility.__init(self)
 	MapEditor.Marshallable.__init(self)
 	MapEditor.ObjectManager.__init(self)
@@ -9,6 +9,8 @@ function MapEditor.Map:__init(initialPosition)
 	self.Destroy = MapEditor.Map.Destroy
 	
 	MapEditor.map = self
+	
+	self.type = mapType
 	
 	Controls.Add("Rotate/pan camera" , "VehicleCam")
 	Controls.Add("Camera pan modifier" , "Shift")
@@ -26,8 +28,13 @@ function MapEditor.Map:__init(initialPosition)
 	
 	self.selectedObjects = MapEditor.ObjectManager()
 	
+	self.mapMenu = MapEditor.MapMenu()
 	self.spawnMenu = MapEditor.SpawnMenu()
 	self.propertiesMenu = nil
+	
+	for index , propertyArgs in ipairs(self.type.properties) do
+		self:AddProperty(propertyArgs)
+	end
 	
 	Mouse:SetVisible(true)
 	
@@ -42,6 +49,7 @@ function MapEditor.Map:Destroy()
 	
 	self.camera:Destroy()
 	
+	self.mapMenu:Destroy()
 	self.spawnMenu:Destroy()
 	if self.propertiesMenu then
 		self.propertiesMenu:Destroy()
