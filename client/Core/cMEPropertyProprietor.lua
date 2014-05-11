@@ -42,9 +42,17 @@ function MapEditor.PropertyProprietor:__init(properties)
 			if commonValue == nil then
 				commonValue = property.value
 			else
-				if property.value ~= commonValue then
-					commonValue = nil
-					break
+				-- Comparing class instances causes an error :|
+				if self.isObject and commonValue ~= MapEditor.Property.NoObject then
+					if property.value:GetId() ~= commonValue:GetId() then
+						commonValue = nil
+						break
+					end
+				else
+					if property.value ~= commonValue then
+						commonValue = nil
+						break
+					end
 				end
 			end
 		end
