@@ -24,6 +24,7 @@ function MapEditor.MapMenu:CreateWindow()
 		"Properties" ,
 		"Save" ,
 		"Load" ,
+		"Validate" ,
 		"Test" ,
 	}
 	for index , buttonName in ipairs(buttonNames) do
@@ -61,6 +62,15 @@ function MapEditor.MapMenu:ButtonPressed(button)
 		
 	elseif name == "Load" then
 		
+	elseif name == "Validate" then
+		-- TODO: It should focus on the source Object of the error.
+		local successOrError = MapEditor.map.mapType.Validate(MapEditor.map)
+		-- TODO: This should be a popup or something.
+		if successOrError == true then
+			Chat:Print("Validation successful" , Color(165 , 250 , 160))
+		else
+			Chat:Print("Validation failed: "..successOrError , Color(250 , 160 , 160))
+		end
 	elseif name == "Test" then
 		MapEditor.map:Test()
 	end
