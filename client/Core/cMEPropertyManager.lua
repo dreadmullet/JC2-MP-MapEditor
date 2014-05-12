@@ -69,7 +69,7 @@ function MapEditor.PropertyManager:Marshal()
 				for key , object in pairs(property.value) do
 					t.properties[name][key] = object:GetId()
 				end
-			elseif property.value then
+			elseif property.value ~= MapEditor.Property.NoObject then
 				t.properties[name] = property.value:GetId()
 			end
 		else
