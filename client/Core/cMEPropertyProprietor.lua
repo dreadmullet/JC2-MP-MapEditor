@@ -2,20 +2,6 @@
 
 class("PropertyProprietor" , MapEditor)
 
-MapEditor.PropertyProprietor.CompareTables = function(a , b)
-	if #a == #b then
-		for index = 1 , #a do
-			if a[index] ~= b[index] then
-				return false
-			end
-		end
-		
-		return true
-	else
-		return false
-	end
-end
-
 function MapEditor.PropertyProprietor:__init(properties)
 	-- array of Propertys with the same name that are part of different PropertyManagers.
 	self.properties = properties
@@ -32,7 +18,7 @@ function MapEditor.PropertyProprietor:__init(properties)
 			if commonValue == nil then
 				commonValue = property.value
 			else
-				local isIdentical = self.CompareTables(commonValue , property.value)
+				local isIdentical = self:CompareTables(commonValue , property.value)
 				if isIdentical == false then
 					commonValue = nil
 					break
@@ -44,7 +30,10 @@ function MapEditor.PropertyProprietor:__init(properties)
 			else
 				-- Comparing class instances causes an error :|
 				if self.isObject and commonValue ~= MapEditor.Property.NoObject then
-					if property.value:GetId() ~= commonValue:GetId() then
+					if
+						property.value ~= MapEditor.Property.NoObject and
+						property.value:GetId() ~= commonValue:GetId()
+					then
 						commonValue = nil
 						break
 					end
@@ -73,6 +62,34 @@ function MapEditor.PropertyProprietor:__init(properties)
 		else
 			self.value = MapEditor.Property.GetDefaultValue(self.type)
 		end
+	end
+end
+
+function MapEditor.PropertyProprietor:CompareTables(a , b)
+	if #a == #b then
+		for index = 1 , #a do
+			if self.isObject then
+				if type(a[index]) ~= type(b[index]) then
+					return false
+				elseif a[index] == MapEditor.Property.NoObject then
+					if b[index] ~= MapEditor.Property.NoObject then
+						return false
+					end
+				else
+					if a[index]:GetId() ~= b[index]:GetId() then
+						return false
+					end
+				end
+			else
+				if a[index] ~= b[index] then
+					return false
+				end
+			end
+		end
+		
+		return true
+	else
+		return false
 	end
 end
 
@@ -133,7 +150,7 @@ end
 
 function MapEditor.PropertyProprietor:SyncTables()
 	for index , property in ipairs(self.properties) do
-		if self.CompareTables(self.value , property.value) == false then
+		if self:CompareTables(self.value , property.value) == false then
 			property.value = {}
 			for index , value in ipairs(self.value) do
 				property.value[index] = value
