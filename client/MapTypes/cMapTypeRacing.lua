@@ -86,34 +86,53 @@ MapTypes.Racing = {
 		-- Validate checkpoints. Make sure it forms a line or a circuit and that there are no stranded
 		-- checkpoints.
 		
-		-- Create a list of checkpoints that could be in the right order.
-		local checkpoints = {}
+		-- Create a linked list of checkpoints.
+		-- Values are like, {previous = table , checkpoint = RaceCheckpoint , next = table}
+		local checkpointList = {}
 		map:IterateObjects(function(object)
 			if object.type == "RaceCheckpoint" then
-				local nextCheckpoint = object:GetProperty("nextCheckpoint").value
-				if nextCheckpoint ~= MapEditor.Property.NoObject then
-					local cpIndex
-					
-					for index , checkpoint in ipairs(checkpoints) do
-						if checkpoint:GetId() == nextCheckpoint:GetId() then
-							cpIndex = index
-							break
-						end
-					end
-					
-					if cpIndex then
-						table.insert(checkpoints , cpIndex , object)
-					else
-						table.insert(checkpoints , 1 , object)
-					end
-				else
-					table.insert(checkpoints , object)
-				end
+				table.insert(checkpointList , {checkpoint = object})
 			end
 		end)
+		for index , listItem in ipairs(checkpointList) do
+			local nextCheckpoint = listItem.checkpoint:GetProperty("nextCheckpoint").value
+			if nextCheckpoint ~= MapEditor.Property.NoObject then
+				for index2 , listItem2 in ipairs(checkpointList) do
+					if listItem2.checkpoint:GetId() == nextCheckpoint:GetId() then
+						listItem.next = listItem2
+						listItem2.previous = listItem
+					end
+				end
+			end
+		end
 		-- Make sure there is at least one checkpoint.
-		if #checkpoints == 0 then
+		if #checkpointList == 0 then
 			return "At least one checkpoint is required"
+		end
+		-- Find the first checkpoint.
+		local firstChoice = checkpointList[1]
+		local startingCheckpoint = firstChoice
+		while true do
+			if startingCheckpoint.previous then
+				startingCheckpoint = startingCheckpoint.previous
+				-- Prevent an infinite loop in case it's a circuit.
+				if startingCheckpoint == firstChoice then
+					break
+				end
+			else
+				break
+			end
+		end
+		-- Translate checkpointList into checkpoints array.
+		local checkpoints = {}
+		local cp = startingCheckpoint
+		repeat
+			table.insert(checkpoints , cp.checkpoint)
+			cp = cp.next
+		until cp == nil or cp == startingCheckpoint
+		
+		if #checkpoints ~= #checkpointList then
+			return "Invalid checkpoint; do two checkpoints have the same next checkpoint?"
 		end
 		-- Make sure the checkpoints are in a valid order. If two checkpoints have the same
 		-- nextCheckpoint, for example, it will fail.
@@ -123,7 +142,7 @@ MapTypes.Racing = {
 				-- It doesn't matter if the last checkpoint has a next one.
 			elseif nextCheckpoint ~= MapEditor.Property.NoObject then
 				if nextCheckpoint:GetId() ~= checkpoints[index + 1]:GetId() then
-					return "Invalid checkpoint; do two checkpoints have the same next checkpoint?"
+					return "Invalid checkpoint; Same Next Checkpoint or stranded checkpoint"
 				end
 			else
 				return "Stranded checkpoint; make sure you set the Next Checkpoint properties correctly"
