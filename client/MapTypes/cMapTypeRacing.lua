@@ -10,12 +10,9 @@ MapTypes.Racing = {
 			type = "string" ,
 			default = "Untitled Course" ,
 		} ,
-		-- TODO: This should be a ComboBox where you can choose Linear and Circuit (as integers?)
-		-- TODO: Actually, this isn't needed anymore, is it?
 		{
-			name = "type" ,
-			type = "string" ,
-			default = "Linear" ,
+			name = "firstCheckpoint" ,
+			type = "RaceCheckpoint" ,
 		} ,
 		{
 			name = "laps" ,
@@ -109,14 +106,26 @@ MapTypes.Racing = {
 		if #checkpointList == 0 then
 			return "At least one checkpoint is required"
 		end
+		-- Make sure each next checkpoint isn't the checkpoint itself.
+		for index , listItem in ipairs(checkpointList) do
+			if listItem.next then
+				local nextCheckpoint = listItem.next.checkpoint
+				if nextCheckpoint:GetId() == listItem.checkpoint:GetId() then
+					return "Invalid checkpoint; Next Checkpoint cannot be the checkpoint itself, you git!"
+				end
+			end
+		end
 		-- Find the first checkpoint.
-		local firstChoice = checkpointList[1]
-		local startingCheckpoint = firstChoice
+		local startingCheckpoint = checkpointList[1]
+		local isCircuit = false
 		while true do
+			startingCheckpoint.beenTo = true
+			
 			if startingCheckpoint.previous then
 				startingCheckpoint = startingCheckpoint.previous
 				-- Prevent an infinite loop in case it's a circuit.
-				if startingCheckpoint == firstChoice then
+				if startingCheckpoint.beenTo then
+					isCircuit = true
 					break
 				end
 			else
@@ -127,36 +136,21 @@ MapTypes.Racing = {
 		local checkpoints = {}
 		local cp = startingCheckpoint
 		repeat
+			for index , checkpoint in ipairs(checkpoints) do
+				if checkpoint:GetId() == cp.checkpoint:GetId() then
+					return "Invalid checkpoint; Are two checkpoints connected to each other?"
+				end
+			end
 			table.insert(checkpoints , cp.checkpoint)
 			cp = cp.next
 		until cp == nil or cp == startingCheckpoint
-		
+		-- Make sure all checkpoints are accounted for.
 		if #checkpoints ~= #checkpointList then
-			return "Invalid checkpoint; do two checkpoints have the same next checkpoint?"
+			return "Invalid checkpoint; Same Next Checkpoint or stranded checkpoint"
 		end
-		-- Make sure the checkpoints are in a valid order. If two checkpoints have the same
-		-- nextCheckpoint, for example, it will fail.
-		for index , checkpoint in ipairs(checkpoints) do
-			local nextCheckpoint = checkpoint:GetProperty("nextCheckpoint").value
-			if index == #checkpoints then
-				-- It doesn't matter if the last checkpoint has a next one.
-			elseif nextCheckpoint ~= MapEditor.Property.NoObject then
-				if nextCheckpoint:GetId() ~= checkpoints[index + 1]:GetId() then
-					return "Invalid checkpoint; Same Next Checkpoint or stranded checkpoint"
-				end
-			else
-				return "Stranded checkpoint; make sure you set the Next Checkpoint properties correctly"
-			end
-		end
-		-- Make sure each next checkpoint isn't the checkpoint itself.
-		for index , checkpoint in ipairs(checkpoints) do
-			local nextCheckpoint = checkpoint:GetProperty("nextCheckpoint").value
-			if
-				nextCheckpoint ~= MapEditor.Property.NoObject and
-				nextCheckpoint:GetId() == checkpoint:GetId()
-			then
-				return "Invalid checkpoint; Next Checkpoint cannot be the checkpoint itself, you git!"
-			end
+		-- If this is a circuit, make sure we have firstCheckpoint.
+		if isCircuit and map:GetProperty("firstCheckpoint").value == MapEditor.Property.NoObject then
+			return "Course is a circuit but First Checkpoint is not set in map properties"
 		end
 		
 		return true
