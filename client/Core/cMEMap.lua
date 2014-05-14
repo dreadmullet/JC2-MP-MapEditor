@@ -156,14 +156,30 @@ function MapEditor.Map:OpenMapProperties()
 	self.propertiesMenu = MapEditor.PropertiesMenu({self})
 end
 
+function MapEditor.Map:Validate()
+	-- TODO: It should focus on the source Object of the error.
+	local successOrError = self.mapType.Validate(self)
+	-- TODO: This should be a popup or something.
+	if successOrError == true then
+		Chat:Print("Validation successful" , Color(165 , 250 , 160))
+		return true
+	else
+		Chat:Print("Validation failed: "..successOrError , Color(250 , 160 , 160))
+		return false
+	end
+end
+
 function MapEditor.Map:Test()
-	local args = {
-		mapType = self.mapTypeName ,
-		marshalledMap = self:Marshal() ,
-	}
-	Network:Send("TestMap" , args)
-	
-	self:Destroy()
+	local success = self:Validate()
+	if success then
+		local args = {
+			mapType = self.mapTypeName ,
+			marshalledMap = self:Marshal() ,
+		}
+		Network:Send("TestMap" , args)
+		
+		self:Destroy()
+	end
 end
 
 -- Events
