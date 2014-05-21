@@ -12,7 +12,7 @@ end
 function MapEditor.MapMenu:CreateWindow()
 	local window = Window.Create()
 	window:SetTitle("Map menu")
-	window:SetSize(Vector2(373 , 58))
+	window:SetSize(Vector2(420 , 58))
 	window:SetClosable(false)
 	self.window = window
 	
