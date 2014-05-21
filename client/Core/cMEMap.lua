@@ -46,8 +46,6 @@ function MapEditor.Map:__init(initialPosition , mapType)
 		self:AddProperty(propertyArgs)
 	end
 	
-	Mouse:SetVisible(true)
-	
 	self:EventSubscribe("Render")
 	self:EventSubscribe("MouseDown")
 	self:EventSubscribe("ControlDown")
@@ -239,6 +237,8 @@ end
 -- Events
 
 function MapEditor.Map:Render()
+	Mouse:SetVisible(true)
+	
 	-- Draw map name.
 	local mapName = self.name or "Untitled map"
 	local position = Vector2(Render.Width - 6 , 34)

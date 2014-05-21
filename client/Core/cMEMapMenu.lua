@@ -24,6 +24,7 @@ function MapEditor.MapMenu:CreateWindow()
 	
 	local buttonNames = {
 		"Properties" ,
+		"New" ,
 		"Save" ,
 		"Save as" ,
 		"Load" ,
@@ -65,6 +66,8 @@ function MapEditor.MapMenu:ButtonPressed(button)
 	
 	if name == "Properties" then
 		MapEditor.map:OpenMapProperties()
+	elseif name == "New" then
+		MapEditor.map:SetAction(Actions.NewMap)
 	elseif name == "Save" then
 		MapEditor.map:Save()
 	elseif name == "Save as" then

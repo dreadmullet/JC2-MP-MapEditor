@@ -1,5 +1,5 @@
 Events:Subscribe("ModuleLoad" , function()
-	MapEditor.Map(Vector3(-6550 , 215 , -3290) , "Racing")
+	Actions.NewMap()
 end)
 
 Events:Subscribe("ModuleUnload" , function()
