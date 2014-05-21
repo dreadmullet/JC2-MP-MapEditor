@@ -62,20 +62,62 @@ function MapEditor.PropertyManager:Marshal()
 	t.properties = {}
 	
 	for name , property in pairs(self.properties) do
+		-- Get value.
+		local value = nil
+		local isObject = false
 		-- Special handling for Objects - use their id instead.
 		if Objects[property.type] or Objects[property.subtype] then
+			isObject = true
+			
 			if property.type == "table" then
-				t.properties[name] = {}
+				value = {}
 				for key , object in pairs(property.value) do
-					t.properties[name][key] = object:GetId()
+					if object ~= MapEditor.Property.NoObject then
+						value[key] = object:GetId()
+					end
 				end
 			elseif property.value ~= MapEditor.Property.NoObject then
-				t.properties[name] = property.value:GetId()
+				value = property.value:GetId()
 			end
 		else
-			t.properties[name] = MapEditor.Marshallable.MarshalValue(property.value)
+			value = MapEditor.Marshallable.MarshalValue(property.value)
 		end
+		
+		-- Get type.
+		-- Man, I really should have made it 'type' and 'isTable', not 'type' and 'subtype'.
+		local actualType
+		if isObject then
+			actualType = "Object"
+		elseif property.type == "table" then
+			actualType = property.subtype
+		else
+			actualType = property.type
+		end
+		
+		-- Assign the property.
+		t.properties[name] = {FNV(actualType) , value}
 	end
 	
 	return t
+end
+
+function MapEditor.PropertyManager:Unmarshal(properties)
+	for name , propertyData in pairs(properties) do
+		local property = self:GetProperty(name)
+		if property then
+			local typeHash = propertyData[1]
+			local value = propertyData[2]
+			
+			if property.type == "table" then
+				property.value = {}
+				for key , value in pairs(value) do
+					property.value[key] = MapEditor.Marshallable.UnmarshalValue(typeHash , value)
+				end
+			else
+				property.value = MapEditor.Marshallable.UnmarshalValue(typeHash , value)
+			end
+		else
+			warn("Property doesn't exist: "..tostring(name))
+		end
+	end
 end

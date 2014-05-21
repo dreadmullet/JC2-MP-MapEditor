@@ -44,6 +44,30 @@ MapEditor.Marshallable.MarshalByType.Color = function(value)
 	return {value.r , value.g , value.b , value.a}
 end
 
+MapEditor.Marshallable.UnmarshalValue = function(typeHash , value)
+	local unmarshalFunction = MapEditor.Marshallable.UnmarshalByTypeHash[typeHash]
+	if unmarshalFunction then
+		return unmarshalFunction(value)
+	else
+		return value
+	end
+end
+
+MapEditor.Marshallable.UnmarshalByTypeHash = {}
+
+MapEditor.Marshallable.UnmarshalByTypeHash[FNV("Object")] = function(value)
+	if value then
+		local object = MapEditor.map:GetObject(value)
+		if object == nil then
+			warn("Couldn't find object with id: "..tostring(value))
+		else
+			return object
+		end
+	else
+		return MapEditor.Property.NoObject
+	end
+end
+
 -- Instance functions
 
 function MapEditor.Marshallable:__init(memberNames)

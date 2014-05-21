@@ -7,6 +7,7 @@ function MapEditor.ObjectManager:__init()
 	MapEditor.Marshallable.__init(self , memberNames)
 	
 	self.AddObject = MapEditor.ObjectManager.AddObject
+	self.GetObject = MapEditor.ObjectManager.GetObject
 	self.RemoveObject = MapEditor.ObjectManager.RemoveObject
 	self.HasObject = MapEditor.ObjectManager.HasObject
 	self.IterateObjects = MapEditor.ObjectManager.IterateObjects
@@ -17,6 +18,10 @@ end
 
 function MapEditor.ObjectManager:AddObject(object)
 	self.objects[object:GetId()] = object
+end
+
+function MapEditor.ObjectManager:GetObject(objectId)
+	return self.objects[objectId]
 end
 
 function MapEditor.ObjectManager:RemoveObject(object)

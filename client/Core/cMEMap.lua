@@ -1,8 +1,14 @@
 class("Map" , MapEditor)
 
-function MapEditor.Map:__init(initialPosition , mapTypeName)
+MapEditor.Map.version = 1
+
+function MapEditor.Map:__init(initialPosition , mapType)
 	EGUSM.SubscribeUtility.__init(self)
-	MapEditor.Marshallable.__init(self)
+	local memberNames = {
+		"type" ,
+		"version" ,
+	}
+	MapEditor.Marshallable.__init(self , memberNames)
 	MapEditor.ObjectManager.__init(self)
 	MapEditor.PropertyManager.__init(self)
 	
@@ -10,9 +16,12 @@ function MapEditor.Map:__init(initialPosition , mapTypeName)
 	
 	MapEditor.map = self
 	
-	self.mapTypeName = mapTypeName
-	self.mapType = MapTypes[mapTypeName]
+	self.type = mapType
+	self.objectIdCounter = 1
+	-- This is used for the filename and is set when saving or loading.
+	self.name = nil
 	
+	-- Temporary until preferences menu.
 	Controls.Add("Rotate/pan camera" , "VehicleCam")
 	Controls.Add("Camera pan modifier" , "Shift")
 	Controls.Add("Move object" , "G")
@@ -33,7 +42,7 @@ function MapEditor.Map:__init(initialPosition , mapTypeName)
 	self.spawnMenu = MapEditor.SpawnMenu()
 	self.propertiesMenu = nil
 	
-	for index , propertyArgs in ipairs(self.mapType.properties) do
+	for index , propertyArgs in ipairs(MapTypes[self.type].properties) do
 		self:AddProperty(propertyArgs)
 	end
 	
@@ -156,9 +165,19 @@ function MapEditor.Map:OpenMapProperties()
 	self.propertiesMenu = MapEditor.PropertiesMenu({self})
 end
 
+function MapEditor.Map:Save()
+	local args = {
+		name = self.name ,
+		marshalledSource = self:Marshal() ,
+	}
+	Network:Send("SaveMap" , args)
+	
+	self.mapMenu.canSave = true
+end
+
 function MapEditor.Map:Validate()
 	-- TODO: It should focus on the source Object of the error.
-	local successOrError = self.mapType.Validate(self)
+	local successOrError = MapTypes[self.type].Validate(self)
 	-- TODO: This should be a popup or something.
 	if successOrError == true then
 		Chat:Print("Validation successful" , Color(165 , 250 , 160))
@@ -173,7 +192,7 @@ function MapEditor.Map:Test()
 	local success = self:Validate()
 	if success then
 		local args = {
-			mapType = self.mapTypeName ,
+			mapType = self.type ,
 			marshalledMap = self:Marshal() ,
 		}
 		Network:Send("TestMap" , args)
@@ -182,9 +201,54 @@ function MapEditor.Map:Test()
 	end
 end
 
+-- Static functions
+
+MapEditor.Map.Load = function(marshalledSource)
+	if MapEditor.Map.version ~= marshalledSource.version then
+		-- TODO: something that is not this
+		Chat:Print("Map cannot be loaded because it has a different file version" , Color.DarkRed)
+		return
+	end
+	
+	local map = MapEditor.Map(Vector3(-6550 , 215 , -3290) , marshalledSource.type)
+	
+	-- Unmarshal Objects.
+	local highestId = 1
+	for objectId , objectData in pairs(marshalledSource.objects) do
+		if objectId > highestId then
+			highestId = objectId
+		end
+		
+		local object = MapEditor.Object.Unmarshal(objectData)
+		map:AddObject(object)
+	end
+	-- Unmarshal Object properties. This is done here because some properties are Objects, so all
+	-- Objects must be loaded first.
+	for objectId , objectData in pairs(marshalledSource.objects) do
+		MapEditor.PropertyManager.Unmarshal(map:GetObject(objectId) , objectData.properties)
+	end
+	-- Unmarshal map properties here, for the same reason as above.
+	MapEditor.PropertyManager.Unmarshal(map , marshalledSource.properties)
+	
+	map.objectIdCounter = highestId + 1
+	map.mapMenu.canSave = true
+	
+	return map
+end
+
 -- Events
 
 function MapEditor.Map:Render()
+	-- Draw map name.
+	local mapName = self.name or "Untitled map"
+	local position = Vector2(Render.Width - 6 , 34)
+	position.x = position.x - Render:GetTextWidth(mapName)
+	Render:DrawText(
+		position ,
+		mapName ,
+		Color(196 , 196 , 196)
+	)
+	
 	self:IterateObjects(function(object)
 		MapEditor.Utility.DrawBounds(
 			object.position ,

@@ -12,17 +12,20 @@ end
 function MapEditor.MapMenu:CreateWindow()
 	local window = Window.Create()
 	window:SetTitle("Map menu")
-	window:SetSize(Vector2(308 , 58))
+	window:SetSize(Vector2(373 , 58))
 	window:SetClosable(false)
 	self.window = window
 	
 	self:ResolutionChange({size = Render.Size})
+	
+	self.canSave = false
 	
 	self.buttons = {}
 	
 	local buttonNames = {
 		"Properties" ,
 		"Save" ,
+		"Save as" ,
 		"Load" ,
 		"Validate" ,
 		"Test" ,
@@ -38,6 +41,8 @@ function MapEditor.MapMenu:CreateWindow()
 		button:Subscribe("Press" , self , self.ButtonPressed)
 		self.buttons[buttonName] = button
 	end
+	
+	self.buttons["Save"]:SetEnabled(self.canSave)
 end
 
 function MapEditor.MapMenu:Destroy()
@@ -49,6 +54,8 @@ function MapEditor.MapMenu:SetEnabled(enabled)
 	for index , button in pairs(self.buttons) do
 		button:SetEnabled(enabled)
 	end
+	
+	self.buttons["Save"]:SetEnabled(enabled and self.canSave)
 end
 
 -- GWEN events
@@ -59,9 +66,11 @@ function MapEditor.MapMenu:ButtonPressed(button)
 	if name == "Properties" then
 		MapEditor.map:OpenMapProperties()
 	elseif name == "Save" then
-		
+		MapEditor.map:Save()
+	elseif name == "Save as" then
+		MapEditor.map:SetAction(Actions.SaveAs)
 	elseif name == "Load" then
-		
+		MapEditor.map:SetAction(Actions.Load)
 	elseif name == "Validate" then
 		MapEditor.map:Validate()
 	elseif name == "Test" then
