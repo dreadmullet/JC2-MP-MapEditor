@@ -50,6 +50,10 @@ function MapEditor.SpawnMenu:SetEnabled(enabled)
 	end
 end
 
+function MapEditor.SpawnMenu:SetVisible(visible)
+	self.window:SetVisible(visible)
+end
+
 -- GWEN events
 
 function MapEditor.SpawnMenu:SpawnButtonPressed(button)

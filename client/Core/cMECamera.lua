@@ -13,6 +13,7 @@ function MapEditor.Camera:__init(position , angle)
 	self.sensitivityRot = 4.5
 	self.sensitivityZoom = 0.07
 	self.sensitivityPan = 5
+	self.isEnabled = true
 	self.isInputEnabled = true
 	-- Private properties
 	self.position = position or Vector3(0 , 10000 , 0)
@@ -100,6 +101,10 @@ end
 -- Events
 
 function MapEditor.Camera:CalcView()
+	if self.isEnabled == false then
+		return true
+	end
+	
 	Camera:SetPosition(self.position)
 	Camera:SetAngle(self.angle)
 	

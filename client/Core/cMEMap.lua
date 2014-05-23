@@ -20,6 +20,7 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	self.objectIdCounter = 1
 	-- This is used for the filename and is set when saving or loading.
 	self.name = nil
+	self.isEnabled = true
 	
 	-- Temporary until preferences menu.
 	Controls.Add("Rotate/pan camera" , "VehicleCam")
@@ -50,6 +51,21 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	self:EventSubscribe("MouseDown")
 	self:EventSubscribe("ControlDown")
 	self:EventSubscribe("ControlUp")
+end
+
+function MapEditor.Map:SetEnabled(enabled)
+	self.mapMenu:SetVisible(enabled)
+	self.spawnMenu:SetVisible(enabled)
+	if self.propertiesMenu then
+		self.propertiesMenu:Destroy()
+	end
+	
+	Mouse:SetVisible(enabled)
+	
+	self.camera.isEnabled = enabled
+	self.camera.isInputEnabled = enabled
+	
+	self.isEnabled = enabled
 end
 
 function MapEditor.Map:Destroy()
@@ -195,7 +211,11 @@ function MapEditor.Map:Test()
 		}
 		Network:Send("TestMap" , args)
 		
-		self:Destroy()
+		self:SetEnabled(false)
+		
+		if MapTypes[self.type].Test then
+			MapTypes[self.type].Test()
+		end
 	end
 end
 
@@ -237,6 +257,10 @@ end
 -- Events
 
 function MapEditor.Map:Render()
+	if self.isEnabled == false then
+		return
+	end
+	
 	Mouse:SetVisible(true)
 	
 	-- Draw map name.
@@ -277,6 +301,10 @@ function MapEditor.Map:Render()
 end
 
 function MapEditor.Map:MouseDown(args)
+	if self.isEnabled == false then
+		return
+	end
+	
 	if self.currentAction == nil then
 		if args.button == 1 then
 			self:SetAction(Actions.Selector , args.button)
@@ -287,6 +315,10 @@ function MapEditor.Map:MouseDown(args)
 end
 
 function MapEditor.Map:ControlDown(args)
+	if self.isEnabled == false then
+		return
+	end
+	
 	if self.currentAction == nil then
 		if args.name == "Move object" then
 			self:SetAction(Actions.Mover)
@@ -309,6 +341,10 @@ function MapEditor.Map:ControlDown(args)
 end
 
 function MapEditor.Map:ControlUp(args)
+	if self.isEnabled == false then
+		return
+	end
+	
 	if args.name == "Rotate/pan camera" then
 		self.camera.isInputEnabled = false
 	end

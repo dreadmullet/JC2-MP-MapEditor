@@ -59,6 +59,10 @@ function MapEditor.MapMenu:SetEnabled(enabled)
 	self.buttons["Save"]:SetEnabled(enabled and self.canSave)
 end
 
+function MapEditor.MapMenu:SetVisible(visible)
+	self.window:SetVisible(visible)
+end
+
 -- GWEN events
 
 function MapEditor.MapMenu:ButtonPressed(button)

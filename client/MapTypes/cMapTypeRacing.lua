@@ -154,5 +154,12 @@ MapTypes.Racing = {
 		end
 		
 		return true
+	end ,
+	Test = function()
+		MapTypes.Racing.raceEndSub = Events:Subscribe("RaceEnd" , function()
+			Events:Unsubscribe(MapTypes.Racing.raceEndSub)
+			
+			MapEditor.map:SetEnabled(true)
+		end)
 	end
 }
