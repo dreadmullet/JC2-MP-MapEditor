@@ -232,24 +232,34 @@ MapEditor.Map.Load = function(marshalledSource)
 	
 	-- Unmarshal Objects.
 	local highestId = 1
-	for objectId , objectData in pairs(marshalledSource.objects) do
-		if objectId > highestId then
-			highestId = objectId
+	local averageObjectPosition = Vector3(0 , 0 , 0)
+	local objectCount = 0
+	for objectIdSometimes , objectData in pairs(marshalledSource.objects) do
+		if objectData.id > highestId then
+			highestId = objectData.id
 		end
 		
 		local object = MapEditor.Object.Unmarshal(objectData)
 		map:AddObject(object)
+		
+		objectCount = objectCount + 1
+		averageObjectPosition = averageObjectPosition + object.position
 	end
+	averageObjectPosition = averageObjectPosition / objectCount
 	-- Unmarshal Object properties. This is done here because some properties are Objects, so all
 	-- Objects must be loaded first.
-	for objectId , objectData in pairs(marshalledSource.objects) do
-		MapEditor.PropertyManager.Unmarshal(map:GetObject(objectId) , objectData.properties)
+	for objectIdSometimes , objectData in pairs(marshalledSource.objects) do
+		MapEditor.PropertyManager.Unmarshal(map:GetObject(objectData.id) , objectData.properties)
 	end
 	-- Unmarshal map properties here, for the same reason as above.
 	MapEditor.PropertyManager.Unmarshal(map , marshalledSource.properties)
 	
 	map.objectIdCounter = highestId + 1
 	map.mapMenu.canSave = true
+	if objectCount > 0 then
+		-- TODO: Generalize the camera so you just have to do SetPosition
+		map.camera.targetPosition = averageObjectPosition
+	end
 	
 	return map
 end
