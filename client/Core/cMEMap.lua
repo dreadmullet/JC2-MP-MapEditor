@@ -58,6 +58,7 @@ function MapEditor.Map:SetEnabled(enabled)
 	self.spawnMenu:SetVisible(enabled)
 	if self.propertiesMenu then
 		self.propertiesMenu:Destroy()
+		self.propertiesMenu = nil
 	end
 	
 	Mouse:SetVisible(enabled)
