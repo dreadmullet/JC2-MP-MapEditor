@@ -149,10 +149,13 @@ Controls.Remove = function(controlName)
 	end
 end
 
-Controls.Down = function(controlInfo)
+Controls.Down = function(controlInfo , optionalState)
 	-- If this is one of our controls, add it to Controls.held and fire ControlDown.
 	for index , control in ipairs(Controls.controls) do
 		if control.type == controlInfo[1] and control.value == controlInfo[2] then
+			if optionalState then
+				control.state = optionalState
+			end
 			Events:Fire("ControlDown" , control)
 			table.insert(Controls.held , control)
 			break
@@ -166,6 +169,7 @@ Controls.Up = function(controlInfo)
 		if control.type == controlInfo[1] and control.value == controlInfo[2] then
 			table.remove(Controls.held , table.find(Controls.held , control) or 0)
 			Events:Fire("ControlUp" , control)
+			control.state = 0
 			break
 		end
 	end
@@ -237,8 +241,8 @@ Controls.MouseScroll = function(args)
 	
 	-- The mouse wheel is an exception, it is instantly released.
 	local controlInfo = {"MouseWheel" , value}
-	Controls.Down(controlInfo)
-	Controls.Up(controlInfo)
+	Controls.Down(controlInfo , math.abs(args.delta))
+	Controls.Up(controlInfo , math.abs(args.delta))
 end
 
 -- This should probably be PostTick or something, but it doesn't really matter.

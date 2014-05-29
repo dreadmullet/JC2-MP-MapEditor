@@ -22,15 +22,6 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	self.name = nil
 	self.isEnabled = true
 	
-	-- Temporary until preferences menu.
-	Controls.Add("Rotate/pan camera" , "VehicleCam")
-	Controls.Add("Camera pan modifier" , "Shift")
-	Controls.Add("Move object" , "G")
-	Controls.Add("Rotate object" , "R")
-	Controls.Add("Undo" , "Z")
-	Controls.Add("Redo" , "Y")
-	Controls.Add("Delete" , "X")
-	
 	self.camera = MapEditor.Camera(initialPosition)
 	
 	self.undoableActions = {}
@@ -41,6 +32,8 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	
 	self.mapMenu = MapEditor.MapMenu()
 	self.spawnMenu = MapEditor.SpawnMenu()
+	self.preferencesMenu = MapEditor.PreferencesMenu()
+	self.preferencesMenu:SetVisible(false)
 	self.propertiesMenu = nil
 	
 	for index , propertyArgs in ipairs(MapTypes[self.type].properties) do
@@ -56,6 +49,9 @@ end
 function MapEditor.Map:SetEnabled(enabled)
 	self.mapMenu:SetVisible(enabled)
 	self.spawnMenu:SetVisible(enabled)
+	if self.preferencesMenu:GetVisible() then
+		self.preferencesMenu:SetVisible(enabled)
+	end
 	if self.propertiesMenu then
 		self.propertiesMenu:Destroy()
 		self.propertiesMenu = nil
@@ -76,6 +72,7 @@ function MapEditor.Map:Destroy()
 	
 	self.mapMenu:Destroy()
 	self.spawnMenu:Destroy()
+	self.preferencesMenu:Destroy()
 	if self.propertiesMenu then
 		self.propertiesMenu:Destroy()
 	end
@@ -340,10 +337,8 @@ function MapEditor.Map:ControlDown(args)
 		end
 	end
 	
-	if args.name == "Rotate/pan camera" then
-		if self.currentAction == nil then
-			self.camera.isInputEnabled = true
-		end
+	if args.name == "Orbit camera: Rotate/pan" then
+		self.camera.isInputEnabled = true
 	elseif args.name == "Undo" then
 		self:Undo()
 	elseif args.name == "Redo" then
@@ -356,7 +351,7 @@ function MapEditor.Map:ControlUp(args)
 		return
 	end
 	
-	if args.name == "Rotate/pan camera" then
+	if args.name == "Orbit camera: Rotate/pan" then
 		self.camera.isInputEnabled = false
 	end
 end

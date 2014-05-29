@@ -10,9 +10,6 @@ function MapEditor.Camera:__init(position , angle)
 	self.minDistance = 0.5
 	self.maxDistance = 32768
 	self.collision = false
-	self.sensitivityRot = 4.5
-	self.sensitivityZoom = 0.07
-	self.sensitivityPan = 5
 	self.isEnabled = true
 	self.isInputEnabled = true
 	-- Private properties
@@ -28,9 +25,8 @@ function MapEditor.Camera:__init(position , angle)
 	self.eventSubs = {}
 	for index , name in ipairs{
 		"CalcView" ,
-		"LocalPlayerInput" ,
-		"MouseScroll" ,
-		"PreTick" ,
+		"ControlDown" ,
+		"PostTick" ,
 	} do
 		table.insert(self.eventSubs , Events:Subscribe(name , self , self[name]))
 	end
@@ -46,10 +42,8 @@ function MapEditor.Camera:UpdateDistance()
 	local distanceDelta = self.distanceDeltaBuffer
 	self.distanceDeltaBuffer = 0
 	
-	self.distance = (
-		self.distance *
-		math.pow(10 , 1 + -distanceDelta * self.sensitivityZoom) / 10
-	)
+	local mult = math.pow(10 , 1 + -distanceDelta * MapEditor.Preferences.camSensitivityZoom)
+	self.distance = self.distance * mult * 0.1
 	self.distance = math.clamp(self.distance , self.minDistance , self.maxDistance)
 end
 
@@ -83,7 +77,7 @@ function MapEditor.Camera:UpdateAngle()
 end
 
 function MapEditor.Camera:UpdateMovement()
-	local velocity = self.panBuffer * self.sensitivityPan * self.deltaTime * self.distance
+	local velocity = self.panBuffer * self.distance
 	local y = velocity.y
 	velocity = Angle(self.angle.yaw , 0 , 0) * velocity
 	velocity.y = y
@@ -112,57 +106,69 @@ function MapEditor.Camera:CalcView()
 	return false
 end
 
-function MapEditor.Camera:LocalPlayerInput(args)
-	if self.isInputEnabled == false then
-		return true
+function MapEditor.Camera:ControlDown(args)
+	local delta
+	
+	if args.name == "Mouse wheel up" then
+		delta = args.state
+	elseif args.name == "Mouse wheel down" then
+		delta = -args.state
 	end
 	
-	local RotateYaw = function(value)
-		self.angleBuffer.yaw = self.angleBuffer.yaw + value * self.sensitivityRot * self.deltaTime
-	end
-	local RotatePitch = function(value)
-		self.angleBuffer.pitch = self.angleBuffer.pitch + value * self.sensitivityRot * self.deltaTime
-		self.angleBuffer.pitch = math.clamp(self.angleBuffer.pitch , self.minPitch , self.maxPitch)
-	end
-	
-	if Controls.GetIsHeld("Rotate/pan camera") then
-		if Controls.GetIsHeld("Camera pan modifier") then
-			if args.input == Action.LookRight then
-				self.panBuffer.x = -args.state
-			elseif args.input == Action.LookLeft then
-				self.panBuffer.x = args.state
-			elseif args.input == Action.LookUp then
-				self.panBuffer.z = -args.state
-			elseif args.input == Action.LookDown then
-				self.panBuffer.z = args.state
-			end
+	if delta then
+		if Controls.GetIsHeld("Orbit camera: Pan modifier") then
+			self.panBuffer.y = delta * MapEditor.Preferences.camSensitivityMove * 0.15
 		else
-			if args.input == Action.LookRight then
-				RotateYaw(-args.state)
-			elseif args.input == Action.LookLeft then
-				RotateYaw(args.state)
-			elseif args.input == Action.LookUp then
-				RotatePitch(-args.state)
-			elseif args.input == Action.LookDown then
-				RotatePitch(args.state)
+			self.distanceDeltaBuffer = delta
+		end
+	end
+end
+
+function MapEditor.Camera:PostTick()
+	self.deltaTime = self.deltaTimer:GetSeconds()
+	self.deltaTimer:Restart()
+	
+	-- Handle inputs.
+	if self.isInputEnabled then
+		local RotateYaw = function(value)
+			self.angleBuffer.yaw = self.angleBuffer.yaw + value * self.deltaTime
+		end
+		local RotatePitch = function(value)
+			self.angleBuffer.pitch = math.clamp(
+				self.angleBuffer.pitch + value * self.deltaTime ,
+				self.minPitch ,
+				self.maxPitch
+			)
+		end
+		
+		if Controls.GetIsHeld("Orbit camera: Rotate/pan") then
+			if Controls.GetIsHeld("Orbit camera: Pan modifier") then
+				local mult = MapEditor.Preferences.camSensitivityMove * self.deltaTime
+				if Controls.GetIsHeld("Look right") then
+					self.panBuffer.x = -Controls.Get("Look right").state * mult
+				else
+					self.panBuffer.x = Controls.Get("Look left").state * mult
+				end
+				if Controls.GetIsHeld("Look up") then
+					self.panBuffer.z = Controls.Get("Look up").state * mult
+				else
+					self.panBuffer.z = -Controls.Get("Look down").state * mult
+				end
+			else
+				local mult = MapEditor.Preferences.camSensitivityRot
+				if Controls.GetIsHeld("Look right") then
+					RotateYaw(-Controls.Get("Look right").state * mult)
+				else
+					RotateYaw(Controls.Get("Look left").state * mult)
+				end
+				if Controls.GetIsHeld("Look up") then
+					RotatePitch(Controls.Get("Look up").state * mult)
+				else
+					RotatePitch(-Controls.Get("Look down").state * mult)
+				end
 			end
 		end
 	end
-	
-	return true
-end
-
-function MapEditor.Camera:MouseScroll(args)
-	if Controls.GetIsHeld("Camera pan modifier") then
-		self.panBuffer.y = args.delta * 0.5
-	else
-		self.distanceDeltaBuffer = args.delta
-	end
-end
-
-function MapEditor.Camera:PreTick()
-	self.deltaTime = self.deltaTimer:GetSeconds()
-	self.deltaTimer:Restart()
 	
 	-- What are these even
 	self:UpdateAngle()

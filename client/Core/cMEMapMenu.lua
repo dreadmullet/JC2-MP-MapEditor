@@ -12,7 +12,7 @@ end
 function MapEditor.MapMenu:CreateWindow()
 	local window = Window.Create()
 	window:SetTitle("Map menu")
-	window:SetSize(Vector2(420 , 58))
+	window:SetSize(Vector2(508 , 58))
 	window:SetClosable(false)
 	self.window = window
 	
@@ -23,11 +23,12 @@ function MapEditor.MapMenu:CreateWindow()
 	self.buttons = {}
 	
 	local buttonNames = {
-		"Properties" ,
+		"Preferences" ,
 		"New" ,
 		"Save" ,
 		"Save as" ,
 		"Load" ,
+		"Properties" ,
 		"Validate" ,
 		"Test" ,
 	}
@@ -68,8 +69,9 @@ end
 function MapEditor.MapMenu:ButtonPressed(button)
 	local name = button:GetDataString("name")
 	
-	if name == "Properties" then
-		MapEditor.map:OpenMapProperties()
+	if name == "Preferences" then
+		local preferencesMenu = MapEditor.map.preferencesMenu
+		preferencesMenu:SetVisible(not preferencesMenu:GetVisible())
 	elseif name == "New" then
 		MapEditor.map:SetAction(Actions.NewMap)
 	elseif name == "Save" then
@@ -78,6 +80,8 @@ function MapEditor.MapMenu:ButtonPressed(button)
 		MapEditor.map:SetAction(Actions.SaveAs)
 	elseif name == "Load" then
 		MapEditor.map:SetAction(Actions.Load)
+	elseif name == "Properties" then
+		MapEditor.map:OpenMapProperties()
 	elseif name == "Validate" then
 		MapEditor.map:Validate()
 	elseif name == "Test" then
