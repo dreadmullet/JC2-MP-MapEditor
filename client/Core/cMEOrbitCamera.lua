@@ -138,11 +138,11 @@ function MapEditor.OrbitCamera:PostTick()
 	-- Handle inputs.
 	if self.isInputEnabled then
 		local RotateYaw = function(value)
-			self.angleBuffer.yaw = self.angleBuffer.yaw + value * deltaTime
+			self.angleBuffer.yaw = self.angleBuffer.yaw + value
 		end
 		local RotatePitch = function(value)
 			self.angleBuffer.pitch = math.clamp(
-				self.angleBuffer.pitch + value * deltaTime ,
+				self.angleBuffer.pitch + value ,
 				self.minPitch ,
 				self.maxPitch
 			)

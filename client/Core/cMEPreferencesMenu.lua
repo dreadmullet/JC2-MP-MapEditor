@@ -21,8 +21,8 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	window:SetSize(Vector2(340 , 380))
 	self.window = window
 	
-	local sliderTextSize = 12
-	local sliderTextWidth = Render:GetTextWidth("Camera movement sensitivity: 00.0" , sliderTextSize)
+	local textSize = 12
+	local textWidth = Render:GetTextWidth("Camera movement sensitivity: 00.00" , textSize)
 	
 	-- Camera movement sensitivity slider
 	
@@ -35,14 +35,14 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	slider:SetDock(GwenPosition.Fill)
 	slider:SetRange(0.1 , 1)
 	slider:SetValue(MapEditor.Preferences.camSensitivityMove)
-	slider:Subscribe("ValueChanged" , self , MapEditor.PreferencesMenu.CamSensitivityMoveSliderChanged)
+	slider:Subscribe("ValueChanged" , self , self.CamSensitivityMoveSliderChanged)
 	self.camSensitivityMoveSlider = slider
 	
 	local label = Label.Create(base)
 	label:SetDock(GwenPosition.Left)
 	label:SetAlignment(GwenPosition.CenterV)
-	label:SetTextSize(sliderTextSize)
-	label:SetWidth(sliderTextWidth)
+	label:SetTextSize(textSize)
+	label:SetWidth(textWidth)
 	self.camSensitivityMoveLabel = label
 	
 	self:CamSensitivityMoveSliderChanged()
@@ -56,19 +56,40 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	
 	local slider = HorizontalSlider.Create(base)
 	slider:SetDock(GwenPosition.Fill)
-	slider:SetRange(0.05 , 1)
+	slider:SetRange(0.002 , 0.015)
 	slider:SetValue(MapEditor.Preferences.camSensitivityRot)
-	slider:Subscribe("ValueChanged" , self , MapEditor.PreferencesMenu.CamSensitivityRotSliderChanged)
+	slider:Subscribe("ValueChanged" , self , self.CamSensitivityRotSliderChanged)
 	self.camSensitivityRotSlider = slider
 	
 	local label = Label.Create(base)
 	label:SetDock(GwenPosition.Left)
 	label:SetAlignment(GwenPosition.CenterV)
-	label:SetTextSize(sliderTextSize)
-	label:SetWidth(sliderTextWidth)
+	label:SetTextSize(textSize)
+	label:SetWidth(textWidth)
 	self.camSensitivityRotLabel = label
 	
 	self:CamSensitivityRotSliderChanged()
+	
+	-- Camera type
+	
+	local base = BaseWindow.Create(self.window)
+	base:SetMargin(Vector2(2 , 0) , Vector2(4 , 0))
+	base:SetDock(GwenPosition.Top)
+	base:SetHeight(18)
+	
+	local label = Label.Create(base)
+	label:SetDock(GwenPosition.Left)
+	label:SetAlignment(GwenPosition.CenterV)
+	label:SetTextSize(textSize)
+	label:SetText("Camera type")
+	label:SetWidth(textWidth)
+	
+	local comboBox = ComboBox.Create(base)
+	-- comboBox:SetMargin(Vector2(0 , 0) , Vector2(0 , 0))
+	comboBox:SetDock(GwenPosition.Fill)
+	comboBox:AddItem("Noclip")
+	comboBox:AddItem("Orbit")
+	comboBox:Subscribe("Selection" , self , self.CameraTypeChanged)
 	
 	-- Bind menu
 	
@@ -97,15 +118,13 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	bindMenu:AddControl("Redo" ,                             "Y")
 	bindMenu:AddControl("Delete" ,                           "X")
 	
-	-- bindMenu:AddControl("Noclip camera: Toggle" ,            "J")
-	-- bindMenu:AddControl("Noclip camera: Forward" ,           "OemComma")
-	-- bindMenu:AddControl("Noclip camera: Back" ,              "O")
-	-- bindMenu:AddControl("Noclip camera: Left" ,              "A")
-	-- bindMenu:AddControl("Noclip camera: Right" ,             "E")
-	-- bindMenu:AddControl("Noclip camera: Up" ,                "Space")
-	-- bindMenu:AddControl("Noclip camera: Down" ,              "Control")
-	-- bindMenu:AddControl("Noclip camera: Increase speed" ,    "Mouse wheel up")
-	-- bindMenu:AddControl("Noclip camera: Decrease speed" ,    "Mouse wheel down")
+	bindMenu:AddControl("Noclip camera: Toggle" ,            "J")
+	bindMenu:AddControl("Noclip camera: Forward" ,           "OemComma")
+	bindMenu:AddControl("Noclip camera: Back" ,              "O")
+	bindMenu:AddControl("Noclip camera: Left" ,              "A")
+	bindMenu:AddControl("Noclip camera: Right" ,             "E")
+	bindMenu:AddControl("Noclip camera: Up" ,                "Space")
+	bindMenu:AddControl("Noclip camera: Down" ,              "Control")
 	
 	bindMenu:RequestSettings()
 	
@@ -138,7 +157,17 @@ end
 function MapEditor.PreferencesMenu:CamSensitivityRotSliderChanged()
 	local value = self.camSensitivityRotSlider:GetValue()
 	MapEditor.Preferences.camSensitivityRot = value
-	self.camSensitivityRotLabel:SetText(string.format("Camera rotation sensitivity: %.2f" , value))
+	self.camSensitivityRotLabel:SetText(string.format("Camera rotation sensitivity: %.3f" , value))
+end
+
+function MapEditor.PreferencesMenu:CameraTypeChanged(comboBox)
+	local name = comboBox:GetSelectedItem():GetText()
+	MapEditor.map.camera:Destroy()
+	if name == "Noclip" then
+		MapEditor.map.camera = MapEditor.NoclipCamera(Camera:GetPosition() , Camera:GetAngle())
+	elseif name == "Orbit" then
+		MapEditor.map.camera = MapEditor.OrbitCamera(Camera:GetPosition() , Camera:GetAngle())
+	end
 end
 
 -- Events

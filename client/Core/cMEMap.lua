@@ -22,7 +22,7 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	self.name = nil
 	self.isEnabled = true
 	
-	self.camera = MapEditor.OrbitCamera(initialPosition)
+	self.camera = MapEditor.NoclipCamera(initialPosition)
 	
 	self.undoableActions = {}
 	self.redoableActions = {}
@@ -94,6 +94,7 @@ function MapEditor.Map:SetAction(actionClass , ...)
 	local finished = false
 	local cancelled = false
 	
+	-- This is all pretty silly because Actions can finish immediately. Bleh.
 	self.ActionFinish = function() finished = true end
 	self.ActionCancel = function() cancelled = true end
 	
@@ -306,7 +307,7 @@ function MapEditor.Map:Render()
 end
 
 function MapEditor.Map:MouseDown(args)
-	if self.isEnabled == false then
+	if self.isEnabled == false or self.camera.isInputEnabled then
 		return
 	end
 	
@@ -324,7 +325,7 @@ function MapEditor.Map:ControlDown(args)
 		return
 	end
 	
-	if self.currentAction == nil then
+	if self.currentAction == nil and self.camera.isInputEnabled == false then
 		if args.name == "Move object" then
 			self:SetAction(Actions.Mover)
 		elseif args.name == "Rotate object" then
