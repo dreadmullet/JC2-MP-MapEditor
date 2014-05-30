@@ -33,6 +33,12 @@ function MapEditor.OrbitCamera:__init(position , angle)
 	end
 end
 
+function MapEditor.OrbitCamera:SetPosition(position)
+	self.targetPosition = position
+	self.angleBuffer.pitch = math.clamp(self.angleBuffer.pitch , -70 , 5)
+	self.distance = 50
+end
+
 function MapEditor.OrbitCamera:Destroy()
 	for index , eventSub in ipairs(self.eventSubs) do
 		Events:Unsubscribe(eventSub)
