@@ -22,7 +22,7 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	self.name = nil
 	self.isEnabled = true
 	
-	self.camera = MapEditor.Camera(initialPosition)
+	self.camera = MapEditor.OrbitCamera(initialPosition)
 	
 	self.undoableActions = {}
 	self.redoableActions = {}

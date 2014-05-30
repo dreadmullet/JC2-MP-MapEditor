@@ -1,8 +1,8 @@
 -- Hacken together from my trusty old OrbitCamera class.
 
-class("Camera" , MapEditor)
+class("OrbitCamera" , MapEditor)
 
-function MapEditor.Camera:__init(position , angle)
+function MapEditor.OrbitCamera:__init(position , angle)
 	-- Public properties
 	self.targetPosition = position or Vector3(0 , 0 , 0)
 	self.minPitch = math.rad(-89)
@@ -32,13 +32,13 @@ function MapEditor.Camera:__init(position , angle)
 	end
 end
 
-function MapEditor.Camera:Destroy()
+function MapEditor.OrbitCamera:Destroy()
 	for index , eventSub in ipairs(self.eventSubs) do
 		Events:Unsubscribe(eventSub)
 	end
 end
 
-function MapEditor.Camera:UpdateDistance()
+function MapEditor.OrbitCamera:UpdateDistance()
 	local distanceDelta = self.distanceDeltaBuffer
 	self.distanceDeltaBuffer = 0
 	
@@ -47,7 +47,7 @@ function MapEditor.Camera:UpdateDistance()
 	self.distance = math.clamp(self.distance , self.minDistance , self.maxDistance)
 end
 
-function MapEditor.Camera:UpdatePosition()
+function MapEditor.OrbitCamera:UpdatePosition()
 	local cameraDirection = (self.angle * Vector3.Backward)
 	if self.collision then
 		-- Raycast test so the camera doesn't go into geometry.
@@ -72,11 +72,11 @@ function MapEditor.Camera:UpdatePosition()
 	self.angle.roll = 0
 end
 
-function MapEditor.Camera:UpdateAngle()
+function MapEditor.OrbitCamera:UpdateAngle()
 	self.angle = self.angleBuffer
 end
 
-function MapEditor.Camera:UpdateMovement()
+function MapEditor.OrbitCamera:UpdateMovement()
 	local velocity = self.panBuffer * self.distance
 	local y = velocity.y
 	velocity = Angle(self.angle.yaw , 0 , 0) * velocity
@@ -94,7 +94,7 @@ end
 
 -- Events
 
-function MapEditor.Camera:CalcView()
+function MapEditor.OrbitCamera:CalcView()
 	if self.isEnabled == false then
 		return true
 	end
@@ -106,7 +106,7 @@ function MapEditor.Camera:CalcView()
 	return false
 end
 
-function MapEditor.Camera:ControlDown(args)
+function MapEditor.OrbitCamera:ControlDown(args)
 	local delta
 	
 	if args.name == "Mouse wheel up" then
@@ -124,7 +124,7 @@ function MapEditor.Camera:ControlDown(args)
 	end
 end
 
-function MapEditor.Camera:PostTick()
+function MapEditor.OrbitCamera:PostTick()
 	self.deltaTime = self.deltaTimer:GetSeconds()
 	self.deltaTimer:Restart()
 	
