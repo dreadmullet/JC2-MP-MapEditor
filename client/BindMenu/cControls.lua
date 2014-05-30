@@ -242,7 +242,7 @@ Controls.MouseScroll = function(args)
 	-- The mouse wheel is an exception, it is instantly released.
 	local controlInfo = {"MouseWheel" , value}
 	Controls.Down(controlInfo , math.abs(args.delta))
-	Controls.Up(controlInfo , math.abs(args.delta))
+	Controls.Up(controlInfo)
 end
 
 -- This should probably be PostTick or something, but it doesn't really matter.
