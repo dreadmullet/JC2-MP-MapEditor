@@ -188,7 +188,7 @@ Controls.LocalPlayerInput = function(args)
 	end
 	
 	local controlInfo = {"Action" , args.input}
-	Controls.Down(controlInfo)
+	Controls.Down(controlInfo , args.state)
 	
 	return true
 end
@@ -202,7 +202,7 @@ Controls.KeyDown = function(args)
 	end
 	
 	local controlInfo = {"Key" , args.key}
-	Controls.Down(controlInfo)
+	Controls.Down(controlInfo , 1)
 end
 
 Controls.KeyUp = function(args)
@@ -223,7 +223,7 @@ Controls.MouseDown = function(args)
 		end
 	end
 	
-	Controls.Down{"MouseButton" , args.button}
+	Controls.Down({"MouseButton" , args.button} , 1)
 end
 
 Controls.MouseUp = function(args)
@@ -274,26 +274,26 @@ Controls.InputPoll = function(args)
 		local newMouseDelta = Mouse:GetPosition() - Controls.mousePosition
 		-- X
 		if oldMouseDelta.x <= 0 and newMouseDelta.x > 0 then
-			Controls.Down{"MouseMovement" , ">"}
+			Controls.Down({"MouseMovement" , ">"} , newMouseDelta.x)
 		end
 		if oldMouseDelta.x > 0 and newMouseDelta.x <= 0 then
 			Controls.Up{"MouseMovement" , ">"}
 		end
 		if oldMouseDelta.x >= 0 and newMouseDelta.x < 0 then
-			Controls.Down{"MouseMovement" , "<"}
+			Controls.Down({"MouseMovement" , "<"} , -newMouseDelta.x)
 		end
 		if oldMouseDelta.x < 0 and newMouseDelta.x >= 0 then
 			Controls.Up{"MouseMovement" , "<"}
 		end
 		-- Y
 		if oldMouseDelta.y <= 0 and newMouseDelta.y > 0 then
-			Controls.Down{"MouseMovement" , "v"}
+			Controls.Down({"MouseMovement" , "v"} , newMouseDelta.y)
 		end
 		if oldMouseDelta.y > 0 and newMouseDelta.y <= 0 then
 			Controls.Up{"MouseMovement" , "v"}
 		end
 		if oldMouseDelta.y >= 0 and newMouseDelta.y < 0 then
-			Controls.Down{"MouseMovement" , "^"}
+			Controls.Down({"MouseMovement" , "^"} , -newMouseDelta.y)
 		end
 		if oldMouseDelta.y < 0 and newMouseDelta.y >= 0 then
 			Controls.Up{"MouseMovement" , "^"}
