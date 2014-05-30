@@ -26,6 +26,7 @@ function MapEditor.OrbitCamera:__init(position , angle)
 	for index , name in ipairs{
 		"CalcView" ,
 		"ControlDown" ,
+		"ControlUp" ,
 		"PostTick" ,
 	} do
 		table.insert(self.eventSubs , Events:Subscribe(name , self , self[name]))
@@ -109,7 +110,9 @@ end
 function MapEditor.OrbitCamera:ControlDown(args)
 	local delta
 	
-	if args.name == "Mouse wheel up" then
+	if args.name == "Orbit camera: Rotate/pan" then
+		self.isInputEnabled = true
+	elseif args.name == "Mouse wheel up" then
 		delta = args.state
 	elseif args.name == "Mouse wheel down" then
 		delta = -args.state
@@ -121,6 +124,12 @@ function MapEditor.OrbitCamera:ControlDown(args)
 		else
 			self.distanceDeltaBuffer = delta
 		end
+	end
+end
+
+function MapEditor.OrbitCamera:ControlUp(args)
+	if args.name == "Orbit camera: Rotate/pan" then
+		self.isInputEnabled = false
 	end
 end
 

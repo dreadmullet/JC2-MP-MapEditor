@@ -43,7 +43,6 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	self:EventSubscribe("Render")
 	self:EventSubscribe("MouseDown")
 	self:EventSubscribe("ControlDown")
-	self:EventSubscribe("ControlUp")
 end
 
 function MapEditor.Map:SetEnabled(enabled)
@@ -337,21 +336,9 @@ function MapEditor.Map:ControlDown(args)
 		end
 	end
 	
-	if args.name == "Orbit camera: Rotate/pan" then
-		self.camera.isInputEnabled = true
-	elseif args.name == "Undo" then
+	if args.name == "Undo" then
 		self:Undo()
 	elseif args.name == "Redo" then
 		self:Redo()
-	end
-end
-
-function MapEditor.Map:ControlUp(args)
-	if self.isEnabled == false then
-		return
-	end
-	
-	if args.name == "Orbit camera: Rotate/pan" then
-		self.camera.isInputEnabled = false
 	end
 end
