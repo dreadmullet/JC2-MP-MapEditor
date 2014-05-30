@@ -268,8 +268,6 @@ function MapEditor.Map:Render()
 		return
 	end
 	
-	Mouse:SetVisible(true)
-	
 	-- Draw map name.
 	local mapName = self.name or "Untitled map"
 	local position = Vector2(Render.Width - 6 , 34)

@@ -2,7 +2,7 @@
 
 class("OrbitCamera" , MapEditor)
 
-function MapEditor.OrbitCamera:__init(position , angle)
+function MapEditor.OrbitCamera:__init(position , angle) ; EGUSM.SubscribeUtility.__init(self)
 	-- Public properties
 	self.targetPosition = position or Vector3(0 , 0 , 0)
 	self.minPitch = math.rad(-89)
@@ -20,29 +20,17 @@ function MapEditor.OrbitCamera:__init(position , angle)
 	self.distanceDeltaBuffer = 0
 	self.panBuffer = Vector3(0 , 0 , 0)
 	self.deltaTimer = Timer()
-	self.deltaTime = 0.05
-	-- Events
-	self.eventSubs = {}
-	for index , name in ipairs{
-		"CalcView" ,
-		"ControlDown" ,
-		"ControlUp" ,
-		"PostTick" ,
-	} do
-		table.insert(self.eventSubs , Events:Subscribe(name , self , self[name]))
-	end
+	
+	self:EventSubscribe("CalcView")
+	self:EventSubscribe("ControlDown")
+	self:EventSubscribe("ControlUp")
+	self:EventSubscribe("PostTick")
 end
 
 function MapEditor.OrbitCamera:SetPosition(position)
 	self.targetPosition = position
 	self.angleBuffer.pitch = math.clamp(self.angleBuffer.pitch , -70 , 5)
 	self.distance = 50
-end
-
-function MapEditor.OrbitCamera:Destroy()
-	for index , eventSub in ipairs(self.eventSubs) do
-		Events:Unsubscribe(eventSub)
-	end
 end
 
 function MapEditor.OrbitCamera:UpdateDistance()
@@ -140,17 +128,21 @@ function MapEditor.OrbitCamera:ControlUp(args)
 end
 
 function MapEditor.OrbitCamera:PostTick()
-	self.deltaTime = self.deltaTimer:GetSeconds()
+	local deltaTime = self.deltaTimer:GetSeconds()
 	self.deltaTimer:Restart()
+	
+	if self.isEnabled == false then
+		return
+	end
 	
 	-- Handle inputs.
 	if self.isInputEnabled then
 		local RotateYaw = function(value)
-			self.angleBuffer.yaw = self.angleBuffer.yaw + value * self.deltaTime
+			self.angleBuffer.yaw = self.angleBuffer.yaw + value * deltaTime
 		end
 		local RotatePitch = function(value)
 			self.angleBuffer.pitch = math.clamp(
-				self.angleBuffer.pitch + value * self.deltaTime ,
+				self.angleBuffer.pitch + value * deltaTime ,
 				self.minPitch ,
 				self.maxPitch
 			)
@@ -158,7 +150,7 @@ function MapEditor.OrbitCamera:PostTick()
 		
 		if Controls.GetIsHeld("Orbit camera: Rotate/pan") then
 			if Controls.GetIsHeld("Orbit camera: Pan modifier") then
-				local mult = MapEditor.Preferences.camSensitivityMove * self.deltaTime
+				local mult = MapEditor.Preferences.camSensitivityMove * deltaTime
 				if Controls.GetIsHeld("Look right") then
 					self.panBuffer.x = -Controls.Get("Look right").state * mult
 				else
@@ -184,6 +176,8 @@ function MapEditor.OrbitCamera:PostTick()
 			end
 		end
 	end
+	
+	Mouse:SetVisible(true)
 	
 	-- What are these even
 	self:UpdateAngle()
