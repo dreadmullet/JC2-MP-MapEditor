@@ -1,11 +1,11 @@
-class("Deselector" , Actions)
+class("Deselect" , Actions)
 
-function Actions.Deselector:__init(...) ; Actions.SelectorBase.__init(self , ...)
+function Actions.Deselect:__init(...) ; Actions.SelectBase.__init(self , ...)
 	self.color = Color.DarkRed
 	self.objects = {}
 end
 
-function Actions.Deselector:OnObjectsChosen(objects)
+function Actions.Deselect:OnObjectsChosen(objects)
 	self.objects = objects
 	-- Remove from the array all objects that aren't selected.
 	for n = #self.objects , 1 , -1 do
@@ -19,11 +19,11 @@ function Actions.Deselector:OnObjectsChosen(objects)
 	self:Confirm()
 end
 
-function Actions.Deselector:OnNothingChosen()
+function Actions.Deselect:OnNothingChosen()
 	self:Cancel()
 end
 
-function Actions.Deselector:Undo()
+function Actions.Deselect:Undo()
 	for index , object in ipairs(self.objects) do
 		object:SetSelected(true)
 	end
@@ -31,7 +31,7 @@ function Actions.Deselector:Undo()
 	MapEditor.map:SelectionChanged()
 end
 
-function Actions.Deselector:Redo()
+function Actions.Deselect:Redo()
 	for index , object in ipairs(self.objects) do
 		object:SetSelected(false)
 	end

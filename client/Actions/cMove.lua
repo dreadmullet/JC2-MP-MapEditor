@@ -1,13 +1,13 @@
-class("Mover" , Actions)
+class("Move" , Actions)
 
-function Actions.Mover:__init()
+function Actions.Move:__init()
 	EGUSM.SubscribeUtility.__init(self)
 	Actions.TransformBase.__init(self)
 	
 	self.sensitivity = 0.001
 end
 
-function Actions.Mover:OnProcess(objectInfo , mouse , pivot)
+function Actions.Move:OnProcess(objectInfo , mouse , pivot)
 	local distance = Vector3.Distance(Camera:GetPosition() , pivot)
 	local mult = distance * self.sensitivity
 	local delta = Camera:GetAngle() * Vector3(mouse.delta.x , -mouse.delta.y , 0) * mult

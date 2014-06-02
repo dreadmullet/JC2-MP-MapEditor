@@ -329,9 +329,9 @@ function MapEditor.Map:MouseDown(args)
 	
 	if self.currentAction == nil then
 		if args.button == 1 then
-			self:SetAction(Actions.Selector , args.button)
+			self:SetAction(Actions.Select , args.button)
 		elseif args.button == 2 then
-			self:SetAction(Actions.Deselector , args.button)
+			self:SetAction(Actions.Deselect , args.button)
 		end
 	end
 end
@@ -343,9 +343,9 @@ function MapEditor.Map:ControlDown(args)
 	
 	if self.currentAction == nil and self.camera.isInputEnabled == false then
 		if args.name == "Move object" then
-			self:SetAction(Actions.Mover)
+			self:SetAction(Actions.Move)
 		elseif args.name == "Rotate object" then
-			self:SetAction(Actions.Rotator)
+			self:SetAction(Actions.Rotate)
 		elseif args.name == "Delete object" then
 			self:SetAction(Actions.Deleter)
 		end

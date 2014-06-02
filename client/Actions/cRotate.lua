@@ -1,6 +1,6 @@
-class("Rotator" , Actions)
+class("Rotate" , Actions)
 
-function Actions.Rotator:__init()
+function Actions.Rotate:__init()
 	EGUSM.SubscribeUtility.__init(self)
 	Actions.TransformBase.__init(self)
 	
@@ -9,7 +9,7 @@ function Actions.Rotator:__init()
 	self.startMouseDirection = nil
 end
 
-function Actions.Rotator:OnProcess(objectInfo , mouse , pivot)
+function Actions.Rotate:OnProcess(objectInfo , mouse , pivot)
 	if mouse.delta == Vector2.Zero then
 		return
 	end
@@ -43,7 +43,7 @@ function Actions.Rotator:OnProcess(objectInfo , mouse , pivot)
 	objectInfo.endTransform.position = pivot + angle * relativePosition
 end
 
-function Actions.Rotator:OnRender(mouse , pivot)
+function Actions.Rotate:OnRender(mouse , pivot)
 	if self.screenPivot then
 		Render:DrawLine(self.screenPivot , Mouse:GetPosition() , Color(127 , 127 , 127 , 180))
 	end

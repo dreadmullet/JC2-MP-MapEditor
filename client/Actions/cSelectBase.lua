@@ -1,6 +1,6 @@
-class("SelectorBase" , Actions)
+class("SelectBase" , Actions)
 
-function Actions.SelectorBase:__init(mouseButton)
+function Actions.SelectBase:__init(mouseButton)
 	EGUSM.SubscribeUtility.__init(self)
 	MapEditor.Action.__init(self)
 	
@@ -8,13 +8,13 @@ function Actions.SelectorBase:__init(mouseButton)
 	self.downPosition = Mouse:GetPosition()
 	self.delta = Vector2(0 , 0)
 	self.color = Color.White
-	self:EventSubscribe("Render" , Actions.SelectorBase.Render)
-	self:EventSubscribe("MouseUp" , Actions.SelectorBase.MouseUp)
+	self:EventSubscribe("Render" , Actions.SelectBase.Render)
+	self:EventSubscribe("MouseUp" , Actions.SelectBase.MouseUp)
 end
 
 -- Events
 
-function Actions.SelectorBase:Render()
+function Actions.SelectBase:Render()
 	self.delta = Mouse:GetPosition() - self.downPosition
 	
 	MapEditor.Utility.DrawArea(
@@ -25,7 +25,7 @@ function Actions.SelectorBase:Render()
 	)
 end
 
-function Actions.SelectorBase:MouseUp(args)
+function Actions.SelectBase:MouseUp(args)
 	if args.button == self.mouseButton then
 		-- If we dragged to make a decent sized rectangle, select the objects in that rectangle.
 		if self.delta:Length() > 16 then
