@@ -36,6 +36,16 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	self.preferencesMenu:SetVisible(false)
 	self.propertiesMenu = nil
 	
+	self.controlDisplayer = MapEditor.ControlDisplayer{
+		name = "Actions" ,
+		linesFromBottom = 3 ,
+		"Move object" ,
+		"Rotate object" ,
+		"Delete object" ,
+		"Undo" ,
+		"Redo" ,
+	}
+	
 	for index , propertyArgs in ipairs(MapTypes[self.type].properties) do
 		self:AddProperty(propertyArgs)
 	end
@@ -55,6 +65,7 @@ function MapEditor.Map:SetEnabled(enabled)
 		self.propertiesMenu:Destroy()
 		self.propertiesMenu = nil
 	end
+	self.controlDisplayer:SetVisible(enabled)
 	
 	Mouse:SetVisible(enabled)
 	
@@ -75,6 +86,7 @@ function MapEditor.Map:Destroy()
 	if self.propertiesMenu then
 		self.propertiesMenu:Destroy()
 	end
+	self.controlDisplayer:Destroy()
 	
 	self:IterateObjects(function(object)
 		object:Destroy()
@@ -111,11 +123,13 @@ function MapEditor.Map:SetAction(actionClass , ...)
 		self.currentAction = nil
 	else
 		Events:Fire("SetMenusEnabled" , false)
+		self.controlDisplayer:SetVisible(false)
 	end
 end
 
 function MapEditor.Map:ActionFinish()
 	Events:Fire("SetMenusEnabled" , true)
+	self.controlDisplayer:SetVisible(true)
 	
 	table.insert(self.undoableActions , self.currentAction)
 	self.redoableActions = {}
@@ -125,6 +139,8 @@ end
 
 function MapEditor.Map:ActionCancel()
 	Events:Fire("SetMenusEnabled" , true)
+	self.controlDisplayer:SetVisible(true)
+	
 	self.currentAction = nil
 end
 
@@ -330,7 +346,7 @@ function MapEditor.Map:ControlDown(args)
 			self:SetAction(Actions.Mover)
 		elseif args.name == "Rotate object" then
 			self:SetAction(Actions.Rotator)
-		elseif args.name == "Delete" then
+		elseif args.name == "Delete object" then
 			self:SetAction(Actions.Deleter)
 		end
 	end

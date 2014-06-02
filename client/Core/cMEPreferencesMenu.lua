@@ -114,9 +114,9 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	
 	bindMenu:AddControl("Move object" ,                      "G")
 	bindMenu:AddControl("Rotate object" ,                    "R")
+	bindMenu:AddControl("Delete object" ,                    "X")
 	bindMenu:AddControl("Undo" ,                             "Z")
 	bindMenu:AddControl("Redo" ,                             "Y")
-	bindMenu:AddControl("Delete" ,                           "X")
 	
 	bindMenu:AddControl("Noclip camera: Toggle" ,            "J")
 	bindMenu:AddControl("Noclip camera: Forward" ,           "OemComma")
