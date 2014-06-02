@@ -158,7 +158,6 @@ Controls.Down = function(controlInfo , optionalState)
 			end
 			Events:Fire("ControlDown" , control)
 			table.insert(Controls.held , control)
-			break
 		end
 	end
 end
@@ -170,7 +169,6 @@ Controls.Up = function(controlInfo)
 			table.remove(Controls.held , table.find(Controls.held , control) or 0)
 			Events:Fire("ControlUp" , control)
 			control.state = 0
-			break
 		end
 	end
 end
