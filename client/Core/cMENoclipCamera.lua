@@ -3,7 +3,7 @@ class("NoclipCamera" , MapEditor)
 function MapEditor.NoclipCamera:__init(position , angle) ; EGUSM.SubscribeUtility.__init(self)
 	self.position = position or Vector3(0 , 250 , 0)
 	self.angle = angle or Angle()
-	self.speed = 10
+	self.speed = 50
 	
 	self.moveBuffer = Vector3()
 	self.rotateBuffer = Angle()
