@@ -6,9 +6,17 @@ function MapEditor.Action:__init()
 end
 
 function MapEditor.Action:Confirm()
+	if self.OnConfirmOrCancel then
+		self:OnConfirmOrCancel()
+	end
+	
 	MapEditor.map:ActionFinish()
 end
 
 function MapEditor.Action:Cancel()
+	if self.OnConfirmOrCancel then
+		self:OnConfirmOrCancel()
+	end
+	
 	MapEditor.map:ActionCancel()
 end

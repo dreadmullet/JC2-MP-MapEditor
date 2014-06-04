@@ -7,6 +7,7 @@ function Actions.TransformBase:__init()
 	self.GetAverageObjectPosition = Actions.TransformBase.GetAverageObjectPosition
 	self.Undo = Actions.TransformBase.Undo
 	self.Redo = Actions.TransformBase.Redo
+	self.OnConfirmOrCancel = Actions.TransformBase.OnConfirmOrCancel
 	
 	self.mouse = {start = Mouse:GetPosition() , delta = Vector2(0 , 0)}
 	-- Map of tables
@@ -26,18 +27,28 @@ function Actions.TransformBase:__init()
 	end)
 	
 	if table.count(self.objects) == 0 then
-		if self.OnDestroy then
-			self:OnDestroy()
-		end
-		
 		self:Cancel()
 		return
 	end
 	
 	self.pivot = self:GetAverageObjectPosition()
+	self.lockedAxis = nil
+	
+	Controls.Add("Lock to X axis" , "X")
+	Controls.Add("Lock to Y axis" , "Y")
+	Controls.Add("Lock to Z axis" , "Z")
+	
+	self.controlDisplayer = MapEditor.ControlDisplayer{
+		name = "TransformBase" ,
+		linesFromBottom = 3 ,
+		"Lock to X axis" ,
+		"Lock to Y axis" ,
+		"Lock to Z axis" ,
+	}
 	
 	self:EventSubscribe("Render" , Actions.TransformBase.Render)
 	self:EventSubscribe("MouseUp" , Actions.TransformBase.MouseUp)
+	self:EventSubscribe("ControlDown" , Actions.TransformBase.ControlDown)
 end
 
 function Actions.TransformBase:GetAverageObjectPosition()
@@ -66,6 +77,10 @@ function Actions.TransformBase:Redo()
 	end
 end
 
+function Actions.TransformBase:OnConfirmOrCancel()
+	self.controlDisplayer:Destroy()
+end
+
 -- Events
 
 function Actions.TransformBase:Render()
@@ -85,20 +100,30 @@ end
 
 function Actions.TransformBase:MouseUp(args)
 	if args.button == 1 then
-		if self.OnDestroy then
-			self:OnDestroy()
-		end
-		
 		self:UnsubscribeAll()
 		self:Confirm()
 	elseif args.button == 2 then
 		self:Undo()
 		
-		if self.OnDestroy then
-			self:OnDestroy()
-		end
-		
 		self:UnsubscribeAll()
 		self:Cancel()
+	end
+end
+
+function Actions.TransformBase:ControlDown(args)
+	local LockAxis = function(axis)
+		if self.lockedAxis == axis then
+			self.lockedAxis = nil
+		else
+			self.lockedAxis = axis
+		end
+	end
+	
+	if args.name == "Lock to X axis" then
+		LockAxis("X")
+	elseif args.name == "Lock to Y axis" then
+		LockAxis("Y")
+	elseif args.name == "Lock to Z axis" then
+		LockAxis("Z")
 	end
 end
