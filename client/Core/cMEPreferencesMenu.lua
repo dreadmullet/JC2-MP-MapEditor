@@ -119,10 +119,6 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	bindMenu:AddControl("Redo" ,                             "Y")
 	
 	bindMenu:AddControl("Noclip camera: Toggle" ,            "J")
-	bindMenu:AddControl("Noclip camera: Forward" ,           "OemComma")
-	bindMenu:AddControl("Noclip camera: Back" ,              "O")
-	bindMenu:AddControl("Noclip camera: Left" ,              "A")
-	bindMenu:AddControl("Noclip camera: Right" ,             "E")
 	bindMenu:AddControl("Noclip camera: Up" ,                "Space")
 	bindMenu:AddControl("Noclip camera: Down" ,              "Control")
 	
