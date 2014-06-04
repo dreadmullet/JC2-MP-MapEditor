@@ -341,19 +341,21 @@ function MapEditor.Map:ControlDown(args)
 		return
 	end
 	
-	if self.currentAction == nil and self.camera.isInputEnabled == false then
-		if args.name == "Move object" then
-			self:SetAction(Actions.Move)
-		elseif args.name == "Rotate object" then
-			self:SetAction(Actions.Rotate)
-		elseif args.name == "Delete object" then
-			self:SetAction(Actions.Deleter)
+	if self.currentAction == nil then
+		if args.name == "Undo" then
+			self:Undo()
+		elseif args.name == "Redo" then
+			self:Redo()
 		end
-	end
-	
-	if args.name == "Undo" then
-		self:Undo()
-	elseif args.name == "Redo" then
-		self:Redo()
+		
+		if self.camera.isInputEnabled == false then
+			if args.name == "Move object" then
+				self:SetAction(Actions.Move)
+			elseif args.name == "Rotate object" then
+				self:SetAction(Actions.Rotate)
+			elseif args.name == "Delete object" then
+				self:SetAction(Actions.Deleter)
+			end
+		end
 	end
 end

@@ -12,20 +12,24 @@ function Actions.TransformBase:__init()
 	-- Map of tables
 	--    Key: Object id
 	--    Value: map: {
-	--       object =           MapEditor.Object ,
+	--       object =         MapEditor.Object ,
 	--       startTransform = {position = Vector3 , angle = Angle} ,
-	--       endTransform =     {position = Vector3 , angle = Angle} ,
+	--       endTransform =   {position = Vector3 , angle = Angle} ,
 	--    }
 	self.objects = {}
 	MapEditor.map.selectedObjects:IterateObjects(function(object)
 		self.objects[object:GetId()] = {
-			object =           object ,
+			object =         object ,
 			startTransform = {position = object:GetPosition() , angle = object:GetAngle()} ,
-			endTransform =     {position = object:GetPosition() , angle = object:GetAngle()} ,
+			endTransform =   {position = object:GetPosition() , angle = object:GetAngle()} ,
 		}
 	end)
 	
 	if table.count(self.objects) == 0 then
+		if self.OnDestroy then
+			self:OnDestroy()
+		end
+		
 		self:Cancel()
 		return
 	end
@@ -81,10 +85,18 @@ end
 
 function Actions.TransformBase:MouseUp(args)
 	if args.button == 1 then
+		if self.OnDestroy then
+			self:OnDestroy()
+		end
+		
 		self:UnsubscribeAll()
 		self:Confirm()
 	elseif args.button == 2 then
 		self:Undo()
+		
+		if self.OnDestroy then
+			self:OnDestroy()
+		end
 		
 		self:UnsubscribeAll()
 		self:Cancel()
