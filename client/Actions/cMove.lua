@@ -3,8 +3,6 @@ class("Move" , Actions)
 function Actions.Move:__init()
 	Actions.TransformBase.__init(self)
 	
-	self.Destroy = Actions.Move.Destroy
-	
 	self.sensitivity = 0.001
 	self.lockedAxis = nil
 	
@@ -13,7 +11,7 @@ function Actions.Move:__init()
 	Controls.Add("Lock to Z axis" , "Z")
 	
 	self.controlDisplayer = MapEditor.ControlDisplayer{
-		name = "Move action" ,
+		name = "Move" ,
 		linesFromBottom = 2 ,
 		"Lock to X axis" ,
 		"Lock to Y axis" ,

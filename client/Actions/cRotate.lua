@@ -7,6 +7,21 @@ function Actions.Rotate:__init()
 	self.sensitivity = 1
 	self.screenPivot = nil
 	self.startMouseDirection = nil
+	self.lockedAxis = nil
+	
+	Controls.Add("Lock to pitch" , "X")
+	Controls.Add("Lock to yaw" ,   "Y")
+	Controls.Add("Lock to roll" ,  "Z")
+	
+	self.controlDisplayer = MapEditor.ControlDisplayer{
+		name = "Rotate" ,
+		linesFromBottom = 2 ,
+		"Lock to pitch" ,
+		"Lock to yaw" ,
+		"Lock to roll" ,
+	}
+	
+	self:EventSubscribe("ControlDown")
 end
 
 function Actions.Rotate:OnProcess(objectInfo , mouse , pivot)
@@ -34,7 +49,17 @@ function Actions.Rotate:OnProcess(objectInfo , mouse , pivot)
 		mouseDirection
 	)
 	
-	local axis = Camera:GetAngle() * Vector3.Forward
+	local axis
+	if self.lockedAxis == "X" then
+		axis = Vector3.Right
+	elseif self.lockedAxis == "Y" then
+		axis = Vector3.Up
+	elseif self.lockedAxis == "Z" then
+		axis = Vector3.Forward
+	else
+		axis = Camera:GetAngle() * Vector3.Forward
+	end
+	
 	local angle = Angle.AngleAxis(mouseAngle.yaw * self.sensitivity , -axis)
 	
 	objectInfo.endTransform.angle = angle * objectInfo.startTransform.angle
@@ -46,5 +71,29 @@ end
 function Actions.Rotate:OnRender(mouse , pivot)
 	if self.screenPivot then
 		Render:DrawLine(self.screenPivot , Mouse:GetPosition() , Color(127 , 127 , 127 , 180))
+	end
+end
+
+function Actions.Rotate:OnDestroy()
+	self.controlDisplayer:Destroy()
+end
+
+-- Events
+
+function Actions.Rotate:ControlDown(args)
+	local LockAxis = function(axis)
+		if self.lockedAxis == axis then
+			self.lockedAxis = nil
+		else
+			self.lockedAxis = axis
+		end
+	end
+	
+	if args.name == "Lock to pitch" then
+		LockAxis("X")
+	elseif args.name == "Lock to yaw" then
+		LockAxis("Y")
+	elseif args.name == "Lock to roll" then
+		LockAxis("Z")
 	end
 end
