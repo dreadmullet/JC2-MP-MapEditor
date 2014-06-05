@@ -136,14 +136,15 @@ function MapEditor.Object:GetBoundingBoxScreenPoints()
 	local points = {}
 	
 	local positionsToCheck = {
-		self.position + Vector3(self.bounds[1].x , self.bounds[1].y , self.bounds[1].z) ,
-		self.position + Vector3(self.bounds[2].x , self.bounds[1].y , self.bounds[1].z) ,
-		self.position + Vector3(self.bounds[1].x , self.bounds[1].y , self.bounds[2].z) ,
-		self.position + Vector3(self.bounds[2].x , self.bounds[1].y , self.bounds[2].z) ,
-		self.position + Vector3(self.bounds[1].x , self.bounds[2].y , self.bounds[1].z) ,
-		self.position + Vector3(self.bounds[2].x , self.bounds[2].y , self.bounds[1].z) ,
-		self.position + Vector3(self.bounds[1].x , self.bounds[2].y , self.bounds[2].z) ,
-		self.position + Vector3(self.bounds[2].x , self.bounds[2].y , self.bounds[2].z) ,
+		self.position ,
+		self.position + self.angle * Vector3(self.bounds[1].x , self.bounds[1].y , self.bounds[1].z) ,
+		self.position + self.angle * Vector3(self.bounds[2].x , self.bounds[1].y , self.bounds[1].z) ,
+		self.position + self.angle * Vector3(self.bounds[1].x , self.bounds[1].y , self.bounds[2].z) ,
+		self.position + self.angle * Vector3(self.bounds[2].x , self.bounds[1].y , self.bounds[2].z) ,
+		self.position + self.angle * Vector3(self.bounds[1].x , self.bounds[2].y , self.bounds[1].z) ,
+		self.position + self.angle * Vector3(self.bounds[2].x , self.bounds[2].y , self.bounds[1].z) ,
+		self.position + self.angle * Vector3(self.bounds[1].x , self.bounds[2].y , self.bounds[2].z) ,
+		self.position + self.angle * Vector3(self.bounds[2].x , self.bounds[2].y , self.bounds[2].z) ,
 	}
 	
 	for index , positionToCheck in ipairs(positionsToCheck) do
