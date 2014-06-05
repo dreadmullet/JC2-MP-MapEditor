@@ -42,6 +42,7 @@ function MapEditor.Map:__init(initialPosition , mapType)
 		"Move object" ,
 		"Rotate object" ,
 		"Delete object" ,
+		"Floor object" ,
 		"Undo" ,
 		"Redo" ,
 	}
@@ -348,13 +349,15 @@ function MapEditor.Map:ControlDown(args)
 			self:Redo()
 		end
 		
-		if self.camera.isInputEnabled == false then
+		if self.camera.isInputEnabled == false and self:IsEmpty() == false then
 			if args.name == "Move object" then
 				self:SetAction(Actions.Move)
 			elseif args.name == "Rotate object" then
 				self:SetAction(Actions.Rotate)
 			elseif args.name == "Delete object" then
 				self:SetAction(Actions.Deleter)
+			elseif args.name == "Floor object" then
+				self:SetAction(Actions.Floor)
 			end
 		end
 	end

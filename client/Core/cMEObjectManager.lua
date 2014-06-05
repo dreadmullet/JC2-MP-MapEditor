@@ -10,6 +10,7 @@ function MapEditor.ObjectManager:__init()
 	self.GetObject = MapEditor.ObjectManager.GetObject
 	self.RemoveObject = MapEditor.ObjectManager.RemoveObject
 	self.HasObject = MapEditor.ObjectManager.HasObject
+	self.IsEmpty = MapEditor.ObjectManager.IsEmpty
 	self.IterateObjects = MapEditor.ObjectManager.IterateObjects
 	self.GetObjectFromScreenPoint = MapEditor.ObjectManager.GetObjectFromScreenPoint
 	
@@ -30,6 +31,14 @@ end
 
 function MapEditor.ObjectManager:HasObject(object)
 	return self.objects[object:GetId()] ~= nil
+end
+
+function MapEditor.ObjectManager:IsEmpty()
+	for id , object in pairs(self.objects) do
+		return false
+	end
+	
+	return true
 end
 
 function MapEditor.ObjectManager:IterateObjects(func)
