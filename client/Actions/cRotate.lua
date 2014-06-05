@@ -1,14 +1,20 @@
 class("Rotate" , Actions)
 
 function Actions.Rotate:__init()
-	EGUSM.SubscribeUtility.__init(self)
 	Actions.TransformBase.__init(self)
 	
 	self.sensitivity = 1
 	self.screenPivot = nil
 	self.startMouseDirection = nil
+	self.isLocal = true
+	
+	Controls.Add("Toggle local" , "L")
 	
 	self.controlDisplayer.name = "Rotate"
+	self.controlDisplayer:AddControl("Toggle local")
+	self.controlDisplayer:SetControlDisplayedName("Toggle local" , "Using local axes")
+	
+	self:EventSubscribe("ControlDown")
 end
 
 function Actions.Rotate:OnProcess(objectInfo , mouse , pivot)
@@ -37,12 +43,18 @@ function Actions.Rotate:OnProcess(objectInfo , mouse , pivot)
 	)
 	
 	local axis
-	if self.lockedAxis == "X" then
-		axis = Vector3.Right
-	elseif self.lockedAxis == "Y" then
-		axis = Vector3.Up
-	elseif self.lockedAxis == "Z" then
-		axis = Vector3.Forward
+	if self.lockedAxis then
+		if self.lockedAxis == "X" then
+			axis = Vector3.Right
+		elseif self.lockedAxis == "Y" then
+			axis = Vector3.Up
+		elseif self.lockedAxis == "Z" then
+			axis = Vector3.Forward
+		end
+		
+		if self.isLocal then
+			axis = objectInfo.startTransform.angle * axis
+		end
 	else
 		axis = Camera:GetAngle() * Vector3.Forward
 	end
@@ -58,5 +70,19 @@ end
 function Actions.Rotate:OnRender(mouse , pivot)
 	if self.screenPivot then
 		Render:DrawLine(self.screenPivot , Mouse:GetPosition() , Color(127 , 127 , 127 , 180))
+	end
+end
+
+-- Events
+
+function Actions.Rotate:ControlDown(args)
+	if args.name == "Toggle local" then
+		self.isLocal = not self.isLocal
+		
+		if self.isLocal then
+			self.controlDisplayer:SetControlDisplayedName("Toggle local" , "Using local axes")
+		else
+			self.controlDisplayer:SetControlDisplayedName("Toggle local" , "Using global axes")
+		end
 	end
 end

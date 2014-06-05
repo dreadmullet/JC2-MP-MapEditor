@@ -3,14 +3,10 @@ class("ControlDisplayer" , MapEditor)
 function MapEditor.ControlDisplayer:__init(args) ; EGUSM.SubscribeUtility.__init(self)
 	self.name = args.name
 	self.linesFromBottom = args.linesFromBottom
+	-- Each element is a table, {name = "" , control = {}}
 	self.controls = {}
 	for index , controlName in ipairs(args) do
-		local control = Controls.Get(controlName)
-		if control then
-			table.insert(self.controls , control)
-		else
-			warn("ControlDisplayer can't find control: "..tostring(controlName))
-		end
+		self:AddControl(controlName)
 	end
 	
 	self.textSize = 20
@@ -22,6 +18,24 @@ end
 
 function MapEditor.ControlDisplayer:SetVisible(isVisible)
 	self.isVisible = isVisible
+end
+
+function MapEditor.ControlDisplayer:AddControl(controlName)
+	local control = Controls.Get(controlName)
+	if control then
+		table.insert(self.controls , {name = control.name , control = control})
+	else
+		warn("ControlDisplayer can't find control: "..tostring(controlName))
+	end
+end
+
+function MapEditor.ControlDisplayer:SetControlDisplayedName(controlName , newName)
+	for index , controlInfo in ipairs(self.controls) do
+		if controlInfo.control.name == controlName then
+			controlInfo.name = newName
+			break
+		end
+	end
 end
 
 function MapEditor.ControlDisplayer:DrawText(text , color)
@@ -59,8 +73,8 @@ function MapEditor.ControlDisplayer:Render()
 	
 	self:DrawText(self.name.."  " , Color(192 , 192 , 192))
 	
-	for index , control in ipairs(self.controls) do
-		local text = control.name..": "..control.valueString.."   "
+	for index , controlInfo in ipairs(self.controls) do
+		local text = controlInfo.name..": "..controlInfo.control.valueString.."   "
 		local color
 		if index % 2 == 0 then
 			color = Color(255 , 234 , 234)
