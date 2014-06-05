@@ -6,6 +6,13 @@ function Actions.Move:__init()
 	self.sensitivity = 0.001
 	
 	self.controlDisplayer.name = "Move"
+	
+	self.gizmoModel = nil
+	
+	local args = {
+		path = "Models/Move gizmo"
+	}
+	OBJLoader.Request(args , self , function(self , model) self.gizmoModel = model end)
 end
 
 function Actions.Move:OnProcess(objectInfo , mouse , pivot)
@@ -27,6 +34,30 @@ function Actions.Move:OnProcess(objectInfo , mouse , pivot)
 		
 		if self.isLocal then
 			delta = objectInfo.startTransform.angle * delta
+		end
+		
+		if self.gizmoModel then
+			local angle
+			if self.lockedAxis == "X" then
+				angle = Angle(0 , 0 , 0)
+			elseif self.lockedAxis == "Y" then
+				angle = Angle(0 , 0 , math.tau / 4)
+			elseif self.lockedAxis == "Z" then
+				angle = Angle(math.tau / 4 , 0 , 0)
+			end
+			
+			if self.isLocal then
+				angle = objectInfo.startTransform.angle * angle
+			end
+			
+			local transform = Transform3()
+			transform:Translate(pivot)
+			transform:Rotate(angle)
+			Render:SetTransform(transform)
+			
+			self.gizmoModel:Draw()
+			
+			Render:ResetTransform()
 		end
 	end
 	

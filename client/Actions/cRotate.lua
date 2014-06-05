@@ -8,6 +8,13 @@ function Actions.Rotate:__init()
 	self.startMouseDirection = nil
 	
 	self.controlDisplayer.name = "Rotate"
+	
+	self.gizmoModel = nil
+	
+	local args = {
+		path = "Models/Rotate gizmo"
+	}
+	OBJLoader.Request(args , self , function(self , model) self.gizmoModel = model end)
 end
 
 function Actions.Rotate:OnProcess(objectInfo , mouse , pivot)
@@ -47,6 +54,30 @@ function Actions.Rotate:OnProcess(objectInfo , mouse , pivot)
 		
 		if self.isLocal then
 			axis = objectInfo.startTransform.angle * axis
+		end
+		
+		if self.gizmoModel then
+			local angle
+			if self.lockedAxis == "X" then
+				angle = Angle(0 , 0 , 0)
+			elseif self.lockedAxis == "Y" then
+				angle = Angle(0 , 0 , math.tau / 4)
+			elseif self.lockedAxis == "Z" then
+				angle = Angle(math.tau / 4 , 0 , 0)
+			end
+			
+			if self.isLocal then
+				angle = objectInfo.startTransform.angle * angle
+			end
+			
+			local transform = Transform3()
+			transform:Translate(pivot)
+			transform:Rotate(angle)
+			Render:SetTransform(transform)
+			
+			self.gizmoModel:Draw()
+			
+			Render:ResetTransform()
 		end
 	else
 		axis = Camera:GetAngle() * Vector3.Forward
