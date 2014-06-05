@@ -355,7 +355,7 @@ function MapEditor.Map:ControlDown(args)
 			elseif args.name == "Rotate object" then
 				self:SetAction(Actions.Rotate)
 			elseif args.name == "Delete object" then
-				self:SetAction(Actions.Deleter)
+				self:SetAction(Actions.Delete)
 			elseif args.name == "Floor object" then
 				self:SetAction(Actions.Floor)
 			end

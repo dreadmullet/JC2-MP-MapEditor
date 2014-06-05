@@ -1,6 +1,6 @@
-class("Deleter" , Actions)
+class("Delete" , Actions)
 
-function Actions.Deleter:__init()
+function Actions.Delete:__init()
 	MapEditor.Action.__init(self)
 	
 	self.objects = {}
@@ -16,7 +16,7 @@ function Actions.Deleter:__init()
 	end
 end
 
-function Actions.Deleter:Undo()
+function Actions.Delete:Undo()
 	for index , object in ipairs(self.objects) do
 		object:Recreate()
 		MapEditor.map:AddObject(object)
@@ -26,7 +26,7 @@ function Actions.Deleter:Undo()
 	MapEditor.map:SelectionChanged()
 end
 
-function Actions.Deleter:Redo()
+function Actions.Delete:Redo()
 	for index , object in ipairs(self.objects) do
 		object:Destroy()
 		MapEditor.map.selectedObjects:RemoveObject(object)
