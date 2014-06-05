@@ -18,7 +18,7 @@ end
 
 function Actions.Floor:Undo()
 	for index , objectInfo in ipairs(self.objectsInfo) do
-		object:SetPosition(objectInfo.originalPosition)
+		objectInfo.object:SetPosition(objectInfo.originalPosition)
 	end
 end
 
