@@ -33,10 +33,12 @@ function Actions.TransformBase:__init()
 	
 	self.pivot = self:GetAverageObjectPosition()
 	self.lockedAxis = nil
+	self.isLocal = false
 	
 	Controls.Add("Lock to X axis" , "X")
 	Controls.Add("Lock to Y axis" , "Y")
 	Controls.Add("Lock to Z axis" , "Z")
+	Controls.Add("Toggle local" , "L")
 	
 	self.controlDisplayer = MapEditor.ControlDisplayer{
 		name = "TransformBase" ,
@@ -44,7 +46,10 @@ function Actions.TransformBase:__init()
 		"Lock to X axis" ,
 		"Lock to Y axis" ,
 		"Lock to Z axis" ,
+		"Toggle local" ,
 	}
+	
+	self.controlDisplayer:SetControlDisplayedName("Toggle local" , "Using global axes")
 	
 	self:EventSubscribe("Render" , Actions.TransformBase.Render)
 	self:EventSubscribe("MouseUp" , Actions.TransformBase.MouseUp)
@@ -125,5 +130,13 @@ function Actions.TransformBase:ControlDown(args)
 		LockAxis("Y")
 	elseif args.name == "Lock to Z axis" then
 		LockAxis("Z")
+	elseif args.name == "Toggle local" then
+		self.isLocal = not self.isLocal
+		
+		if self.isLocal then
+			self.controlDisplayer:SetControlDisplayedName("Toggle local" , "Using local axes")
+		else
+			self.controlDisplayer:SetControlDisplayedName("Toggle local" , "Using global axes")
+		end
 	end
 end
