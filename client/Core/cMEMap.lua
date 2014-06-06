@@ -272,7 +272,6 @@ MapEditor.Map.Load = function(marshalledSource)
 	map.objectIdCounter = highestId + 1
 	map.mapMenu.canSave = true
 	if objectCount > 0 then
-		-- TODO: Generalize the camera so you just have to do SetPosition
 		map.camera:SetPosition(averageObjectPosition)
 	end
 	
