@@ -40,6 +40,7 @@ function Actions.SelectBase:MouseUp(args)
 			-- the bounds of our selection rectangle.
 			-- TODO: This won't scale very well at ALL
 			local objects = {}
+			local hasObjects = false
 			local screenPos , isOnScreen
 			MapEditor.map:IterateObjects(function(object)
 				local screenPoints = object:GetBoundingBoxScreenPoints()
@@ -51,13 +52,14 @@ function Actions.SelectBase:MouseUp(args)
 						screenPoint.y > top and
 						screenPoint.y < bottom
 					then
-						table.insert(objects , object)
+						objects[object:GetId()] = object
+						hasObjects = true
 						break
 					end
 				end
 			end)
 			
-			if #objects > 0 then
+			if hasObjects then
 				self:OnObjectsChosen(objects)
 			else
 				self:OnNothingChosen()
@@ -67,7 +69,7 @@ function Actions.SelectBase:MouseUp(args)
 			local object = MapEditor.map:GetObjectFromScreenPoint(Mouse:GetPosition())
 			
 			if object then
-				self:OnObjectsChosen({object})
+				self:OnObjectsChosen({[object:GetId()] = object})
 			else
 				self:OnNothingChosen()
 			end

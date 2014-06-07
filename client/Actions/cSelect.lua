@@ -5,15 +5,12 @@ function Actions.Select:__init(...) ; Actions.SelectBase.__init(self , ...)
 	self.objects = {}
 end
 
-function Actions.Select:OnObjectsChosen(objectsToSelect)
+function Actions.Select:OnObjectsChosen(objectIdToObject)
 	if Key:IsDown(VirtualKey.Shift) == false then
 		MapEditor.map:IterateObjects(function(object)
-			local objectId = object:GetId()
-			-- Make sure this object isn't already in self.objects.
-			for index , existingObject in ipairs(self.objects) do
-				if existingObject:GetId() == objectId then
-					return
-				end
+			-- Make sure this object isn't what we selected.
+			if objectIdToObject[object:GetId()] then
+				return
 			end
 			
 			if object:GetIsSelected() then
@@ -22,17 +19,19 @@ function Actions.Select:OnObjectsChosen(objectsToSelect)
 		end)
 	end
 	
-	for index , object in ipairs(objectsToSelect) do
-		-- There's a good chance that self.objects will already contain this object, which means it
-		-- will be unselected and then selected again. This greatly simplifies the code, trust me.
-		table.insert(self.objects , object)
+	for objectId , object in pairs(objectIdToObject) do
+		if object:GetIsSelected() == false then
+			-- There's a good chance that self.objects will already contain this object, which means it
+			-- will be unselected and then selected again. This greatly simplifies the code, trust me.
+			table.insert(self.objects , object)
+		end
 	end
 	
-	if #self.objects == 0 then
-		self:Cancel()
-	else
+	if #self.objects > 0 then
 		self:Redo()
 		self:Confirm()
+	else
+		self:Cancel()
 	end
 end
 

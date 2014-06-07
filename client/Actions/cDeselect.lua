@@ -5,12 +5,12 @@ function Actions.Deselect:__init(...) ; Actions.SelectBase.__init(self , ...)
 	self.objects = {}
 end
 
-function Actions.Deselect:OnObjectsChosen(objects)
-	self.objects = objects
-	-- Remove from the array all objects that aren't selected.
-	for n = #self.objects , 1 , -1 do
-		if self.objects[n]:GetIsSelected() == false then
-			table.remove(self.objects , n)
+function Actions.Deselect:OnObjectsChosen(objectIdToObject)
+	self.objects = {}
+	-- Only add to self.objects those that are selected.
+	for objectId , object in pairs(objectIdToObject) do
+		if object:GetIsSelected() then
+			table.insert(self.objects , object)
 		end
 	end
 	
