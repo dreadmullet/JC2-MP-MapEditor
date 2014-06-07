@@ -64,17 +64,16 @@ Utility.PrintTable = function(t , depth , tableList)
 			end
 		elseif type == "boolean" then
 			if value then
-				print(tab..keyString..typeString.." = true")
+				print(tab..keyString..typeString.."= true")
 			else
-				print(tab..keyString..typeString.." = false")
+				print(tab..keyString..typeString.."= false")
 			end
+		elseif type == "number" or type == "string" or type == "function" then
+			print(tab..keyString..typeString.."= "..tostring(value))
+		elseif type == "userdata" then
+			print(tab..keyString..typeString.."= "..tostring(value))
 		else
-			-- other types
-			if type == "number" or type == "string" then
-				print(tab..keyString..typeString.." = "..value)
-			else
-				print(tab..keyString..typeString.." ("..tostring(value.__type)..") = "..tostring(value))
-			end
+			print(tab..keyString..typeString)
 		end
 	end
 end
