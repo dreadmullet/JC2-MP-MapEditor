@@ -57,6 +57,10 @@ function MapEditor.Map:__init(initialPosition , mapType)
 end
 
 function MapEditor.Map:SetEnabled(enabled)
+	if self.isEnabled == enabled then
+		return
+	end
+	
 	self.mapMenu:SetVisible(enabled)
 	self.spawnMenu:SetVisible(enabled)
 	if self.preferencesMenu:GetVisible() then
@@ -74,6 +78,16 @@ function MapEditor.Map:SetEnabled(enabled)
 	self.camera.isInputEnabled = enabled
 	
 	self.isEnabled = enabled
+	
+	if self.isEnabled then
+		self:IterateObjects(function(object)
+			object:Recreate()
+		end)
+	else
+		self:IterateObjects(function(object)
+			object:Destroy()
+		end)
+	end
 end
 
 function MapEditor.Map:Destroy()
