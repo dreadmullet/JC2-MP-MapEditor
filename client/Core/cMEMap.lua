@@ -16,13 +16,23 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	
 	MapEditor.map = self
 	
+	if MapEditor.maplessState then
+		MapEditor.maplessState:Destroy()
+	end
+	
 	self.type = mapType
 	self.objectIdCounter = 1
 	-- This is used for the filename and is set when saving or loading.
 	self.name = nil
 	self.isEnabled = true
 	
-	self.camera = MapEditor.NoclipCamera(initialPosition)
+	if MapEditor.Preferences.camType == "Noclip" then
+		self.camera = MapEditor.NoclipCamera(initialPosition)
+	elseif MapEditor.Preferences.camType == "Orbit" then
+		self.camera = MapEditor.OrbitCamera(initialPosition)
+	else
+		error("Invalid camera type")
+	end
 	
 	self.undoableActions = {}
 	self.redoableActions = {}
@@ -30,10 +40,9 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	
 	self.selectedObjects = MapEditor.ObjectManager()
 	
-	self.mapMenu = MapEditor.MapMenu()
+	MapEditor.mapMenu.state = "Unsaved map"
+	
 	self.spawnMenu = MapEditor.SpawnMenu()
-	self.preferencesMenu = MapEditor.PreferencesMenu()
-	self.preferencesMenu:SetVisible(false)
 	self.propertiesMenu = nil
 	
 	self.controlDisplayer = MapEditor.ControlDisplayer{
@@ -61,10 +70,10 @@ function MapEditor.Map:SetEnabled(enabled)
 		return
 	end
 	
-	self.mapMenu:SetVisible(enabled)
+	MapEditor.mapMenu:SetVisible(enabled)
 	self.spawnMenu:SetVisible(enabled)
-	if self.preferencesMenu:GetVisible() then
-		self.preferencesMenu:SetVisible(enabled)
+	if MapEditor.preferencesMenu:GetVisible() then
+		MapEditor.preferencesMenu:SetVisible(enabled)
 	end
 	if self.propertiesMenu then
 		self.propertiesMenu:Destroy()
@@ -95,9 +104,7 @@ function MapEditor.Map:Destroy()
 	
 	self.camera:Destroy()
 	
-	self.mapMenu:Destroy()
 	self.spawnMenu:Destroy()
-	self.preferencesMenu:Destroy()
 	if self.propertiesMenu then
 		self.propertiesMenu:Destroy()
 	end
@@ -215,7 +222,7 @@ function MapEditor.Map:Save()
 	}
 	Network:Send("SaveMap" , args)
 	
-	self.mapMenu.canSave = true
+	MapEditor.mapMenu.state = "Saved map"
 end
 
 function MapEditor.Map:Validate()
@@ -283,11 +290,13 @@ MapEditor.Map.Load = function(marshalledSource)
 	-- Unmarshal map properties here, for the same reason as above.
 	MapEditor.PropertyManager.Unmarshal(map , marshalledSource.properties)
 	
-	map.objectIdCounter = highestId + 1
-	map.mapMenu.canSave = true
 	if objectCount > 0 then
 		map.camera:SetPosition(averageObjectPosition)
 	end
+	
+	map.objectIdCounter = highestId + 1
+	
+	MapEditor.mapMenu.state = "Saved map"
 	
 	return map
 end

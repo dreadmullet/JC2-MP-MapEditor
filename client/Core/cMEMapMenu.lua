@@ -1,7 +1,9 @@
 class("MapMenu" , MapEditor)
 
 function MapEditor.MapMenu:__init() ; EGUSM.SubscribeUtility.__init(self)
-	self.Destroy = MapEditor.MapMenu.Destroy
+	-- self.Destroy = MapEditor.MapMenu.Destroy
+	
+	MapEditor.mapMenu = self
 	
 	self:CreateWindow()
 	
@@ -18,7 +20,11 @@ function MapEditor.MapMenu:CreateWindow()
 	
 	self:ResolutionChange({size = Render.Size})
 	
-	self.canSave = false
+	-- States:
+	--    "No map"
+	--    "Unsaved map"
+	--    "Saved map"
+	self.state = "No map"
 	
 	self.buttons = {}
 	
@@ -44,12 +50,7 @@ function MapEditor.MapMenu:CreateWindow()
 		self.buttons[buttonName] = button
 	end
 	
-	self.buttons["Save"]:SetEnabled(self.canSave)
-end
-
-function MapEditor.MapMenu:Destroy()
-	self:UnsubscribeAll()
-	self.window:Remove()
+	self:SetEnabled(true)
 end
 
 function MapEditor.MapMenu:SetEnabled(enabled)
@@ -57,7 +58,15 @@ function MapEditor.MapMenu:SetEnabled(enabled)
 		button:SetEnabled(enabled)
 	end
 	
-	self.buttons["Save"]:SetEnabled(enabled and self.canSave)
+	if self.state == "Unsaved map" then
+		self.buttons["Save"]:SetEnabled(false)
+	elseif self.state == "No map" then
+		self.buttons["Save"]:SetEnabled(false)
+		self.buttons["Save as"]:SetEnabled(false)
+		self.buttons["Properties"]:SetEnabled(false)
+		self.buttons["Validate"]:SetEnabled(false)
+		self.buttons["Test"]:SetEnabled(false)
+	end
 end
 
 function MapEditor.MapMenu:SetVisible(visible)
@@ -70,22 +79,31 @@ function MapEditor.MapMenu:ButtonPressed(button)
 	local name = button:GetDataString("name")
 	
 	if name == "Preferences" then
-		local preferencesMenu = MapEditor.map.preferencesMenu
-		preferencesMenu:SetVisible(not preferencesMenu:GetVisible())
-	elseif name == "New" then
-		MapEditor.map:SetAction(Actions.NewMap)
-	elseif name == "Save" then
-		MapEditor.map:Save()
-	elseif name == "Save as" then
-		MapEditor.map:SetAction(Actions.SaveAs)
-	elseif name == "Load" then
-		MapEditor.map:SetAction(Actions.Load)
-	elseif name == "Properties" then
-		MapEditor.map:OpenMapProperties()
-	elseif name == "Validate" then
-		MapEditor.map:Validate()
-	elseif name == "Test" then
-		MapEditor.map:Test()
+		MapEditor.preferencesMenu:SetVisible(not MapEditor.preferencesMenu:GetVisible())
+	end
+	
+	if MapEditor.map then
+		if name == "New" then
+			MapEditor.map:SetAction(Actions.NewMap)
+		elseif name == "Save" then
+			MapEditor.map:Save()
+		elseif name == "Save as" then
+			MapEditor.map:SetAction(Actions.SaveAs)
+		elseif name == "Load" then
+			MapEditor.map:SetAction(Actions.Load)
+		elseif name == "Properties" then
+			MapEditor.map:OpenMapProperties()
+		elseif name == "Validate" then
+			MapEditor.map:Validate()
+		elseif name == "Test" then
+			MapEditor.map:Test()
+		end
+	else
+		if name == "New" then
+			Actions.NewMap()
+		elseif name == "Load" then
+			Actions.Load()
+		end
 	end
 end
 

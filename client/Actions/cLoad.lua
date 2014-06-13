@@ -1,3 +1,5 @@
+-- TODO: Shouldn't this call Cancel?
+
 class("Load" , Actions)
 
 function Actions.Load:__init() ; Actions.SaveLoadBase.__init(self)
@@ -26,7 +28,9 @@ function Actions.Load:ReceiveMap(marshalledSource)
 		return
 	end
 	
-	MapEditor.map:Destroy()
+	if MapEditor.map then
+		MapEditor.map:Destroy()
+	end
 	
 	MapEditor.map = MapEditor.Map.Load(marshalledSource)
 	MapEditor.map.name = self.mapName

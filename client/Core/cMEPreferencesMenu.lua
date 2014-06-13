@@ -4,13 +4,16 @@ function MapEditor.PreferencesMenu:__init()
 	EGUSM.SubscribeUtility.__init(self)
 	MapEditor.Action.__init(self)
 	
+	MapEditor.preferencesMenu = self
+	
 	self.CreateWindow = MapEditor.PreferencesMenu.CreateWindow
-	self.Destroy = MapEditor.PreferencesMenu.Destroy
 	self.ResolutionChange = MapEditor.PreferencesMenu.ResolutionChange
 	
 	self:CreateWindow()
 	
 	self:ResolutionChange{size = Render.Size}
+	
+	self:SetVisible(false)
 	
 	self:EventSubscribe("ResolutionChange" , MapEditor.PreferencesMenu.ResolutionChange)
 end
@@ -136,13 +139,6 @@ function MapEditor.PreferencesMenu:GetVisible()
 	return self.window:GetVisible()
 end
 
-function MapEditor.PreferencesMenu:Destroy()
-	self:UnsubscribeAll()
-	
-	self.bindMenu:Remove()
-	self.window:Remove()
-end
-
 -- GWEN events
 
 function MapEditor.PreferencesMenu:CamSensitivityMoveSliderChanged()
@@ -159,11 +155,16 @@ end
 
 function MapEditor.PreferencesMenu:CameraTypeChanged(comboBox)
 	local name = comboBox:GetSelectedItem():GetText()
-	MapEditor.map.camera:Destroy()
-	if name == "Noclip" then
-		MapEditor.map.camera = MapEditor.NoclipCamera(Camera:GetPosition() , Camera:GetAngle())
-	elseif name == "Orbit" then
-		MapEditor.map.camera = MapEditor.OrbitCamera(Camera:GetPosition() , Camera:GetAngle())
+	
+	MapEditor.Preferences.camType = name
+	
+	if MapEditor.map then
+		MapEditor.map.camera:Destroy()
+		if name == "Noclip" then
+			MapEditor.map.camera = MapEditor.NoclipCamera(Camera:GetPosition() , Camera:GetAngle())
+		elseif name == "Orbit" then
+			MapEditor.map.camera = MapEditor.OrbitCamera(Camera:GetPosition() , Camera:GetAngle())
+		end
 	end
 end
 

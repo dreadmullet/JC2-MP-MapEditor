@@ -12,7 +12,9 @@ Events:Subscribe("ModuleLoad" , function()
 	Controls.Add("Look left" ,                   "Mouse left")
 	Controls.Add("Look right" ,                  "Mouse right")
 	
-	Actions.NewMap()
+	MapEditor.MapMenu()
+	MapEditor.PreferencesMenu()
+	MapEditor.MaplessState()
 end)
 
 Events:Subscribe("ModuleUnload" , function()
