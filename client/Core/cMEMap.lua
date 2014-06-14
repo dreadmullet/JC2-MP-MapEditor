@@ -26,14 +26,6 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	self.name = nil
 	self.isEnabled = true
 	
-	if MapEditor.Preferences.camType == "Noclip" then
-		self.camera = MapEditor.NoclipCamera(initialPosition)
-	elseif MapEditor.Preferences.camType == "Orbit" then
-		self.camera = MapEditor.OrbitCamera(initialPosition)
-	else
-		error("Invalid camera type")
-	end
-	
 	self.undoableActions = {}
 	self.redoableActions = {}
 	self.currentAction = nil
@@ -44,6 +36,10 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	
 	self.spawnMenu = MapEditor.SpawnMenu()
 	self.propertiesMenu = nil
+	
+	for index , propertyArgs in ipairs(MapTypes[self.type].properties) do
+		self:AddProperty(propertyArgs)
+	end
 	
 	self.controlDisplayers = {
 		selection = MapEditor.ControlDisplayer{
@@ -65,9 +61,7 @@ function MapEditor.Map:__init(initialPosition , mapType)
 		}
 	}
 	
-	for index , propertyArgs in ipairs(MapTypes[self.type].properties) do
-		self:AddProperty(propertyArgs)
-	end
+	self:SetCameraType(MapEditor.Preferences.camType , initialPosition)
 	
 	self:EventSubscribe("Render")
 	self:EventSubscribe("ControlDown")
@@ -217,6 +211,21 @@ function MapEditor.Map:SelectionChanged()
 			self.propertiesMenu:Destroy()
 			self.propertiesMenu = nil
 		end
+	end
+end
+
+function MapEditor.Map:SetCameraType(cameraType , initialPosition , initialAngle)
+	if self.camera then
+		self.camera:Destroy()
+		self.camera = nil
+	end
+	
+	if cameraType == "Noclip" then
+		self.camera = MapEditor.NoclipCamera(initialPosition , initialAngle)
+	elseif cameraType == "Orbit" then
+		self.camera = MapEditor.OrbitCamera(initialPosition , initialAngle)
+	else
+		error("Invalid camera type")
 	end
 end
 

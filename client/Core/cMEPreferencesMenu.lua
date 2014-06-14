@@ -159,12 +159,7 @@ function MapEditor.PreferencesMenu:CameraTypeChanged(comboBox)
 	MapEditor.Preferences.camType = name
 	
 	if MapEditor.map then
-		MapEditor.map.camera:Destroy()
-		if name == "Noclip" then
-			MapEditor.map.camera = MapEditor.NoclipCamera(Camera:GetPosition() , Camera:GetAngle())
-		elseif name == "Orbit" then
-			MapEditor.map.camera = MapEditor.OrbitCamera(Camera:GetPosition() , Camera:GetAngle())
-		end
+		MapEditor.map:SetCameraType(name , Camera:GetPosition() , Camera:GetAngle())
 	end
 end
 
