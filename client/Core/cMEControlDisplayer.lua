@@ -9,7 +9,7 @@ function MapEditor.ControlDisplayer:__init(args) ; EGUSM.SubscribeUtility.__init
 		self:AddControl(controlName)
 	end
 	
-	self.textSize = 20
+	self.textSize = 18
 	self.x = 0
 	self.isVisible = true
 	
@@ -38,7 +38,11 @@ function MapEditor.ControlDisplayer:SetControlDisplayedName(controlName , newNam
 	end
 end
 
-function MapEditor.ControlDisplayer:DrawText(text , color)
+function MapEditor.ControlDisplayer:DrawText(text , color , isTitle)
+	if isTitle then
+		self.x = -Render:GetTextWidth(text , self.textSize)
+	end
+	
 	local shadowColor = Color.Black * 0.45
 	Render:DrawText(Vector2(self.x - 2 , 2) , text , shadowColor , self.textSize)
 	Render:DrawText(Vector2(self.x - 2 , -2) , text , shadowColor , self.textSize)
@@ -51,7 +55,11 @@ function MapEditor.ControlDisplayer:DrawText(text , color)
 	
 	Render:DrawText(Vector2(self.x , 0) , text , color , self.textSize)
 	
-	self.x = self.x + Render:GetTextWidth(text , self.textSize)
+	if isTitle then
+		self.x = 0
+	else
+		self.x = self.x + Render:GetTextWidth(text , self.textSize)
+	end
 end
 
 -- Events
@@ -63,15 +71,13 @@ function MapEditor.ControlDisplayer:Render()
 	
 	local transform = Transform2()
 	local position = Vector2(
-		90 ,
+		128 ,
 		Render.Height - self.linesFromBottom * (self.textSize + 2)
 	)
 	transform:Translate(position)
 	Render:SetTransform(transform)
 	
-	self.x = 0
-	
-	self:DrawText(self.name.."  " , Color(192 , 192 , 192))
+	self:DrawText(self.name.."   " , Color(192 , 204 , 192) , true)
 	
 	for index , controlInfo in ipairs(self.controls) do
 		local text = controlInfo.name..": "..controlInfo.control.valueString.."   "
