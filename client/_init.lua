@@ -2,18 +2,26 @@ Events:Subscribe("ModuleLoad" , function()
 	Controls.Add("Select" ,                      "Mouse1")
 	Controls.Add("Deselect" ,                    "Mouse2")
 	Controls.Add("Add to selection" ,            "Shift")
+	Controls.Add("Done" ,                        "Mouse1")
+	Controls.Add("Cancel" ,                      "Mouse2")
+	
+	Controls.Add("Snap to surface" ,             "Shift")
+	
 	Controls.Add("Orbit camera: Rotate/pan" ,    "Mouse3")
 	Controls.Add("Orbit camera: Pan modifier" ,  "Shift")
+	
 	Controls.Add("Noclip camera: Forward" ,      "MoveForward")
 	Controls.Add("Noclip camera: Back" ,         "MoveBackward")
 	Controls.Add("Noclip camera: Left" ,         "MoveLeft")
 	Controls.Add("Noclip camera: Right" ,        "MoveRight")
-	Controls.Add("Mouse wheel up" ,              "Mouse wheel up")
-	Controls.Add("Mouse wheel down" ,            "Mouse wheel down")
+	
 	Controls.Add("Look up" ,                     "Mouse up")
 	Controls.Add("Look down" ,                   "Mouse down")
 	Controls.Add("Look left" ,                   "Mouse left")
 	Controls.Add("Look right" ,                  "Mouse right")
+	
+	Controls.Add("Mouse wheel up" ,              "Mouse wheel up")
+	Controls.Add("Mouse wheel down" ,            "Mouse wheel down")
 	
 	MapEditor.MapMenu()
 	MapEditor.PreferencesMenu()

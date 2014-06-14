@@ -10,8 +10,15 @@ function Actions.ObjectPlacer:__init(objectClass)
 	self.object = self.objectClass(self.position , self.angle)
 	MapEditor.map:AddObject(self.object)
 	
+	self.controlDisplayer = MapEditor.ControlDisplayer{
+		name = "Place object" ,
+		linesFromBottom = 3 ,
+		"Done" ,
+		"Cancel" ,
+	}
+	
 	self:EventSubscribe("Render")
-	self:EventSubscribe("MouseDown")
+	self:EventSubscribe("ControlUp")
 end
 
 function Actions.ObjectPlacer:Undo()
@@ -24,6 +31,10 @@ function Actions.ObjectPlacer:Redo()
 	MapEditor.map:AddObject(self.object)
 end
 
+function Actions.ObjectPlacer:OnConfirmOrCancel()
+	self.controlDisplayer:Destroy()
+end
+
 -- Events
 
 function Actions.ObjectPlacer:Render()
@@ -33,11 +44,11 @@ function Actions.ObjectPlacer:Render()
 	self.object:SetPosition(self.position)
 end
 
-function Actions.ObjectPlacer:MouseDown(args)
-	if args.button == 1 then
+function Actions.ObjectPlacer:ControlUp(args)
+	if args.name == "Done" then
 		self:UnsubscribeAll()
 		self:Confirm()
-	elseif args.button == 2 then
+	elseif args.name == "Cancel" then
 		self.object:Destroy()
 		MapEditor.map:RemoveObject(self.object)
 		

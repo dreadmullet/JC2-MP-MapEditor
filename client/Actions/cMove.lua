@@ -6,6 +6,7 @@ function Actions.Move:__init()
 	self.sensitivity = 0.001
 	
 	self.controlDisplayer.name = "Move"
+	self.controlDisplayer:AddControl("Snap to surface")
 	
 	self.gizmoModel = nil
 	
@@ -18,7 +19,7 @@ end
 function Actions.Move:OnProcess(objectInfo , mouse , pivot)
 	local delta
 	-- Holding shift moves the object to the mouse cursor using a raycast.
-	if Key:IsDown(VirtualKey.Shift) then
+	if Controls.Get("Snap to surface").state ~= 0 and self.lockedAxis == nil then
 		local result = Physics:Raycast(
 			Camera:GetPosition() ,
 			Render:ScreenToWorldDirection(Mouse:GetPosition()) ,

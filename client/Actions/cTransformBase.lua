@@ -43,6 +43,8 @@ function Actions.TransformBase:__init()
 	self.controlDisplayer = MapEditor.ControlDisplayer{
 		name = "TransformBase" ,
 		linesFromBottom = 3 ,
+		"Done" ,
+		"Cancel" ,
 		"Lock to X axis" ,
 		"Lock to Y axis" ,
 		"Lock to Z axis" ,
@@ -52,7 +54,7 @@ function Actions.TransformBase:__init()
 	self.controlDisplayer:SetControlDisplayedName("Toggle local" , "Using global axes")
 	
 	self:EventSubscribe("Render" , Actions.TransformBase.Render)
-	self:EventSubscribe("MouseUp" , Actions.TransformBase.MouseUp)
+	self:EventSubscribe("ControlUp" , Actions.TransformBase.ControlUp)
 	self:EventSubscribe("ControlDown" , Actions.TransformBase.ControlDown)
 end
 
@@ -103,13 +105,12 @@ function Actions.TransformBase:Render()
 	end
 end
 
-function Actions.TransformBase:MouseUp(args)
-	if args.button == 1 then
+function Actions.TransformBase:ControlUp(args)
+	if args.name == "Done" then
 		self:UnsubscribeAll()
 		self:Confirm()
-	elseif args.button == 2 then
+	elseif args.name == "Cancel" then
 		self:Undo()
-		
 		self:UnsubscribeAll()
 		self:Cancel()
 	end
