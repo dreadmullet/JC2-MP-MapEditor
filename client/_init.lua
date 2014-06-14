@@ -1,4 +1,7 @@
 Events:Subscribe("ModuleLoad" , function()
+	Controls.Add("Select" ,                      "Mouse1")
+	Controls.Add("Deselect" ,                    "Mouse2")
+	Controls.Add("Add to selection" ,            "Shift")
 	Controls.Add("Orbit camera: Rotate/pan" ,    "Mouse3")
 	Controls.Add("Orbit camera: Pan modifier" ,  "Shift")
 	Controls.Add("Noclip camera: Forward" ,      "MoveForward")

@@ -1,6 +1,6 @@
 class("Deselect" , Actions)
 
-function Actions.Deselect:__init(...) ; Actions.SelectBase.__init(self , ...)
+function Actions.Deselect:__init() ; Actions.SelectBase.__init(self , "Deselect")
 	self.color = Color.DarkRed
 	self.objects = {}
 end

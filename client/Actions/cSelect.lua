@@ -1,12 +1,12 @@
 class("Select" , Actions)
 
-function Actions.Select:__init(...) ; Actions.SelectBase.__init(self , ...)
+function Actions.Select:__init() ; Actions.SelectBase.__init(self , "Select")
 	self.color = Color.LimeGreen
 	self.objects = {}
 end
 
 function Actions.Select:OnObjectsChosen(objectIdToObject)
-	if Key:IsDown(VirtualKey.Shift) == false then
+	if Controls.Get("Add to selection").state == 0 then
 		MapEditor.map:IterateObjects(function(object)
 			-- Make sure this object isn't what we selected.
 			if objectIdToObject[object:GetId()] then
@@ -36,7 +36,7 @@ function Actions.Select:OnObjectsChosen(objectIdToObject)
 end
 
 function Actions.Select:OnNothingChosen()
-	if Key:IsDown(VirtualKey.Shift) then
+	if Controls.Get("Add to selection").state ~= 0 then
 		return
 	end
 	

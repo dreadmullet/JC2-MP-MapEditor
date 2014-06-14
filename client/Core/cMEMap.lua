@@ -45,15 +45,24 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	self.spawnMenu = MapEditor.SpawnMenu()
 	self.propertiesMenu = nil
 	
-	self.controlDisplayer = MapEditor.ControlDisplayer{
-		name = "Actions" ,
-		linesFromBottom = 3 ,
-		"Move object" ,
-		"Rotate object" ,
-		"Delete object" ,
-		"Floor object" ,
-		"Undo" ,
-		"Redo" ,
+	self.controlDisplayers = {
+		selection = MapEditor.ControlDisplayer{
+			name = "Selection" ,
+			linesFromBottom = 4 ,
+			"Select" ,
+			"Deselect" ,
+			"Add to selection" ,
+		} ,
+		actions = MapEditor.ControlDisplayer{
+			name = "Actions" ,
+			linesFromBottom = 3 ,
+			"Move object" ,
+			"Rotate object" ,
+			"Delete object" ,
+			"Floor object" ,
+			"Undo" ,
+			"Redo" ,
+		}
 	}
 	
 	for index , propertyArgs in ipairs(MapTypes[self.type].properties) do
@@ -61,7 +70,6 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	end
 	
 	self:EventSubscribe("Render")
-	self:EventSubscribe("MouseDown")
 	self:EventSubscribe("ControlDown")
 end
 
@@ -79,7 +87,8 @@ function MapEditor.Map:SetEnabled(enabled)
 		self.propertiesMenu:Destroy()
 		self.propertiesMenu = nil
 	end
-	self.controlDisplayer:SetVisible(enabled)
+	self.controlDisplayers.selection:SetVisible(enabled)
+	self.controlDisplayers.actions:SetVisible(enabled)
 	
 	Mouse:SetVisible(enabled)
 	
@@ -108,7 +117,8 @@ function MapEditor.Map:Destroy()
 	if self.propertiesMenu then
 		self.propertiesMenu:Destroy()
 	end
-	self.controlDisplayer:Destroy()
+	self.controlDisplayers.selection:Destroy()
+	self.controlDisplayers.actions:Destroy()
 	
 	self:IterateObjects(function(object)
 		object:Destroy()
@@ -145,13 +155,15 @@ function MapEditor.Map:SetAction(actionClass , ...)
 		self.currentAction = nil
 	else
 		Events:Fire("SetMenusEnabled" , false)
-		self.controlDisplayer:SetVisible(false)
+		self.controlDisplayers.selection:SetVisible(false)
+		self.controlDisplayers.actions:SetVisible(false)
 	end
 end
 
 function MapEditor.Map:ActionFinish()
 	Events:Fire("SetMenusEnabled" , true)
-	self.controlDisplayer:SetVisible(true)
+	self.controlDisplayers.selection:SetVisible(true)
+	self.controlDisplayers.actions:SetVisible(true)
 	
 	table.insert(self.undoableActions , self.currentAction)
 	self.redoableActions = {}
@@ -161,7 +173,8 @@ end
 
 function MapEditor.Map:ActionCancel()
 	Events:Fire("SetMenusEnabled" , true)
-	self.controlDisplayer:SetVisible(true)
+	self.controlDisplayers.selection:SetVisible(true)
+	self.controlDisplayers.actions:SetVisible(true)
 	
 	self.currentAction = nil
 end
@@ -345,20 +358,6 @@ function MapEditor.Map:Render()
 	end)
 end
 
-function MapEditor.Map:MouseDown(args)
-	if self.isEnabled == false or self.camera.isInputEnabled then
-		return
-	end
-	
-	if self.currentAction == nil then
-		if args.button == 1 then
-			self:SetAction(Actions.Select , args.button)
-		elseif args.button == 2 then
-			self:SetAction(Actions.Deselect , args.button)
-		end
-	end
-end
-
 function MapEditor.Map:ControlDown(args)
 	if self.isEnabled == false then
 		return
@@ -372,7 +371,11 @@ function MapEditor.Map:ControlDown(args)
 		end
 		
 		if self.camera.isInputEnabled == false and self:IsEmpty() == false then
-			if args.name == "Move object" then
+			if args.name == "Select" then
+				self:SetAction(Actions.Select)
+			elseif args.name == "Deselect" then
+				self:SetAction(Actions.Deselect)
+			elseif args.name == "Move object" then
 				self:SetAction(Actions.Move)
 			elseif args.name == "Rotate object" then
 				self:SetAction(Actions.Rotate)

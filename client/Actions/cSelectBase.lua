@@ -1,15 +1,15 @@
 class("SelectBase" , Actions)
 
-function Actions.SelectBase:__init(mouseButton)
+function Actions.SelectBase:__init(controlName)
 	EGUSM.SubscribeUtility.__init(self)
 	MapEditor.Action.__init(self)
 	
-	self.mouseButton = mouseButton
+	self.controlName = controlName
 	self.downPosition = Mouse:GetPosition()
 	self.delta = Vector2(0 , 0)
 	self.color = Color.White
 	self:EventSubscribe("Render" , Actions.SelectBase.Render)
-	self:EventSubscribe("MouseUp" , Actions.SelectBase.MouseUp)
+	self:EventSubscribe("ControlUp" , Actions.SelectBase.ControlUp)
 end
 
 -- Events
@@ -25,8 +25,8 @@ function Actions.SelectBase:Render()
 	)
 end
 
-function Actions.SelectBase:MouseUp(args)
-	if args.button == self.mouseButton then
+function Actions.SelectBase:ControlUp(args)
+	if args.name == self.controlName then
 		-- If we dragged to make a decent sized rectangle, select the objects in that rectangle.
 		if self.delta:Length() > 16 then
 			local pos1 = self.downPosition
