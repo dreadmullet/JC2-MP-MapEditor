@@ -1,6 +1,8 @@
 class("NoclipCamera" , MapEditor)
 
 function MapEditor.NoclipCamera:__init(position , angle) ; EGUSM.SubscribeUtility.__init(self)
+	self.Destroy = MapEditor.NoclipCamera.Destroy
+	
 	self.position = position or Vector3(0 , 250 , 0)
 	self.angle = angle or Angle()
 	self.speed = 50
@@ -18,15 +20,33 @@ function MapEditor.NoclipCamera:__init(position , angle) ; EGUSM.SubscribeUtilit
 	
 	self.deltaTimer = Timer()
 	
+	self.controlDisplayer = MapEditor.ControlDisplayer{
+		name = "Camera" ,
+		linesFromBottom = 2 ,
+	}
+	self.controlDisplayer:AddControl("Noclip camera: Toggle" , "Toggle")
+	self.controlDisplayer:AddControl("Mouse wheel up" , "Increase speed")
+	self.controlDisplayer:AddControl("Mouse wheel down" , "Decrease speed")
+	self.controlDisplayer:AddControl("Noclip camera: Up" , "Move up")
+	self.controlDisplayer:AddControl("Noclip camera: Down" , "Move down")
+	
 	self:EventSubscribe("ControlHeld")
 	self:EventSubscribe("ControlDown")
 	self:EventSubscribe("CalcView")
 	self:EventSubscribe("PostTick")
 end
 
+function MapEditor.NoclipCamera:Destroy()
+	self.controlDisplayer:Destroy()
+	
+	self:UnsubscribeAll()
+end
+
 function MapEditor.NoclipCamera:SetPosition(position)
 	self.position = position
 end
+
+-- Events
 
 function MapEditor.NoclipCamera:ControlHeld(args)
 	if self.isEnabled == false or self.isInputEnabled == false then
@@ -58,8 +78,10 @@ end
 
 function MapEditor.NoclipCamera:ControlDown(args)
 	if args.name == "Noclip camera: Toggle" then
-		self.isInputEnabled = not self.isInputEnabled
-		Events:Fire("SetMenusEnabled" , not self.isInputEnabled)
+		if MapEditor.map.currentAction == nil then
+			self.isInputEnabled = not self.isInputEnabled
+			Events:Fire("SetMenusEnabled" , not self.isInputEnabled)
+		end
 	elseif args.name == "Mouse wheel up" then
 		self.speedChangeBuffer = args.state
 	elseif args.name == "Mouse wheel down" then
@@ -112,6 +134,8 @@ function MapEditor.NoclipCamera:CalcView()
 end
 
 function MapEditor.NoclipCamera:PostTick()
+	self.controlDisplayer:SetVisible(MapEditor.map.currentAction == nil)
+	
 	if self.isEnabled == false then
 		return
 	end

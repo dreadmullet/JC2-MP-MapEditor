@@ -20,10 +20,10 @@ function MapEditor.ControlDisplayer:SetVisible(isVisible)
 	self.isVisible = isVisible
 end
 
-function MapEditor.ControlDisplayer:AddControl(controlName)
+function MapEditor.ControlDisplayer:AddControl(controlName , displayedName)
 	local control = Controls.Get(controlName)
 	if control then
-		table.insert(self.controls , {name = control.name , control = control})
+		table.insert(self.controls , {name = displayedName or control.name , control = control})
 	else
 		warn("ControlDisplayer can't find control: "..tostring(controlName))
 	end
@@ -71,7 +71,7 @@ function MapEditor.ControlDisplayer:Render()
 	
 	local transform = Transform2()
 	local position = Vector2(
-		128 ,
+		Render.Width * 0.16 - 80 ,
 		Render.Height - self.linesFromBottom * (self.textSize + 2)
 	)
 	transform:Translate(position)

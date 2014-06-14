@@ -3,6 +3,8 @@
 class("OrbitCamera" , MapEditor)
 
 function MapEditor.OrbitCamera:__init(position , angle) ; EGUSM.SubscribeUtility.__init(self)
+	self.Destroy = MapEditor.NoclipCamera.Destroy
+	
 	-- Public properties
 	self.targetPosition = position or Vector3(0 , 0 , 0)
 	self.minPitch = math.rad(-89)
@@ -21,10 +23,25 @@ function MapEditor.OrbitCamera:__init(position , angle) ; EGUSM.SubscribeUtility
 	self.panBuffer = Vector3(0 , 0 , 0)
 	self.deltaTimer = Timer()
 	
+	self.controlDisplayer = MapEditor.ControlDisplayer{
+		name = "Camera" ,
+		linesFromBottom = 2 ,
+	}
+	self.controlDisplayer:AddControl("Orbit camera: Rotate/pan" , "Rotate/pan")
+	self.controlDisplayer:AddControl("Orbit camera: Pan modifier" , "Pan modifier")
+	self.controlDisplayer:AddControl("Mouse wheel up" , "Zoom in")
+	self.controlDisplayer:AddControl("Mouse wheel down" , "Zoom out")
+	
 	self:EventSubscribe("CalcView")
 	self:EventSubscribe("ControlDown")
 	self:EventSubscribe("ControlUp")
 	self:EventSubscribe("PostTick")
+end
+
+function MapEditor.NoclipCamera:Destroy()
+	self.controlDisplayer:Destroy()
+	
+	self:UnsubscribeAll()
 end
 
 function MapEditor.OrbitCamera:SetPosition(position)
