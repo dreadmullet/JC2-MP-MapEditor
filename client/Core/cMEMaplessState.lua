@@ -5,17 +5,22 @@ function MapEditor.MaplessState:__init() ; EGUSM.SubscribeUtility.__init(self)
 	
 	MapEditor.maplessState = self
 	
-	self.timer = Timer()
+	self.yawTimer = nil
 	self.offsetYaw = math.random() * math.tau
 	self.yawMult = 0.0075
 	if math.random() > 0.5 then
 		self.yawMult = self.yawMult * -1
 	end
 	
+	if Game:GetState() ~= GUIState.Loading then
+		self:GameLoad()
+	end
+	
 	Game:FireEvent("gui.hud.hide")
 	
 	self:EventSubscribe("Render")
 	self:EventSubscribe("CalcView")
+	self:EventSubscribe("GameLoad")
 end
 
 function MapEditor.MaplessState:Destroy()
@@ -55,7 +60,12 @@ function MapEditor.MaplessState:Render()
 end
 
 function MapEditor.MaplessState:CalcView()
-	local yaw = self.timer:GetSeconds() * self.yawMult + self.offsetYaw
+	local yaw
+	if self.yawTimer then
+		yaw = self.yawTimer:GetSeconds() * self.yawMult + self.offsetYaw
+	else
+		yaw = self.offsetYaw
+	end
 	local pitch = math.rad(-6.6)
 	local angle = Angle(yaw , pitch , 0)
 	local origin = Vector3(-1600 , 245 , 1000)
@@ -67,4 +77,8 @@ function MapEditor.MaplessState:CalcView()
 	Camera:SetPosition(position)
 	
 	return false
+end
+
+function MapEditor.MaplessState:GameLoad()
+	self.yawTimer = Timer()
 end
