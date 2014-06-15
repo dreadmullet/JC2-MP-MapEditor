@@ -2,7 +2,7 @@ class("PropertiesMenu" , MapEditor)
 
 -- Y is relative to height.
 MapEditor.PropertiesMenu.position = Vector2(5 , 0.25)
-MapEditor.PropertiesMenu.size = Vector2(340 , 210)
+MapEditor.PropertiesMenu.size = Vector2(320 , 210)
 
 function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtility.__init(self)
 	self.Destroy = MapEditor.PropertiesMenu.Destroy
