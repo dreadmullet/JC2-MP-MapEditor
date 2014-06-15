@@ -104,7 +104,7 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	
 	-- Create the property controls.
 	for index , propertyProprietor in ipairs(self.propertyProprietors) do
-		self:CreatePropertyControl(propertyProprietor)
+		self:CreatePropertyControl(propertyProprietor , index)
 	end
 	
 	--
@@ -115,11 +115,17 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	self:EventSubscribe("SetMenusEnabled")
 end
 
-function MapEditor.PropertiesMenu:CreatePropertyControl(propertyProprietor)
-	local base = BaseWindow.Create(self.scrollControl)
-	base:SetMargin(Vector2(0 , 2) , Vector2(0 , 2))
+function MapEditor.PropertiesMenu:CreatePropertyControl(propertyProprietor , index)
+	local base = Rectangle.Create(self.scrollControl)
+	base:SetPadding(Vector2(2 , 2) , Vector2(2 , 2))
 	base:SetDock(GwenPosition.Top)
 	base:SetHeight(0)
+	
+	if index % 2 == 0 then
+		base:SetColor(Color(120 , 120 , 120 , 64))
+	else
+		base:SetColor(Color(0 , 0 , 0 , 64))
+	end
 	
 	local label = Label.Create(base)
 	label:SetDock(GwenPosition.Left)
@@ -148,7 +154,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 	end
 	
 	if propertyType == "number" then
-		parent:SetHeight(parent:GetHeight() + self.textSize + 6)
+		parent:SetHeight(parent:GetHeight() + self.textSize + 10)
 		
 		local control = TextBoxNumeric.Create(parent)
 		control:SetDock(GwenPosition.Fill)
@@ -166,7 +172,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		
 		return control
 	elseif propertyType == "string" then
-		parent:SetHeight(parent:GetHeight() + self.textSize + 6)
+		parent:SetHeight(parent:GetHeight() + self.textSize + 10)
 		
 		local textBox = TextBox.Create(parent)
 		textBox:SetDock(GwenPosition.Fill)
@@ -185,11 +191,11 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		
 		return textBox
 	elseif propertyType == "boolean" then
-		parent:SetHeight(parent:GetHeight() + self.textSize + 4)
+		parent:SetHeight(parent:GetHeight() + self.textSize + 8)
 		
 		local button = Button.Create(parent)
 		button:SetDock(GwenPosition.Left)
-		button:SetWidth(64)
+		button:SetWidth(72)
 		button:SetTextSize(self.textSize)
 		button:SetText("")
 		button:SetToggleable(true)
@@ -212,7 +218,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		end
 		
 		local base = BaseWindow.Create(parent)
-		base:SetMargin(Vector2(0 , 2) , Vector2(0 , 2))
+		base:SetMargin(Vector2(0 , 0) , Vector2(0 , 4))
 		base:SetDock(GwenPosition.Top)
 		base:SetHeight(self.textSize + 6)
 		local header = base
@@ -272,7 +278,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		
 		return header
 	elseif Objects[propertyType] ~= nil then
-		parent:SetHeight(parent:GetHeight() + self.textSize + 6)
+		parent:SetHeight(parent:GetHeight() + self.textSize + 10)
 		
 		local button = Button.Create(parent)
 		button:SetDock(GwenPosition.Fill)
@@ -312,7 +318,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		label:SetTextColor(Color.DarkRed)
 		label:SizeToContents()
 		
-		parent:SetHeight(parent:GetHeight() + label:GetHeight() + 2)
+		parent:SetHeight(parent:GetHeight() + label:GetHeight() + 6)
 		
 		return label
 	end
