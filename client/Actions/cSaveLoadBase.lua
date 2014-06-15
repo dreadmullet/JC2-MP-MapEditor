@@ -54,7 +54,9 @@ function Actions.SaveLoadBase:CreateWindow()
 end
 
 function Actions.SaveLoadBase:Destroy()
-	self:Cancel()
+	if MapEditor.map then
+		self:Cancel()
+	end
 	
 	self:UnsubscribeAll()
 	self.window:Remove()
