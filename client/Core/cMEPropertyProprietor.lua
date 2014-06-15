@@ -12,6 +12,7 @@ function MapEditor.PropertyProprietor:__init(properties)
 	self.isObject = Objects[self.type] ~= nil or Objects[self.subtype] ~= nil
 	-- This is copied from commonValue, or if it's nil, it's a sane default value.
 	self.value = nil
+	self.hasCommonValue = false
 	-- If commonValue ends up nil, there is a conflict. Otherwise, all Propertys have the same value.
 	commonValue = nil
 	
@@ -49,7 +50,8 @@ function MapEditor.PropertyProprietor:__init(properties)
 		end
 	end
 	
-	if commonValue then
+	if commonValue ~= nil then
+		self.hasCommonValue = true
 		if self.type == "table" then
 			self.value = {}
 			for index , value in ipairs(commonValue) do

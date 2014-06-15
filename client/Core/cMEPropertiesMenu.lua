@@ -129,6 +129,11 @@ function MapEditor.PropertiesMenu:CreatePropertyControl(propertyProprietor)
 	label:SizeToContents()
 	label:SetMargin(Vector2(0 , 0) , Vector2(self.nameColumnWidth - label:GetWidth() , 0))
 	
+	-- Make the label a yellow color if not all PropertyManagers have a common value.
+	if propertyProprietor.hasCommonValue == false then
+		label:SetTextColor(Color(255 , 218 , 96))
+	end
+	
 	self:CreateEditControl(propertyProprietor , base)
 	
 	return base
