@@ -10,6 +10,8 @@ function MapEditor.PropertyProprietor:__init(properties)
 	self.subtype = self.properties[1].subtype
 	self.defaultElement = self.properties[1].defaultElement
 	self.isObject = Objects[self.type] ~= nil or Objects[self.subtype] ~= nil
+	-- This is copied from commonValue, or if it's nil, it's a sane default value.
+	self.value = nil
 	-- If commonValue ends up nil, there is a conflict. Otherwise, all Propertys have the same value.
 	commonValue = nil
 	
@@ -94,6 +96,11 @@ function MapEditor.PropertyProprietor:CompareTables(a , b)
 end
 
 function MapEditor.PropertyProprietor:SetValue(value)
+	-- Don't do anything if nothing changed.
+	if self.value == value then
+		return
+	end
+	
 	local args = {
 		properties = self.properties ,
 		value = value ,
@@ -107,6 +114,11 @@ function MapEditor.PropertyProprietor:SetValue(value)
 end
 
 function MapEditor.PropertyProprietor:SetTableValue(index , value)
+	-- Don't do anything if nothing changed.
+	if self.value[index] == value then
+		return
+	end
+	
 	self:SyncTables()
 	
 	local args = {

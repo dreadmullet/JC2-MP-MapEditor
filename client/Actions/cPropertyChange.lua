@@ -18,9 +18,8 @@ function Actions.PropertyChange:__init(args)
 	self.oldButtonText = nil
 	self.newButtonText = nil
 	
-	self.objectClass = Objects[self.type] ~= nil
-	
-	if self.objectClass and self.tableActionType ~= "Add" and self.tableActionType ~= "Remove" then
+	local isObjectClass = Objects[self.type] ~= nil
+	if isObjectClass and self.tableActionType ~= "Add" and self.tableActionType ~= "Remove" then
 		Events:Fire("SetMenusEnabled" , false)
 		-- Reusing self.value like this is questionable but makes it really convenient.
 		self.objectChooseButton = self.value

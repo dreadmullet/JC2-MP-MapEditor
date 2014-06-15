@@ -151,10 +151,10 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		if tableIndex then
 			control:SetText(tostring(propertyProprietor.value[tableIndex]))
 			control:SetDataNumber("tableIndex" , tableIndex)
-			control:Subscribe("ReturnPressed" , self , self.TableNumberChanged)
+			control:Subscribe("Blur" , self , self.TableNumberChanged)
 		else
 			control:SetText(tostring(propertyProprietor.value))
-			control:Subscribe("ReturnPressed" , self , self.NumberChanged)
+			control:Subscribe("Blur" , self , self.NumberChanged)
 		end
 		
 		table.insert(self.controls , control)
@@ -170,10 +170,10 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		if tableIndex then
 			textBox:SetText(propertyProprietor.value[tableIndex])
 			textBox:SetDataNumber("tableIndex" , tableIndex)
-			textBox:Subscribe("ReturnPressed" , self , self.TableStringChanged)
+			textBox:Subscribe("Blur" , self , self.TableStringChanged)
 		else
 			textBox:SetText(propertyProprietor.value)
-			textBox:Subscribe("ReturnPressed" , self , self.StringChanged)
+			textBox:Subscribe("Blur" , self , self.StringChanged)
 		end
 		
 		table.insert(self.controls , textBox)
