@@ -2,7 +2,7 @@ class("PropertiesMenu" , MapEditor)
 
 -- Y is relative to height.
 MapEditor.PropertiesMenu.position = Vector2(5 , 0.25)
-MapEditor.PropertiesMenu.size = Vector2(320 , 210)
+MapEditor.PropertiesMenu.size = Vector2(340 , 210)
 
 function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtility.__init(self)
 	self.Destroy = MapEditor.PropertiesMenu.Destroy
@@ -16,6 +16,8 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	-- Value: PropertyProprietor
 	self.propertyProprietors = {}
 	
+	-- These controls are enabled/disabled on SetEnabled, and are also removed when they're removed
+	-- from a table property.
 	self.controls = {}
 	
 	--
@@ -220,20 +222,10 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		local base = BaseWindow.Create(parent)
 		base:SetMargin(Vector2(0 , 0) , Vector2(0 , 4))
 		base:SetDock(GwenPosition.Top)
-		base:SetHeight(self.textSize + 6)
+		base:SetHeight(self.textSize + 8)
 		local header = base
 		
-		local button = Button.Create(base)
-		button:SetDock(GwenPosition.Left)
-		button:SetTextSize(self.textSize)
-		button:SetText("-")
-		button:SetWidth(26)
-		button:SetDataObject("propertyProprietor" , propertyProprietor)
-		button:Subscribe("Press" , self , self.TableRemoveElement)
-		table.insert(self.controls , button)
-		local buttonRemove = button
-		
-		local button = Button.Create(base)
+		local button = Button.Create(header)
 		button:SetDock(GwenPosition.Left)
 		button:SetTextSize(self.textSize)
 		button:SetText("+")
@@ -243,35 +235,29 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		table.insert(self.controls , button)
 		local buttonAdd = button
 		
-		local label = Label.Create(base)
+		local label = Label.Create(header)
 		label:SetMargin(Vector2(4 , 0) , Vector2(0 , 0))
 		label:SetDock(GwenPosition.Fill)
 		label:SetAlignment(GwenPosition.CenterV)
 		label:SetTextSize(self.textSize)
 		label:SetText(string.format("%i elements" , #propertyProprietor.value))
 		
-		local gwenInfo = {}
-		gwenInfo.label = label
-		gwenInfo.base = parent
-		gwenInfo.propertyControls = {}
-		gwenInfo.editControls = {}
+		local buttonData = {
+			propertyProprietor = propertyProprietor ,
+			label = label ,
+			base = parent ,
+			propertyControls = {} ,
+			editControls = {} ,
+		}
 		
-		buttonRemove:SetDataObject("gwenInfo" , gwenInfo)
-		buttonAdd:SetDataObject("gwenInfo" , gwenInfo)
+		buttonAdd:SetDataObject("buttonData" , buttonData)
 		
-		local height = base:GetHeight() + 4
+		local height = header:GetHeight() + 4
 		
 		for index , value in ipairs(propertyProprietor.value) do
-			local base = BaseWindow.Create(parent)
-			base:SetMargin(Vector2(54 , 2) , Vector2(0 , 2))
-			base:SetDock(GwenPosition.Top)
-			base:SetHeight(0)
-			table.insert(gwenInfo.propertyControls , base)
+			local base = self:AddTableElement(buttonData)
 			
-			local editControl = self:CreateEditControl(propertyProprietor , base , index)
-			table.insert(gwenInfo.editControls , editControl)
-			
-			height = height + base:GetHeight() + 4
+			height = height + base:GetHeight() + 2
 		end
 		
 		parent:SetHeight(parent:GetHeight() + height)
@@ -324,6 +310,39 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 	end
 end
 
+function MapEditor.PropertiesMenu:AddTableElement(buttonData)
+	local propertyProprietor = buttonData.propertyProprietor
+	
+	local base = BaseWindow.Create(buttonData.base)
+	base:SetMargin(Vector2(0 , 1) , Vector2(0 , 1))
+	base:SetDock(GwenPosition.Top)
+	base:SetHeight(0)
+	table.insert(buttonData.propertyControls , base)
+	
+	-- Remove button
+	local button = Button.Create(base)
+	button:SetMargin(Vector2(0 , 0) , Vector2(8 , 2))
+	button:SetDock(GwenPosition.Left)
+	button:SetTextSize(self.textSize)
+	button:SetTextNormalColor(Color(220 , 50 , 50))
+	button:SetTextPressedColor(Color(150 , 40 , 40))
+	button:SetTextHoveredColor(Color(255 , 70 , 70))
+	button:SetText("x")
+	button:SetWidth(26)
+	button:SetDataObject("propertyProprietor" , propertyProprietor)
+	button:SetDataObject("buttonData" , buttonData)
+	button:Subscribe("Press" , self , self.TableRemoveElement)
+	table.insert(self.controls , button)
+	
+	local index = #buttonData.editControls + 1
+	local editControl = self:CreateEditControl(propertyProprietor , base , index)
+	table.insert(buttonData.editControls , editControl)
+	
+	base:SetHeight(base:GetHeight() - 2)
+	
+	return base
+end
+
 function MapEditor.PropertiesMenu:Destroy()
 	self.window:Remove()
 	
@@ -367,50 +386,48 @@ end
 
 function MapEditor.PropertiesMenu:TableRemoveElement(button)
 	local propertyProprietor = button:GetDataObject("propertyProprietor")
-	local gwenInfo = button:GetDataObject("gwenInfo")
+	local buttonData = button:GetDataObject("buttonData")
 	
-	local propertyCount = #propertyProprietor.value
-	
-	if propertyCount == 0 then
-		return
+	-- This index calculation is kind of janky: it iterates through the GWEN hierarchy.
+	local index = -2
+	local parent = button:GetParent()
+	for n , control in ipairs(buttonData.base:GetChildren()) do
+		index = index + 1
+		if control == parent then
+			break
+		end
 	end
 	
-	propertyProprietor:RemoveTableValue(propertyCount)
+	propertyProprietor:RemoveTableValue(index)
 	
-	gwenInfo.label:SetText(string.format("%i elements" , propertyCount - 1))
+	buttonData.label:SetText(string.format("%i elements" , #propertyProprietor.value))
 	
-	local editControl = gwenInfo.editControls[propertyCount]
+	local editControl = buttonData.editControls[index]
 	table.remove(self.controls , table.find(self.controls , editControl))
-	table.remove(gwenInfo.editControls , propertyCount)
+	table.remove(self.controls , table.find(self.controls , button))
+	table.remove(buttonData.editControls , index)
 	
-	local propertyControl = gwenInfo.propertyControls[propertyCount]
+	local propertyControl = buttonData.propertyControls[index]
 	propertyControl:Hide()
 	propertyControl:Remove()
-	table.remove(gwenInfo.propertyControls , propertyCount)
+	table.remove(buttonData.propertyControls , index)
 	
-	gwenInfo.base:SetHeight(0)
-	gwenInfo.base:SizeToChildren(false , true)
+	buttonData.base:SetHeight(0)
+	buttonData.base:SizeToChildren(false , true)
 end
 
 function MapEditor.PropertiesMenu:TableAddElement(button)
 	local propertyProprietor = button:GetDataObject("propertyProprietor")
-	local gwenInfo = button:GetDataObject("gwenInfo")
+	local buttonData = button:GetDataObject("buttonData")
 	
 	propertyProprietor:AddTableValue()
 	
-	gwenInfo.label:SetText(string.format("%i elements" , #propertyProprietor.value))
+	buttonData.label:SetText(string.format("%i elements" , #propertyProprietor.value))
 	
-	local base = BaseWindow.Create(gwenInfo.base)
-	base:SetMargin(Vector2(54 , 2) , Vector2(0 , 2))
-	base:SetDock(GwenPosition.Top)
-	base:SetHeight(0)
-	table.insert(gwenInfo.propertyControls , base)
+	self:AddTableElement(buttonData)
 	
-	local editControl = self:CreateEditControl(propertyProprietor , base , #propertyProprietor.value)
-	table.insert(gwenInfo.editControls , editControl)
-	
-	gwenInfo.base:SetHeight(0)
-	gwenInfo.base:SizeToChildren(false , true)
+	buttonData.base:SetHeight(0)
+	buttonData.base:SizeToChildren(false , true)
 end
 
 function MapEditor.PropertiesMenu:ObjectChoose(button)
