@@ -294,6 +294,30 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		table.insert(self.controls , button)
 		
 		return button
+	elseif propertyType == "Color" then
+		parent:SetHeight(parent:GetHeight() + self.textSize + 8)
+		
+		local rectangle = Rectangle.Create(parent)
+		rectangle:SetDock(GwenPosition.Fill)
+		
+		-- This is an invisible button that is the size of the colored rectangle.
+		local button = LabelClickable.Create(rectangle)
+		button:SetDock(GwenPosition.Fill)
+		button:SetDataObject("propertyProprietor" , propertyProprietor)
+		table.insert(self.controls , button)
+		
+		if tableIndex then
+			rectangle:SetColor(propertyProprietor.value[tableIndex])
+			
+			button:SetDataNumber("tableIndex" , tableIndex)
+			button:Subscribe("Press" , self , self.TableColorChoose)
+		else
+			rectangle:SetColor(propertyProprietor.value)
+			
+			button:Subscribe("Press" , self , self.ColorChoose)
+		end
+		
+		return rectangle
 	else
 		-- Fall back to just an "(unsupported)" label.
 		local label = Label.Create(parent)
@@ -447,6 +471,27 @@ function MapEditor.PropertiesMenu:TableObjectChoose(button)
 		index = tableIndex ,
 		tableActionType = "Set" ,
 		objectChooseButton = button ,
+	}
+	MapEditor.map:SetAction(Actions.PropertyChange , args)
+end
+
+function MapEditor.PropertiesMenu:ColorChoose(button)
+	local propertyProprietor = button:GetDataObject("propertyProprietor")
+	local args = {
+		propertyProprietor = propertyProprietor ,
+		rectangle = button:GetParent() ,
+	}
+	MapEditor.map:SetAction(Actions.PropertyChange , args)
+end
+
+function MapEditor.PropertiesMenu:TableColorChoose(button)
+	local propertyProprietor = button:GetDataObject("propertyProprietor")
+	local tableIndex = button:GetDataNumber("tableIndex")
+	local args = {
+		propertyProprietor = propertyProprietor ,
+		index = tableIndex ,
+		tableActionType = "Set" ,
+		rectangle = button:GetParent() ,
 	}
 	MapEditor.map:SetAction(Actions.PropertyChange , args)
 end

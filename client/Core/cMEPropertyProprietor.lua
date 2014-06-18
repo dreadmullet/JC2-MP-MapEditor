@@ -122,8 +122,8 @@ function MapEditor.PropertyProprietor:SetValue(value)
 	
 	self.value = value
 	
-	-- If our type is an Object, this is already taken care of (in PropertiesMenu).
-	if self.isObject == false then
+	-- Some types are already taken care of (in PropertiesMenu).
+	if not (self.isObject or self.type == "Color") then
 		local args = {
 			propertyProprietor = self ,
 			value = value ,

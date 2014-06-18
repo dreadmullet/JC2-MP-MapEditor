@@ -12,6 +12,8 @@ MapEditor.Property.GetDefaultValue = function(type)
 		return false
 	elseif type == "table" then
 		return {}
+	elseif type == "Color" then
+		return Color(255 , 255 , 255)
 	elseif Objects[type] ~= nil then
 		return MapEditor.Property.NoObject
 	end

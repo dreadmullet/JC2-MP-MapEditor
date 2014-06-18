@@ -29,9 +29,10 @@ function Actions.PropertyChange:__init(args)
 		self.oldButtonText = self.objectChooseButton:GetText()
 		
 		MapEditor.ObjectChooser(self.type , self.ObjectChosen , self)
-	-- elseif self.type == "Color" then
-		-- Events:Fire("SetMenusEnabled" , false)
-		-- MapEditor.ColorChooser(self.type , self.ColorChosen , self)
+	elseif self.type == "Color" then
+		Events:Fire("SetMenusEnabled" , false)
+		self.rectangle = args.rectangle
+		MapEditor.ColorChooser(self.rectangle , self.ColorChosen , self)
 	else
 		self:Apply()
 		self:Confirm()
@@ -135,6 +136,39 @@ function Actions.PropertyChange:ObjectChosen(object)
 		
 		Events:Fire("SetMenusEnabled" , true)
 	else
+		Cancel()
+	end
+end
+
+function Actions.PropertyChange:ColorChosen(color)
+	local Cancel = function()
+		self:UnsubscribeAll()
+		self:Cancel()
+		
+		Events:Fire("SetMenusEnabled" , true)
+	end
+	
+	if color then
+		-- Make sure it's different to the previous color.
+		local changed
+		if self.index then
+			changed = self.propertyProprietor:SetTableValue(self.index , color)
+		else
+			changed = self.propertyProprietor:SetValue(color)
+		end
+		if changed == false then
+			Cancel()
+		end
+		
+		self.value = color
+		self:Apply()
+		
+		self:UnsubscribeAll()
+		self:Confirm()
+		
+		Events:Fire("SetMenusEnabled" , true)
+	else
+		self.rectangle:SetColor(self.propertyProprietor.value)
 		Cancel()
 	end
 end
