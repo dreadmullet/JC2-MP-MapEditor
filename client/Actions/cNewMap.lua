@@ -1,16 +1,11 @@
 class("NewMap" , Actions)
 
-function Actions.NewMap:__init()
-	EGUSM.SubscribeUtility.__init(self)
-	MapEditor.Action.__init(self)
-	
+function Actions.NewMap:__init() ; MapEditor.Action.__init(self)
 	self.Destroy = Actions.NewMap.Destroy
 	
 	self:CreateWindow()
 	
 	Mouse:SetVisible(true)
-	
-	self:EventSubscribe("LocalPlayerInput")
 end
 
 function Actions.NewMap:CreateWindow()
@@ -31,7 +26,12 @@ function Actions.NewMap:CreateWindow()
 	label:SetText("Select a map type")
 	label:SizeToContents()
 	
+	local mapTypes = {}
 	for mapType , unused in pairs(MapTypes) do
+		table.insert(mapTypes , mapType)
+	end
+	table.sort(mapTypes)
+	for index , mapType in ipairs(mapTypes) do
 		local button = Button.Create(self.window)
 		button:SetPadding(Vector2(8 , 5) , Vector2(8 , 5))
 		button:SetMargin(Vector2(0 , 1) , Vector2(0 , 1))
@@ -50,7 +50,6 @@ function Actions.NewMap:Destroy()
 	
 	Mouse:SetVisible(false)
 	
-	self:UnsubscribeAll()
 	self.window:Remove()
 end
 
@@ -70,10 +69,4 @@ function Actions.NewMap:ButtonPressed(button)
 	MapEditor.Map(Vector3(-6550 , 215 , -3290) , mapType)
 	
 	self:Destroy()
-end
-
--- Events
-
-function Actions.NewMap:LocalPlayerInput()
-	return false
 end
