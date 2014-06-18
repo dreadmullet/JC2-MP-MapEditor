@@ -1,10 +1,14 @@
+-- Helps with adding undo/redo to property changes and also handles advanced things like choosing
+-- an Object or Color.
+
 class("PropertyChange" , Actions)
 
 function Actions.PropertyChange:__init(args)
 	EGUSM.SubscribeUtility.__init(self)
 	MapEditor.Action.__init(self)
 	
-	self.properties = args.properties
+	self.propertyProprietor = args.propertyProprietor
+	self.properties = self.propertyProprietor.properties
 	self.value = args.value
 	self.index = args.index
 	self.tableActionType = args.tableActionType
@@ -21,14 +25,13 @@ function Actions.PropertyChange:__init(args)
 	local isObjectClass = Objects[self.type] ~= nil
 	if isObjectClass and self.tableActionType ~= "Add" and self.tableActionType ~= "Remove" then
 		Events:Fire("SetMenusEnabled" , false)
-		-- Reusing self.value like this is questionable but makes it really convenient.
-		self.objectChooseButton = self.value
-		self.value = nil
-		
+		self.objectChooseButton = args.objectChooseButton
 		self.oldButtonText = self.objectChooseButton:GetText()
 		
-		self:EventSubscribe("Render")
-		self:EventSubscribe("MouseUp")
+		MapEditor.ObjectChooser(self.type , self.ObjectChosen , self)
+	-- elseif self.type == "Color" then
+		-- Events:Fire("SetMenusEnabled" , false)
+		-- MapEditor.ColorChooser(self.type , self.ColorChosen , self)
 	else
 		self:Apply()
 		self:Confirm()
@@ -39,16 +42,16 @@ function Actions.PropertyChange:Apply()
 	for index , property in ipairs(self.properties) do
 		if property.type == "table" then
 			if self.tableActionType == "Set" then
-				self.previousValues[index] = property.value[self.index]
+				self.previousValues[index] = self:Copy(property.value[self.index])
 				property.value[self.index] = self.value
 			elseif self.tableActionType == "Remove" then
-				self.previousValues[index] = property.value[self.index]
+				self.previousValues[index] = self:Copy(property.value[self.index])
 				table.remove(property.value , self.index)
 			elseif self.tableActionType == "Add" then
 				table.insert(property.value , property.defaultElement)
 			end
 		else
-			self.previousValues[index] = property.value
+			self.previousValues[index] = self:Copy(property.value)
 			property.value = self.value
 		end
 	end
@@ -56,17 +59,16 @@ end
 
 function Actions.PropertyChange:Undo()
 	for index , property in ipairs(self.properties) do
-		
 		if property.type == "table" then
 			if self.tableActionType == "Set" then
-				property.value[self.index] = self.previousValues[index]
+				property.value[self.index] = self:Copy(self.previousValues[index])
 			elseif self.tableActionType == "Remove" then
-				table.insert(property.value , self.index , self.previousValues[index])
+				table.insert(property.value , self.index , self:Copy(self.previousValues[index]))
 			elseif self.tableActionType == "Add" then
 				table.remove(property.value , #property.value)
 			end
 		else
-			property.value = self.previousValues[index]
+			property.value = self:Copy(self.previousValues[index])
 		end
 	end
 	
@@ -74,6 +76,7 @@ function Actions.PropertyChange:Undo()
 		self.objectChooseButton:SetText(self.oldButtonText)
 	end
 	
+	-- TODO: Rename this to UpdatePropertiesMenu or something
 	MapEditor.map:SelectionChanged()
 end
 
@@ -87,52 +90,51 @@ function Actions.PropertyChange:Redo()
 	MapEditor.map:SelectionChanged()
 end
 
--- Events
-
-function Actions.PropertyChange:Render()
-	-- Draw a simple cursor thing on the mouse.
-	local mousePos = Mouse:GetPosition()
-	local size = 60
-	Render:DrawLine(
-		mousePos + Vector2(-size , 0) ,
-		mousePos + Vector2(size , 0) ,
-		Color(127 , 127 , 127 , 127)
-	)
-	Render:DrawLine(
-		mousePos + Vector2(0 , -size) ,
-		mousePos + Vector2(0 , size) ,
-		Color(127 , 127 , 127 , 127)
-	)
+-- Calls Copy unless our type is an Object.
+function Actions.PropertyChange:Copy(value)
+	if Objects[self.type] then
+		return value
+	else
+		return Copy(value) or value
+	end
 end
 
-function Actions.PropertyChange:MouseUp(args)
-	if args.button == 1 then
-		local object = MapEditor.map:GetObjectFromScreenPoint(Mouse:GetPosition())
-		if object and class_info(object).name == self.type then
-			self.value = object
-			self:Apply()
-			
-			self.newButtonText = string.format("Object: %s (id: %i)" , self.type , object:GetId())
-			self.objectChooseButton:SetText(self.newButtonText)
-			
-			self:UnsubscribeAll()
-			self:Confirm()
-		else
-			self.value = MapEditor.Property.NoObject
-			self:Apply()
-			
-			self.newButtonText = string.format("Object: (None)")
-			self.objectChooseButton:SetText(self.newButtonText)
-			
-			self:UnsubscribeAll()
-			self:Confirm()
-		end
-		
-		Events:Fire("SetMenusEnabled" , true)
-	elseif args.button == 2 then
+function Actions.PropertyChange:ObjectChosen(object)
+	local Cancel = function()
 		self:UnsubscribeAll()
 		self:Cancel()
 		
 		Events:Fire("SetMenusEnabled" , true)
+	end
+	
+	-- Make sure we chose an object.
+	if object then
+		-- Make sure it's different to the previous object.
+		local changed
+		if self.index then
+			changed = self.propertyProprietor:SetTableValue(self.index , object)
+		else
+			changed = self.propertyProprietor:SetValue(object)
+		end
+		if changed == false then
+			Cancel()
+		end
+		
+		self.value = object
+		self:Apply()
+		
+		self:UnsubscribeAll()
+		self:Confirm()
+		
+		if object ~= MapEditor.Property.NoObject then
+			self.newButtonText = string.format("Object: %s (id: %i)" , self.type , object:GetId())
+		else
+			self.newButtonText = string.format("Object: (None)")
+		end
+		self.objectChooseButton:SetText(self.newButtonText)
+		
+		Events:Fire("SetMenusEnabled" , true)
+	else
+		Cancel()
 	end
 end

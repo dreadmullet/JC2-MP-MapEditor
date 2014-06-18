@@ -432,13 +432,23 @@ end
 
 function MapEditor.PropertiesMenu:ObjectChoose(button)
 	local propertyProprietor = button:GetDataObject("propertyProprietor")
-	propertyProprietor:SetValue(button)
+	local args = {
+		propertyProprietor = propertyProprietor ,
+		objectChooseButton = button ,
+	}
+	MapEditor.map:SetAction(Actions.PropertyChange , args)
 end
 
 function MapEditor.PropertiesMenu:TableObjectChoose(button)
 	local propertyProprietor = button:GetDataObject("propertyProprietor")
 	local tableIndex = button:GetDataNumber("tableIndex")
-	propertyProprietor:SetTableValue(tableIndex , button)
+	local args = {
+		propertyProprietor = propertyProprietor ,
+		index = tableIndex ,
+		tableActionType = "Set" ,
+		objectChooseButton = button ,
+	}
+	MapEditor.map:SetAction(Actions.PropertyChange , args)
 end
 
 -- Events

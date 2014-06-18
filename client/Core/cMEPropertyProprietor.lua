@@ -32,11 +32,16 @@ function MapEditor.PropertyProprietor:__init(properties)
 				commonValue = property.value
 			else
 				-- Comparing class instances causes an error :|
-				if self.isObject and commonValue ~= MapEditor.Property.NoObject then
-					if
-						property.value ~= MapEditor.Property.NoObject and
-						property.value:GetId() ~= commonValue:GetId()
-					then
+				if self.isObject then
+					local id , commonId = -1 , -1
+					if commonValue ~= MapEditor.Property.NoObject then
+						commonId = commonValue:GetId()
+					end
+					if property.value ~= MapEditor.Property.NoObject then
+						id = property.value:GetId()
+					end
+					
+					if id ~= commonId then
 						commonValue = nil
 						break
 					end
@@ -53,12 +58,18 @@ function MapEditor.PropertyProprietor:__init(properties)
 	if commonValue ~= nil then
 		self.hasCommonValue = true
 		if self.type == "table" then
+			-- Deep copy the table, don't use a reference. Will Copy even work here? I think there's a
+			-- reason I didn't use it here. Oh well, I trust my past self. He seems like a cool guy. He
+			-- did write this entire script, after all.
 			self.value = {}
 			for index , value in ipairs(commonValue) do
 				table.insert(self.value , value)
 			end
-		else
+		elseif Objects[self.type] then
 			self.value = commonValue
+		else
+			-- If commonValue is a Color or something, we don't want to use the reference.
+			self.value = Copy(commonValue) or commonValue
 		end
 	else
 		if self.type == "table" then
@@ -99,49 +110,59 @@ end
 
 function MapEditor.PropertyProprietor:SetValue(value)
 	-- Don't do anything if nothing changed.
-	if self.value == value then
-		return
+	if self.isObject then
+		if MapEditor.Object.Compare(self.value , value) then
+			return false
+		end
+	else
+		if self.value == value then
+			return false
+		end
 	end
 	
-	local args = {
-		properties = self.properties ,
-		value = value ,
-	}
-	MapEditor.map:SetAction(Actions.PropertyChange , args)
+	self.value = value
 	
-	-- Object selection begins now, and value is the object button for some reason.
+	-- If our type is an Object, this is already taken care of (in PropertiesMenu).
 	if self.isObject == false then
-		self.value = value
+		local args = {
+			propertyProprietor = self ,
+			value = value ,
+		}
+		MapEditor.map:SetAction(Actions.PropertyChange , args)
 	end
+	
+	return true
 end
 
 function MapEditor.PropertyProprietor:SetTableValue(index , value)
 	-- Don't do anything if nothing changed.
 	if self.value[index] == value then
-		return
+		return false
 	end
 	
 	self:SyncTables()
 	
-	local args = {
-		properties = self.properties ,
-		value = value ,
-		index = index ,
-		tableActionType = "Set" ,
-	}
-	MapEditor.map:SetAction(Actions.PropertyChange , args)
+	self.value[index] = value
 	
-	-- Object selection begins now, and value is the object button for some reason.
+	-- If our type is an Object, this is already taken care of (in PropertiesMenu).
 	if self.isObject == false then
-		self.value[index] = value
+		local args = {
+			propertyProprietor = self ,
+			value = value ,
+			index = index ,
+			tableActionType = "Set" ,
+		}
+		MapEditor.map:SetAction(Actions.PropertyChange , args)
 	end
+	
+	return true
 end
 
 function MapEditor.PropertyProprietor:RemoveTableValue(index)
 	self:SyncTables()
 	
 	local args = {
-		properties = self.properties ,
+		propertyProprietor = self ,
 		index = index ,
 		tableActionType = "Remove" ,
 	}
@@ -154,7 +175,7 @@ function MapEditor.PropertyProprietor:AddTableValue()
 	self:SyncTables()
 	
 	local args = {
-		properties = self.properties ,
+		propertyProprietor = self ,
 		tableActionType = "Add" ,
 	}
 	MapEditor.map:SetAction(Actions.PropertyChange , args)
@@ -162,6 +183,8 @@ function MapEditor.PropertyProprietor:AddTableValue()
 	table.insert(self.value , self.defaultElement)
 end
 
+-- This edits all of our properties to have the same values.
+-- Uhh, wouldn't this result in all properties either not changing or becoming an empty table?
 function MapEditor.PropertyProprietor:SyncTables()
 	for index , property in ipairs(self.properties) do
 		if self:CompareTables(self.value , property.value) == false then

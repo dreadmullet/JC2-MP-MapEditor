@@ -22,8 +22,25 @@ MapEditor.Object.Unmarshal = function(o)
 	object.id = o.id
 	
 	-- Properties must be done after this, which is annoying.
+	-- What was this comment for again
 	
 	return object
+end
+
+MapEditor.Object.Compare = function(o1 , o2)
+	if o1 == MapEditor.Property.NoObject then
+		if o2 == MapEditor.Property.NoObject then
+			return true
+		else
+			return false
+		end
+	else
+		if o2 == MapEditor.Property.NoObject then
+			return false
+		else
+			return o1:GetId() == o2:GetId()
+		end
+	end
 end
 
 -- Instance
