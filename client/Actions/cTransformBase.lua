@@ -26,11 +26,6 @@ function Actions.TransformBase:__init()
 		}
 	end)
 	
-	if table.count(self.objects) == 0 then
-		self:Cancel()
-		return
-	end
-	
 	self.pivot = self:GetAverageObjectPosition()
 	self.lockedAxis = nil
 	self.isLocal = false
@@ -86,11 +81,19 @@ end
 
 function Actions.TransformBase:OnConfirmOrCancel()
 	self.controlDisplayer:Destroy()
+	self:UnsubscribeAll()
 end
 
 -- Events
 
 function Actions.TransformBase:Render()
+	-- This is here instead of the constructor because of annoying ordering issues (Move's
+	-- constructor will be ran after our constructor.)
+	if table.count(self.objects) == 0 then
+		self:Cancel()
+		return
+	end
+	
 	self.mouse.delta = Mouse:GetPosition() - self.mouse.start
 	
 	if self.OnRender then
@@ -107,11 +110,9 @@ end
 
 function Actions.TransformBase:ControlUp(args)
 	if args.name == "Done" then
-		self:UnsubscribeAll()
 		self:Confirm()
 	elseif args.name == "Cancel" then
 		self:Undo()
-		self:UnsubscribeAll()
 		self:Cancel()
 	end
 end
