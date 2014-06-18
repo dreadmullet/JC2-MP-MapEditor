@@ -20,6 +20,7 @@ MapEditor.Property.GetDefaultValue = function(type)
 end
 
 function MapEditor.Property:__init(args)
+	self.propertyManager = args.propertyManager
 	self.name = args.name
 	self.type = args.type
 	self.subtype = args.subtype

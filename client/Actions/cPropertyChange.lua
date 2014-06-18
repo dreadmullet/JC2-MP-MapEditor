@@ -41,6 +41,11 @@ end
 
 function Actions.PropertyChange:Apply()
 	for index , property in ipairs(self.properties) do
+		local propertyChangeArgs = {
+			name = property.name ,
+			newValue = self.value ,
+		}
+		
 		if property.type == "table" then
 			if self.tableActionType == "Set" then
 				self.previousValues[index] = self:Copy(property.value[self.index])
@@ -54,6 +59,10 @@ function Actions.PropertyChange:Apply()
 		else
 			self.previousValues[index] = self:Copy(property.value)
 			property.value = self.value
+		end
+		
+		if property.propertyManager.OnPropertyChange then
+			property.propertyManager:OnPropertyChange(propertyChangeArgs)
 		end
 	end
 end
@@ -70,6 +79,10 @@ function Actions.PropertyChange:Undo()
 			end
 		else
 			property.value = self:Copy(self.previousValues[index])
+		end
+		
+		if property.propertyManager.OnPropertyChange then
+			property.propertyManager:OnPropertyChange(propertyChangeArgs)
 		end
 	end
 	

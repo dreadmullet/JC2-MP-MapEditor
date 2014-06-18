@@ -15,28 +15,9 @@ function MapEditor.PropertyManager:__init()
 end
 
 function MapEditor.PropertyManager:AddProperty(args)
+	args.propertyManager = self
 	local property = MapEditor.Property(args)
 	self.properties[property.name] = property
-end
-
-function MapEditor.PropertyManager:SetProperty(name , value)
-	local property = self.properties[name]
-	if property == nil then
-		error("Property doesn't exist: "..tostring(name))
-		return
-	end
-	
-	local oldValue = property.value
-	property.value = value
-	
-	if self.OnPropertyChange then
-		local args = {
-			name = property.name ,
-			newValue = property.value ,
-			oldValue = oldValue ,
-		}
-		self:OnPropertyChange(args)
-	end
 end
 
 function MapEditor.PropertyManager:GetProperty(propertyName)
