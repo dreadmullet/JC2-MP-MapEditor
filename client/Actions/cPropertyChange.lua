@@ -69,6 +69,11 @@ end
 
 function Actions.PropertyChange:Undo()
 	for index , property in ipairs(self.properties) do
+		local propertyChangeArgs = {
+			name = property.name ,
+			newValue = self.previousValues[index] ,
+		}
+		
 		if property.type == "table" then
 			if self.tableActionType == "Set" then
 				property.value[self.index] = self:Copy(self.previousValues[index])
