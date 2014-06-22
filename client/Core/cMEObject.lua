@@ -7,6 +7,7 @@ MapEditor.Object.memberNames = {
 	"type" ,
 	"position" ,
 	"angle" ,
+	"isClientSide" ,
 }
 
 MapEditor.Object.Unmarshal = function(o)
@@ -21,8 +22,7 @@ MapEditor.Object.Unmarshal = function(o)
 	local object = objectClass(position , angle)
 	object.id = o.id
 	
-	-- Properties must be done after this, which is annoying.
-	-- What was this comment for again
+	-- Properties are done in PropertyManager.Unmarshal later on.
 	
 	return object
 end
@@ -65,6 +65,7 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	self.type = class_info(self).name
 	self.position = initialPosition or Vector3(0 , 208 , 0)
 	self.angle = initialAngle or Angle(0 , 0 , 0)
+	self.isClientSide = false
 	
 	self.isSelected = false
 	self.cursor = MapEditor.Cursor(self.position)

@@ -3,12 +3,17 @@ class("SpawnMenu" , MapEditor)
 function MapEditor.SpawnMenu:__init() ; EGUSM.SubscribeUtility.__init(self)
 	self.Destroy = MapEditor.SpawnMenu.Destroy
 	
-	-- Take all class names in the Objects namespace and add them to self.objectNames.
+	-- Get self.objectNames from the current map's type's objects list, and also all generic objects.
 	self.objectNames = {}
-	for key , value in pairs(Objects) do
-		table.insert(self.objectNames , tostring(key))
+	for index , objectName in ipairs(MapTypes[MapEditor.map.type].objects) do
+		table.insert(self.objectNames , objectName)
 	end
 	table.sort(self.objectNames)
+	if MapEditor.map.type ~= "Generic" then
+		for index , objectName in ipairs(MapTypes.Generic.objects) do
+			table.insert(self.objectNames , objectName)
+		end
+	end
 	
 	self:CreateWindow()
 	
