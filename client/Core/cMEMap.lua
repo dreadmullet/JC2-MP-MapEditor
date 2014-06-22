@@ -77,12 +77,15 @@ function MapEditor.Map:SetEnabled(enabled)
 	if MapEditor.preferencesMenu:GetVisible() then
 		MapEditor.preferencesMenu:SetVisible(enabled)
 	end
+	
+	for name , controlDisplayer in pairs(self.controlDisplayers) do
+		controlDisplayer:SetVisible(enabled)
+	end
+	
 	if self.propertiesMenu then
 		self.propertiesMenu:Destroy()
 		self.propertiesMenu = nil
 	end
-	self.controlDisplayers.selection:SetVisible(enabled)
-	self.controlDisplayers.actions:SetVisible(enabled)
 	
 	Mouse:SetVisible(enabled)
 	
@@ -108,11 +111,14 @@ function MapEditor.Map:Destroy()
 	self.camera:Destroy()
 	
 	self.spawnMenu:Destroy()
+	
+	for name , controlDisplayer in pairs(self.controlDisplayers) do
+		controlDisplayer:Destroy()
+	end
+	
 	if self.propertiesMenu then
 		self.propertiesMenu:Destroy()
 	end
-	self.controlDisplayers.selection:Destroy()
-	self.controlDisplayers.actions:Destroy()
 	
 	self:IterateObjects(function(object)
 		object:Destroy()
@@ -149,15 +155,19 @@ function MapEditor.Map:SetAction(actionClass , ...)
 		self.currentAction = nil
 	else
 		Events:Fire("SetMenusEnabled" , false)
-		self.controlDisplayers.selection:SetVisible(false)
-		self.controlDisplayers.actions:SetVisible(false)
+		
+		for name , controlDisplayer in pairs(self.controlDisplayers) do
+			controlDisplayer:SetVisible(false)
+		end
 	end
 end
 
 function MapEditor.Map:ActionFinish()
 	Events:Fire("SetMenusEnabled" , true)
-	self.controlDisplayers.selection:SetVisible(true)
-	self.controlDisplayers.actions:SetVisible(true)
+	
+	for name , controlDisplayer in pairs(self.controlDisplayers) do
+		controlDisplayer:SetVisible(true)
+	end
 	
 	table.insert(self.undoableActions , self.currentAction)
 	self.redoableActions = {}
@@ -167,8 +177,10 @@ end
 
 function MapEditor.Map:ActionCancel()
 	Events:Fire("SetMenusEnabled" , true)
-	self.controlDisplayers.selection:SetVisible(true)
-	self.controlDisplayers.actions:SetVisible(true)
+	
+	for name , controlDisplayer in pairs(self.controlDisplayers) do
+		controlDisplayer:SetVisible(true)
+	end
 	
 	self.currentAction = nil
 end

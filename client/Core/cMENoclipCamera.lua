@@ -20,15 +20,16 @@ function MapEditor.NoclipCamera:__init(position , angle) ; EGUSM.SubscribeUtilit
 	
 	self.deltaTimer = Timer()
 	
-	self.controlDisplayer = MapEditor.ControlDisplayer{
+	local controlDisplayer = MapEditor.ControlDisplayer{
 		name = "Camera" ,
 		linesFromBottom = 2 ,
 	}
-	self.controlDisplayer:AddControl("Noclip camera: Toggle" , "Toggle")
-	self.controlDisplayer:AddControl("Mouse wheel up" , "Increase speed")
-	self.controlDisplayer:AddControl("Mouse wheel down" , "Decrease speed")
-	self.controlDisplayer:AddControl("Noclip camera: Up" , "Move up")
-	self.controlDisplayer:AddControl("Noclip camera: Down" , "Move down")
+	controlDisplayer:AddControl("Noclip camera: Toggle" , "Toggle")
+	controlDisplayer:AddControl("Mouse wheel up" , "Increase speed")
+	controlDisplayer:AddControl("Mouse wheel down" , "Decrease speed")
+	controlDisplayer:AddControl("Noclip camera: Up" , "Move up")
+	controlDisplayer:AddControl("Noclip camera: Down" , "Move down")
+	MapEditor.map.controlDisplayers.camera = controlDisplayer
 	
 	self:EventSubscribe("ControlHeld")
 	self:EventSubscribe("ControlDown")
@@ -37,7 +38,7 @@ function MapEditor.NoclipCamera:__init(position , angle) ; EGUSM.SubscribeUtilit
 end
 
 function MapEditor.NoclipCamera:Destroy()
-	self.controlDisplayer:Destroy()
+	MapEditor.map.controlDisplayers.camera:Destroy()
 	
 	self:UnsubscribeAll()
 end
@@ -134,7 +135,7 @@ function MapEditor.NoclipCamera:CalcView()
 end
 
 function MapEditor.NoclipCamera:PostTick()
-	self.controlDisplayer:SetVisible(MapEditor.map.currentAction == nil)
+	-- MapEditor.map.controlDisplayers.camera:SetVisible(MapEditor.map.currentAction == nil)
 	
 	if self.isEnabled == false then
 		return
