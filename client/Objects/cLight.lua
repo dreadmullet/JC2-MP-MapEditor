@@ -34,14 +34,9 @@ function Objects.Light:__init(...) ; MapEditor.Object.__init(self , ...)
 		default = 1 ,
 	}
 	
-	self:UpdateBounds()
+	self.selectionStrategy = {type = "Icon" , icon = Icons.Light}
 	
 	self:OnRecreate()
-end
-
-function Objects.Light:UpdateBounds()
-	local radius = self:GetProperty("radius").value
-	self.bounds = {Vector3.One * -radius , Vector3.One * radius}
 end
 
 function Objects.Light:OnRecreate()
@@ -74,9 +69,4 @@ function Objects.Light:OnPropertyChange(args)
 		attenuationLinear = "SetLinearAttenuation" ,
 		attenuationQuadratic = "SetQuadraticAttenuation" ,
 	})[args.name]](self.light , args.newValue)
-	
-	-- ClientLights only seem to update when their transform changes.
-	self.light:SetPosition(self.position)
-	
-	self:UpdateBounds()
 end

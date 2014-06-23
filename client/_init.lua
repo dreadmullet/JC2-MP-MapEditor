@@ -1,3 +1,9 @@
+MapEditor = {}
+Objects = {}
+Actions = {}
+MapTypes = {}
+Icons = {}
+
 Events:Subscribe("ModuleLoad" , function()
 	Controls.Add("Select" ,                      "Mouse1")
 	Controls.Add("Deselect" ,                    "Mouse2")
@@ -22,6 +28,14 @@ Events:Subscribe("ModuleLoad" , function()
 	
 	Controls.Add("Mouse wheel up" ,              "Mouse wheel up")
 	Controls.Add("Mouse wheel down" ,            "Mouse wheel down")
+	
+	MapEditor.iconModel = Model.Create{
+		Vertex(Vector3(-1 , 0 , 1) , Vector2(0 , 0)) ,
+		Vertex(Vector3(1 , 0 , 1) , Vector2(1 , 0)) ,
+		Vertex(Vector3(-1 , 0 , -1) , Vector2(0 , 1)) ,
+		Vertex(Vector3(1 , 0 , -1) , Vector2(1 , 1)) ,
+	}
+	MapEditor.iconModel:SetTopology(Topology.TriangleStrip)
 	
 	MapEditor.MapMenu()
 	MapEditor.PreferencesMenu()

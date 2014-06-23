@@ -43,7 +43,7 @@ function Actions.SelectBase:ControlUp(args)
 			local hasObjects = false
 			local screenPos , isOnScreen
 			MapEditor.map:IterateObjects(function(object)
-				local screenPoints = object:GetBoundingBoxScreenPoints()
+				local screenPoints = object:GetScreenPoints()
 				
 				for index , screenPoint in ipairs(screenPoints) do
 					if

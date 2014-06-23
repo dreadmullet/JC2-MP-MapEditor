@@ -1,8 +1,8 @@
 MapEditor.Utility = {}
 
-MapEditor.Utility.DrawBounds = function(position , angle , bounds , color)
-	local b1 = bounds[1]
-	local b2 = bounds[2]
+MapEditor.Utility.DrawBounds = function(args)
+	local b1 = args.bounds[1]
+	local b2 = args.bounds[2]
 	local lines = {
 		-- Top square
 		{Vector3(b1.x , b2.y , b1.z) , Vector3(b2.x , b2.y , b1.z)} ,
@@ -22,12 +22,12 @@ MapEditor.Utility.DrawBounds = function(position , angle , bounds , color)
 	}
 	
 	local transform = Transform3()
-	transform:Translate(position)
-	transform:Rotate(angle)
+	transform:Translate(args.position)
+	transform:Rotate(args.angle)
 	Render:SetTransform(transform)
 	
 	for index , line in ipairs(lines) do
-		Render:DrawLine(line[1] , line[2] , color or Color.White)
+		Render:DrawLine(line[1] , line[2] , args.color or Color.White)
 	end
 	
 	Render:ResetTransform()

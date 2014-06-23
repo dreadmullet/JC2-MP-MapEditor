@@ -52,27 +52,7 @@ function MapEditor.ObjectManager:GetObjectFromScreenPoint(screenPointToTest)
 	local nearestObject = nil
 	local nearestObjectDistSquared = nil
 	self:IterateObjects(function(object)
-		local screenPoints = object:GetBoundingBoxScreenPoints()
-		
-		local xMin = 50000
-		local xMax = 0
-		local yMin = 50000
-		local yMax = 0
-		for index , screenPoint in ipairs(screenPoints) do
-			xMin = math.min(xMin , screenPoint.x)
-			xMax = math.max(xMax , screenPoint.x)
-			yMin = math.min(yMin , screenPoint.y)
-			yMax = math.max(yMax , screenPoint.y)
-		end
-		
-		local isWithinBounds = (
-			screenPointToTest.x > xMin and
-			screenPointToTest.x < xMax and
-			screenPointToTest.y > yMin and
-			screenPointToTest.y < yMax
-		)
-		
-		if isWithinBounds then
+		if object:GetIsScreenPointWithin(screenPointToTest) then
 			local distanceSquared = Camera:GetPosition():DistanceSqr(object:GetPosition())
 			
 			if nearestObject == nil or distanceSquared < nearestObjectDistSquared then

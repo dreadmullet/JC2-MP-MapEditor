@@ -1,4 +1,0 @@
-MapEditor = {}
-Objects = {}
-Actions = {}
-MapTypes = {}

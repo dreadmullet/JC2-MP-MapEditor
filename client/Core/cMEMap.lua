@@ -353,28 +353,8 @@ function MapEditor.Map:Render()
 	)
 	
 	self:IterateObjects(function(object)
-		MapEditor.Utility.DrawBounds(
-			object.position ,
-			object.angle ,
-			object.bounds ,
-			Color.White * 0.5
-		)
-		
-		if object.OnRender then
-			object:OnRender()
-		end
-		
-		-- Highlight all selected objects.
-		if self.selectedObjects:HasObject(object) then
-			local boundsEnlarged = {}
-			boundsEnlarged[1] = object.bounds[1] * 1.1
-			boundsEnlarged[2] = object.bounds[2] * 1.1
-			MapEditor.Utility.DrawBounds(
-				object.position ,
-				object.angle ,
-				boundsEnlarged ,
-				Color.LimeGreen * 0.8
-			)
+		if object.Render then
+			object:Render()
 		end
 	end)
 end

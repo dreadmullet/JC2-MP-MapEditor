@@ -23,7 +23,7 @@ function Objects.RaceCheckpoint:__init(...) ; MapEditor.Object.__init(self , ...
 		type = "RaceCheckpoint" ,
 	}
 	
-	self.bounds = {Vector3.One * -6 , Vector3.One * 6}
+	self.selectionStrategy = {type = "Radius" , radius = 10}
 	
 	self.timer = Timer()
 	

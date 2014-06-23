@@ -13,4 +13,6 @@ function Objects.RaceVehicleInfo:__init(...) ; MapEditor.Object.__init(self , ..
 		subtype = "string" ,
 		default = {""} ,
 	}
+	
+	self.selectionStrategy = {type = "Icon" , icon = Icons.VehicleInfo}
 end
