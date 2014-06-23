@@ -54,9 +54,9 @@ function Objects.RaceCheckpoint:OnRender()
 		local position = self:GetPosition()
 		local direction = (nextCheckpoint:GetPosition() - position):Normalized()
 		local distance = Vector3.Distance(nextCheckpoint:GetPosition() , position)
-		local lineLength = 15
-		local lineSpacing = 5
-		local speed = 15
+		local lineLength = 30
+		local lineSpacing = 15
+		local speed = 30
 		local offset = (self.timer:GetSeconds() * speed) % (lineLength + lineSpacing)
 		
 		for n = -lineLength , distance - lineLength , lineLength + lineSpacing do
