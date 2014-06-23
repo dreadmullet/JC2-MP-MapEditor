@@ -37,6 +37,7 @@ end
 
 function Actions.Select:OnNothingChosen()
 	if Controls.Get("Add to selection").state ~= 0 then
+		self:Cancel()
 		return
 	end
 	
