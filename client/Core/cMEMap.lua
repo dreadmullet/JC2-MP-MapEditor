@@ -52,12 +52,13 @@ function MapEditor.Map:__init(initialPosition , mapType)
 		actions = MapEditor.ControlDisplayer{
 			name = "Actions" ,
 			linesFromBottom = 3 ,
+			"Undo" ,
+			"Redo" ,
 			"Move object" ,
 			"Rotate object" ,
 			"Delete object" ,
 			"Floor object" ,
-			"Undo" ,
-			"Redo" ,
+			"Duplicate object" ,
 		}
 	}
 	
@@ -206,7 +207,6 @@ function MapEditor.Map:Redo()
 end
 
 function MapEditor.Map:SelectionChanged()
-	-- TODO: Support multiple objects for PropertiesMenu.
 	local objects = {}
 	self.selectedObjects:IterateObjects(function(object)
 		table.insert(objects , object)
@@ -384,6 +384,8 @@ function MapEditor.Map:ControlDown(args)
 				self:SetAction(Actions.Delete)
 			elseif args.name == "Floor object" then
 				self:SetAction(Actions.Floor)
+			elseif args.name == "Duplicate object" then
+				self:SetAction(Actions.Duplicate)
 			end
 		end
 	end

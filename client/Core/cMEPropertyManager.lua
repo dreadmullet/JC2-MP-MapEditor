@@ -24,6 +24,24 @@ function MapEditor.PropertyManager:GetProperty(propertyName)
 	return self.properties[propertyName]
 end
 
+function MapEditor.PropertyManager:SetProperty(propertyName , value)
+	local copiedValue
+	if Objects[self.type] then
+		copiedValue = value
+	else
+		copiedValue = Copy(value) or value
+	end
+	
+	self.properties[propertyName].value = copiedValue
+	
+	if self.OnPropertyChange then
+		self:OnPropertyChange{
+			name = propertyName ,
+			newValue = copiedValue ,
+		}
+	end
+end
+
 function MapEditor.PropertyManager:RemoveProperty(propertyName)
 	self.properties[propertyName] = nil
 end
