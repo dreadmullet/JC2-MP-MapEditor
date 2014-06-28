@@ -64,7 +64,7 @@ MapTypes.Racing = {
 				end
 				
 				for index , vehicleInfo in ipairs(vehicleInfos) do
-					if vehicleInfo == MapEditor.Property.NoObject then
+					if vehicleInfo == MapEditor.NoObject then
 						errorString = "RaceSpawn vehicle element is empty (index "..tostring(index)..")"
 						return
 					end
@@ -93,7 +93,7 @@ MapTypes.Racing = {
 		end)
 		for index , listItem in ipairs(checkpointList) do
 			local nextCheckpoint = listItem.checkpoint:GetProperty("nextCheckpoint").value
-			if nextCheckpoint ~= MapEditor.Property.NoObject then
+			if nextCheckpoint ~= MapEditor.NoObject then
 				for index2 , listItem2 in ipairs(checkpointList) do
 					if listItem2.checkpoint:GetId() == nextCheckpoint:GetId() then
 						listItem.next = listItem2
@@ -149,7 +149,7 @@ MapTypes.Racing = {
 			return "Invalid checkpoint; Same Next Checkpoint or stranded checkpoint"
 		end
 		-- If this is a circuit, make sure we have firstCheckpoint.
-		if isCircuit and map:GetProperty("firstCheckpoint").value == MapEditor.Property.NoObject then
+		if isCircuit and map:GetProperty("firstCheckpoint").value == MapEditor.NoObject then
 			return "Course is a circuit but First Checkpoint is not set in map properties"
 		end
 		

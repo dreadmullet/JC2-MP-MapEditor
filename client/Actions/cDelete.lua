@@ -14,7 +14,7 @@ function Actions.Delete:__init()
 	
 	local TestProperty = function(property)
 		local IsInObjects = function(propertyValue)
-			if propertyValue ~= MapEditor.Property.NoObject then
+			if propertyValue ~= MapEditor.NoObject then
 				local objectId = propertyValue:GetId()
 				for index , object in ipairs(self.objects) do
 					if object:GetId() == objectId then
@@ -85,9 +85,9 @@ function Actions.Delete:Redo()
 	
 	for index , propertyInfo in ipairs(self.properties) do
 		if propertyInfo.index then
-			propertyInfo.property.value[propertyInfo.index] = MapEditor.Property.NoObject
+			propertyInfo.property.value[propertyInfo.index] = MapEditor.NoObject
 		else
-			propertyInfo.property.value = MapEditor.Property.NoObject
+			propertyInfo.property.value = MapEditor.NoObject
 		end
 	end
 	

@@ -50,7 +50,7 @@ function Objects.RaceCheckpoint:OnRender()
 	
 	-- Render relationship line to our nextCheckpoint.
 	local nextCheckpoint = self:GetProperty("nextCheckpoint").value
-	if nextCheckpoint ~= MapEditor.Property.NoObject then
+	if nextCheckpoint ~= MapEditor.NoObject then
 		local position = self:GetPosition()
 		local direction = (nextCheckpoint:GetPosition() - position):Normalized()
 		local distance = Vector3.Distance(nextCheckpoint:GetPosition() , position)

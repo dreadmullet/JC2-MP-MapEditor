@@ -148,7 +148,7 @@ function Actions.PropertyChange:ObjectChosen(object)
 		self:UnsubscribeAll()
 		self:Confirm()
 		
-		if object ~= MapEditor.Property.NoObject then
+		if object ~= MapEditor.NoObject then
 			self.newButtonText = string.format("Object: %s (id: %i)" , self.type , object:GetId())
 		else
 			self.newButtonText = string.format("Object: (None)")

@@ -271,7 +271,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		button:SetTextSize(self.textSize)
 		button:SetDataObject("propertyProprietor" , propertyProprietor)
 		if tableIndex then
-			if propertyProprietor.value[tableIndex] ~= MapEditor.Property.NoObject then
+			if propertyProprietor.value[tableIndex] ~= MapEditor.NoObject then
 				local object = propertyProprietor.value[tableIndex]
 				button:SetText(string.format("Object: %s (id: %i)" , propertyType , object:GetId()))
 			else
@@ -281,7 +281,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 			button:SetDataNumber("tableIndex" , tableIndex)
 			button:Subscribe("Press" , self , self.TableObjectChoose)
 		else
-			if propertyProprietor.value ~= MapEditor.Property.NoObject then
+			if propertyProprietor.value ~= MapEditor.NoObject then
 				local object = propertyProprietor.value
 				button:SetText(string.format("Object: %s (id: %i)" , propertyType , object:GetId()))
 			else

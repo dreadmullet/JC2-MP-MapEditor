@@ -19,7 +19,7 @@ end
 
 function Objects.RaceSpawn:OnRender()
 	for index , vehicleInfo in ipairs(self:GetProperty("vehicles").value) do
-		if vehicleInfo ~= MapEditor.Property.NoObject then
+		if vehicleInfo ~= MapEditor.NoObject then
 			Render:DrawLine(self.position , vehicleInfo.position , Color.Gray)
 		end
 	end

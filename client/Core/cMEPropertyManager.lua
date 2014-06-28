@@ -85,14 +85,14 @@ function MapEditor.PropertyManager:Marshal()
 			if property.type == "table" then
 				value = {}
 				for index , object in ipairs(property.value) do
-					if object ~= MapEditor.Property.NoObject then
+					if object ~= MapEditor.NoObject then
 						value[index] = object:GetId()
 					else
 						value[index] = -1
 					end
 				end
 			else
-				if property.value ~= MapEditor.Property.NoObject then
+				if property.value ~= MapEditor.NoObject then
 					value = property.value:GetId()
 				else
 					value = -1
@@ -169,7 +169,7 @@ MapEditor.PropertyManager.UnmarshalByTypeHash = {}
 
 MapEditor.PropertyManager.UnmarshalByTypeHash[FNV("Object")] = function(value)
 	if value == -1 then
-		return MapEditor.Property.NoObject
+		return MapEditor.NoObject
 	else
 		local object = MapEditor.map:GetObject(value)
 		if object == nil then

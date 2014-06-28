@@ -63,10 +63,10 @@ function MapEditor.ObjectChooser:ControlUp(args)
 			if isCorrectType then
 				self:CallCallback(object)
 			else
-				self:CallCallback(MapEditor.Property.NoObject)
+				self:CallCallback(MapEditor.NoObject)
 			end
 		else
-			self:CallCallback(MapEditor.Property.NoObject)
+			self:CallCallback(MapEditor.NoObject)
 		end
 		
 		Events:Fire("SetMenusEnabled" , true)

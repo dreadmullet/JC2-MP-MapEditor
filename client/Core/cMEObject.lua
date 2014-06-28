@@ -30,14 +30,14 @@ MapEditor.Object.Unmarshal = function(o)
 end
 
 MapEditor.Object.Compare = function(o1 , o2)
-	if o1 == MapEditor.Property.NoObject then
-		if o2 == MapEditor.Property.NoObject then
+	if o1 == MapEditor.NoObject then
+		if o2 == MapEditor.NoObject then
 			return true
 		else
 			return false
 		end
 	else
-		if o2 == MapEditor.Property.NoObject then
+		if o2 == MapEditor.NoObject then
 			return false
 		else
 			return o1:GetId() == o2:GetId()

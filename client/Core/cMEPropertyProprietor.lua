@@ -34,10 +34,10 @@ function MapEditor.PropertyProprietor:__init(properties)
 				-- Comparing class instances causes an error :|
 				if self.isObject then
 					local id , commonId = -1 , -1
-					if commonValue ~= MapEditor.Property.NoObject then
+					if commonValue ~= MapEditor.NoObject then
 						commonId = commonValue:GetId()
 					end
-					if property.value ~= MapEditor.Property.NoObject then
+					if property.value ~= MapEditor.NoObject then
 						id = property.value:GetId()
 					end
 					
@@ -86,8 +86,8 @@ function MapEditor.PropertyProprietor:CompareTables(a , b)
 			if self.isObject then
 				if type(a[index]) ~= type(b[index]) then
 					return false
-				elseif a[index] == MapEditor.Property.NoObject then
-					if b[index] ~= MapEditor.Property.NoObject then
+				elseif a[index] == MapEditor.NoObject then
+					if b[index] ~= MapEditor.NoObject then
 						return false
 					end
 				else

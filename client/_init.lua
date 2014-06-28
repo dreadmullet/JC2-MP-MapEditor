@@ -4,6 +4,9 @@ Actions = {}
 MapTypes = {}
 Icons = {}
 
+-- Having properties that are Object be nil is bad for tables.
+MapEditor.NoObject = {}
+
 MapEditor.IsObjectType = function(type)
 	return type == "Object" or Objects[type] ~= nil
 end
