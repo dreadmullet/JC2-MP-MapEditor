@@ -140,6 +140,7 @@ function Actions.PropertyChange:ObjectChosen(object)
 		end
 		if changed == false then
 			Cancel()
+			return
 		end
 		
 		self.value = object
@@ -179,6 +180,7 @@ function Actions.PropertyChange:ColorChosen(color)
 		end
 		if changed == false then
 			Cancel()
+			return
 		end
 		
 		self.value = color
