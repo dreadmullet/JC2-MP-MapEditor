@@ -9,7 +9,7 @@ function MapEditor.PropertyProprietor:__init(properties)
 	self.type = self.properties[1].type
 	self.subtype = self.properties[1].subtype
 	self.defaultElement = self.properties[1].defaultElement
-	self.isObject = Objects[self.type] ~= nil or Objects[self.subtype] ~= nil
+	self.isObject = MapEditor.IsObjectType(self.type) or MapEditor.IsObjectType(self.subtype)
 	-- This is copied from commonValue, or if it's nil, it's a sane default value.
 	self.value = nil
 	self.hasCommonValue = false
@@ -65,7 +65,7 @@ function MapEditor.PropertyProprietor:__init(properties)
 			for index , value in ipairs(commonValue) do
 				table.insert(self.value , value)
 			end
-		elseif Objects[self.type] then
+		elseif self.isObject then
 			self.value = commonValue
 		else
 			-- If commonValue is a Color or something, we don't want to use the reference.

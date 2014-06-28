@@ -25,14 +25,27 @@ function MapEditor.PropertyManager:GetProperty(propertyName)
 end
 
 function MapEditor.PropertyManager:SetProperty(propertyName , value)
+	local property = self.properties[propertyName]
+	
 	local copiedValue
-	if Objects[self.type] then
-		copiedValue = value
+	if property.type == "table" then
+		copiedValue = {}
+		for index , value in ipairs(value) do
+			if MapEditor.IsObjectType(property.subtype) then
+				copiedValue[index] = value
+			else
+				copiedValue[index] = Copy(value) or value
+			end
+		end
 	else
-		copiedValue = Copy(value) or value
+		if MapEditor.IsObjectType(property.type) then
+			copiedValue = value
+		else
+			copiedValue = Copy(value) or value
+		end
 	end
 	
-	self.properties[propertyName].value = copiedValue
+	property.value = copiedValue
 	
 	if self.OnPropertyChange then
 		self:OnPropertyChange{
@@ -63,11 +76,12 @@ function MapEditor.PropertyManager:Marshal()
 	for name , property in pairs(self.properties) do
 		-- Get value.
 		local value = nil
-		local isObject = false
+		local isObject = (
+			MapEditor.IsObjectType(property.type) or
+			MapEditor.IsObjectType(property.subtype)
+		)
 		-- Special handling for Objects - use their id instead. -1 means no Object.
-		if Objects[property.type] or Objects[property.subtype] then
-			isObject = true
-			
+		if isObject then
 			if property.type == "table" then
 				value = {}
 				for index , object in ipairs(property.value) do

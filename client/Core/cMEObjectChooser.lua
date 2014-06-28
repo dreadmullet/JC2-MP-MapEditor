@@ -2,10 +2,10 @@
 
 class("ObjectChooser" , MapEditor)
 
-function MapEditor.ObjectChooser:__init(objectTypeOrNil , callback , instance)
+function MapEditor.ObjectChooser:__init(objectType , callback , instance)
 	EGUSM.SubscribeUtility.__init(self)
 	
-	self.objectType = objectTypeOrNil
+	self.objectType = objectType
 	self.callback = callback
 	self.instance = instance
 	
@@ -52,8 +52,19 @@ end
 function MapEditor.ObjectChooser:ControlUp(args)
 	if args.name == "Done" then
 		local object = MapEditor.map:GetObjectFromScreenPoint(Mouse:GetPosition())
-		if object and (self.objectType == nil or class_info(object).name == self.objectType) then
-			self:CallCallback(object)
+		if object then
+			local isCorrectType = false
+			if self.objectType == "Object" then
+				isCorrectType = true
+			elseif class_info(object).name == self.objectType then
+				isCorrectType = true
+			end
+			
+			if isCorrectType then
+				self:CallCallback(object)
+			else
+				self:CallCallback(MapEditor.Property.NoObject)
+			end
 		else
 			self:CallCallback(MapEditor.Property.NoObject)
 		end

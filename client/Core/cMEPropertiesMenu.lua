@@ -263,7 +263,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		parent:SetHeight(parent:GetHeight() + height)
 		
 		return header
-	elseif Objects[propertyType] ~= nil then
+	elseif MapEditor.IsObjectType(propertyType) then
 		parent:SetHeight(parent:GetHeight() + self.textSize + 10)
 		
 		local button = Button.Create(parent)
@@ -325,7 +325,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		label:SetAlignment(GwenPosition.CenterV)
 		label:SetTextSize(self.textSize)
 		label:SetText("(unsupported) "..tostring(propertyType))
-		label:SetTextColor(Color.DarkRed)
+		label:SetTextColor(Color.Red)
 		label:SizeToContents()
 		
 		parent:SetHeight(parent:GetHeight() + label:GetHeight() + 6)

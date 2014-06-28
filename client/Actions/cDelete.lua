@@ -26,11 +26,11 @@ function Actions.Delete:__init()
 			return false
 		end
 		
-		if Objects[property.type] then
+		if MapEditor.IsObjectType(property.type) then
 			if IsInObjects(property.value) then
 				table.insert(self.properties , {property = property , originalValue = property.value})
 			end
-		elseif Objects[property.subtype] then
+		elseif MapEditor.IsObjectType(property.subtype) then
 			for index , object in ipairs(property.value) do
 				if IsInObjects(object) then
 					local propertyInfo = {

@@ -4,6 +4,10 @@ Actions = {}
 MapTypes = {}
 Icons = {}
 
+MapEditor.IsObjectType = function(type)
+	return type == "Object" or Objects[type] ~= nil
+end
+
 Events:Subscribe("ModuleLoad" , function()
 	Controls.Add("Select" ,                      "Mouse1")
 	Controls.Add("Deselect" ,                    "Mouse2")

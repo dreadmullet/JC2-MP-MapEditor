@@ -22,8 +22,11 @@ function Actions.PropertyChange:__init(args)
 	self.oldButtonText = nil
 	self.newButtonText = nil
 	
-	local isObjectClass = Objects[self.type] ~= nil
-	if isObjectClass and self.tableActionType ~= "Add" and self.tableActionType ~= "Remove" then
+	if
+		self.propertyProprietor.isObject and
+		self.tableActionType ~= "Add" and
+		self.tableActionType ~= "Remove"
+	then
 		Events:Fire("SetMenusEnabled" , false)
 		self.objectChooseButton = args.objectChooseButton
 		self.oldButtonText = self.objectChooseButton:GetText()
@@ -111,7 +114,7 @@ end
 
 -- Calls Copy unless our type is an Object.
 function Actions.PropertyChange:Copy(value)
-	if Objects[self.type] then
+	if self.propertyProprietor.isObject then
 		return value
 	else
 		return Copy(value) or value
