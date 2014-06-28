@@ -66,11 +66,7 @@ function Actions.Delete:Undo()
 	end
 	
 	for index , propertyInfo in ipairs(self.properties) do
-		if propertyInfo.index then
-			propertyInfo.property.value[propertyInfo.index] = propertyInfo.originalValue
-		else
-			propertyInfo.property.value = propertyInfo.originalValue
-		end
+		propertyInfo.property:SetValue(propertyInfo.originalValue , propertyInfo.index)
 	end
 	
 	MapEditor.map:SelectionChanged()
@@ -84,11 +80,7 @@ function Actions.Delete:Redo()
 	end
 	
 	for index , propertyInfo in ipairs(self.properties) do
-		if propertyInfo.index then
-			propertyInfo.property.value[propertyInfo.index] = MapEditor.NoObject
-		else
-			propertyInfo.property.value = MapEditor.NoObject
-		end
+		propertyInfo.property:SetValue(MapEditor.NoObject , propertyInfo.index)
 	end
 	
 	MapEditor.map:SelectionChanged()

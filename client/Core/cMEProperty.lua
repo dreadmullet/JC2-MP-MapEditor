@@ -28,3 +28,43 @@ function MapEditor.Property:__init(args)
 		self.defaultElement = args.defaultElement or MapEditor.Property.GetDefaultValue(self.subtype)
 	end
 end
+
+function MapEditor.Property:SetValue(value , index)
+	local copiedValue
+	if self.type == "table" and index == nil then
+		copiedValue = {}
+		for index , value in ipairs(value) do
+			if MapEditor.IsObjectType(self.subtype) then
+				copiedValue[index] = value
+			else
+				copiedValue[index] = Copy(value) or value
+			end
+		end
+	else
+		if MapEditor.IsObjectType(self.type) or MapEditor.IsObjectType(self.subtype) then
+			copiedValue = value
+		else
+			copiedValue = Copy(value) or value
+		end
+	end
+	
+	local isSame = false
+	if index then
+		if self.value[index] == copiedValue then
+			isSame = true
+		end
+		self.value[index] = copiedValue
+	else
+		if self.value == copiedValue then
+			isSame = true
+		end
+		self.value = copiedValue
+	end
+	
+	if isSame == false and self.propertyManager.OnPropertyChange then
+		self.propertyManager:OnPropertyChange{
+			name = self.name ,
+			newValue = self.value ,
+		}
+	end
+end

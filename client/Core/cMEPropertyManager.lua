@@ -26,33 +26,7 @@ end
 
 function MapEditor.PropertyManager:SetProperty(propertyName , value)
 	local property = self.properties[propertyName]
-	
-	local copiedValue
-	if property.type == "table" then
-		copiedValue = {}
-		for index , value in ipairs(value) do
-			if MapEditor.IsObjectType(property.subtype) then
-				copiedValue[index] = value
-			else
-				copiedValue[index] = Copy(value) or value
-			end
-		end
-	else
-		if MapEditor.IsObjectType(property.type) then
-			copiedValue = value
-		else
-			copiedValue = Copy(value) or value
-		end
-	end
-	
-	property.value = copiedValue
-	
-	if self.OnPropertyChange then
-		self:OnPropertyChange{
-			name = propertyName ,
-			newValue = copiedValue ,
-		}
-	end
+	property:SetValue(value)
 end
 
 function MapEditor.PropertyManager:RemoveProperty(propertyName)
