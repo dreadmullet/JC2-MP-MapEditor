@@ -7,6 +7,7 @@ MapEditor.PropertiesMenu.size = Vector2(340 , 210)
 function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtility.__init(self)
 	self.Destroy = MapEditor.PropertiesMenu.Destroy
 	
+	-- Copy propertyManagers into self.propertyManagers
 	self.propertyManagers = {}
 	for key , propertyManager in pairs(propertyManagers) do
 		table.insert(self.propertyManagers , propertyManager)
@@ -52,6 +53,9 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	-- Value: array of Propertys
 	local propertyMap = {}
 	local propertyNameCount = 0
+	-- Used for sorting property controls by their original order, since the order is otherwise lost
+	-- along the way.
+	local propertyNameToIndex = {}
 	for index , propertyManager in ipairs(self.propertyManagers) do
 		propertyManager:IterateProperties(function(property)
 			local existingArray = propertyMap[property.name]
@@ -60,6 +64,7 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 			else
 				propertyMap[property.name] = {property}
 				propertyNameCount = propertyNameCount + 1
+				propertyNameToIndex[property.name] = propertyNameCount
 			end
 		end)
 	end
@@ -87,9 +92,15 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	
 	-- Populate self.propertyProprietors.
 	for propertyName , propertyArray in pairs(propertyMap) do
-		table.insert(self.propertyProprietors , MapEditor.PropertyProprietor(propertyArray))
+		local propertyProprietor = MapEditor.PropertyProprietor(propertyArray)
+		self.propertyProprietors[propertyNameToIndex[propertyName]] = propertyProprietor
 	end
-	table.sort(self.propertyProprietors , function(a , b) return a.name < b.name end)
+	table.sort(
+		self.propertyProprietors ,
+		function(a , b)
+			return propertyNameToIndex[a.name] < propertyNameToIndex[b.name]
+		end
+	)
 	
 	-- Get self.nameColumnWidth.
 	self.nameColumnWidth = 0

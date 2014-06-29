@@ -12,12 +12,14 @@ function MapEditor.PropertyManager:__init()
 	self.Marshal = MapEditor.PropertyManager.Marshal
 	
 	self.properties = {}
+	self.propertyNames = {}
 end
 
 function MapEditor.PropertyManager:AddProperty(args)
 	args.propertyManager = self
 	local property = MapEditor.Property(args)
 	self.properties[property.name] = property
+	table.insert(self.propertyNames , property.name)
 end
 
 function MapEditor.PropertyManager:GetProperty(propertyName)
@@ -31,6 +33,7 @@ end
 
 function MapEditor.PropertyManager:RemoveProperty(propertyName)
 	self.properties[propertyName] = nil
+	table.remove(self.propertyNames , table.find(self.propertyNames , propertyName))
 end
 
 function MapEditor.PropertyManager:HasProperty(propertyName)
@@ -38,8 +41,8 @@ function MapEditor.PropertyManager:HasProperty(propertyName)
 end
 
 function MapEditor.PropertyManager:IterateProperties(func)
-	for name , property in pairs(self.properties) do
-		func(property)
+	for index , propertyName in pairs(self.propertyNames) do
+		func(self.properties[propertyName])
 	end
 end
 
