@@ -80,9 +80,16 @@ end
 
 Utility.PrettifyVariableName = function(name)
 	local words = {}
+	
 	for word in string.gmatch(name , "[%u%l][%l%d]+") do
 		word = word:sub(1 , 1):upper()..word:sub(2)
 		table.insert(words , word)
+	end
+	
+	-- Quick fix for "offsetX" showing up as "Offset"
+	local lastChar = name:sub(name:len())
+	if lastChar:find("%u") then
+		table.insert(words , lastChar)
 	end
 	
 	return table.concat(words , " ")
