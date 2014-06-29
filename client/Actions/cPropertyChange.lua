@@ -144,17 +144,19 @@ function Actions.PropertyChange:ObjectChosen(object)
 		end
 		
 		-- Disallow self-selecting by making sure it's not one of the currently selected objects.
-		local isSelf = false
-		MapEditor.map.selectedObjects:IterateObjects(function(selectedObject)
-			if object:GetId() == selectedObject:GetId() then
-				isSelf = true
+		if object ~= MapEditor.NoObject then
+			local isSelf = false
+			MapEditor.map.selectedObjects:IterateObjects(function(selectedObject)
+				if object:GetId() == selectedObject:GetId() then
+					isSelf = true
+					return
+				end
+			end)
+			if isSelf then
+				Chat:Print("Cannot select the same object!" , Color.DarkRed)
+				self:Cancel()
 				return
 			end
-		end)
-		if isSelf then
-			Chat:Print("Cannot select the same object!" , Color.DarkRed)
-			self:Cancel()
-			return
 		end
 		
 		self.value = object
