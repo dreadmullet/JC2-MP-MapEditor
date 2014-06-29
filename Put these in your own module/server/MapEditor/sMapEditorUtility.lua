@@ -102,9 +102,9 @@ MapEditor.LoadFromMarshalledMap = function(map)
 					object.properties.offsetZ
 				)
 				local offsetAngle = Angle(
-					object.properties.offsetYaw ,
-					object.properties.offsetPitch ,
-					object.properties.offsetRoll
+					math.rad(object.properties.offsetYaw) ,
+					math.rad(object.properties.offsetPitch) ,
+					math.rad(object.properties.offsetRoll)
 				)
 				local relativeOffsetPosition = Vector3(
 					object.properties.relativeOffsetX ,
@@ -112,14 +112,14 @@ MapEditor.LoadFromMarshalledMap = function(map)
 					object.properties.relativeOffsetZ
 				)
 				local relativeOffsetAngle = Angle(
-					object.properties.relativeOffsetYaw ,
-					object.properties.relativeOffsetPitch ,
-					object.properties.relativeOffsetRoll
+					math.rad(object.properties.relativeOffsetYaw) ,
+					math.rad(object.properties.relativeOffsetPitch) ,
+					math.rad(object.properties.relativeOffsetRoll)
 				)
 				
 				local Next = function()
-					angle = angle * relativeOffsetAngle
 					position = position + angle * relativeOffsetPosition
+					angle = angle * relativeOffsetAngle
 					
 					position = position + offsetPosition
 					angle = offsetAngle * angle

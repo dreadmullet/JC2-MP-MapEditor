@@ -119,8 +119,8 @@ function Objects.Array:UpdateObjectTransforms()
 	)
 	
 	local Next = function()
-		angle = angle * relativeOffsetAngle
 		position = position + angle * relativeOffsetPosition
+		angle = angle * relativeOffsetAngle
 		
 		position = position + offsetPosition
 		angle = offsetAngle * angle
