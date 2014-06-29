@@ -64,9 +64,7 @@ function Actions.PropertyChange:Apply()
 			property.value = self.value
 		end
 		
-		if property.propertyManager.OnPropertyChange then
-			property.propertyManager:OnPropertyChange(propertyChangeArgs)
-		end
+		property.propertyManager:PropertyChanged(propertyChangeArgs)
 	end
 end
 
@@ -89,9 +87,7 @@ function Actions.PropertyChange:Undo()
 			property.value = self:Copy(self.previousValues[index])
 		end
 		
-		if property.propertyManager.OnPropertyChange then
-			property.propertyManager:OnPropertyChange(propertyChangeArgs)
-		end
+		property.propertyManager:PropertyChanged(propertyChangeArgs)
 	end
 	
 	if IsValid(self.objectChooseButton) then

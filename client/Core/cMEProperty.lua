@@ -61,8 +61,8 @@ function MapEditor.Property:SetValue(value , index)
 		self.value = copiedValue
 	end
 	
-	if isSame == false and self.propertyManager.OnPropertyChange then
-		self.propertyManager:OnPropertyChange{
+	if isSame == false then
+		self.propertyManager:PropertyChanged{
 			name = self.name ,
 			newValue = self.value ,
 		}

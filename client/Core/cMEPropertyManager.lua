@@ -9,6 +9,7 @@ function MapEditor.PropertyManager:__init()
 	self.RemoveProperty = MapEditor.PropertyManager.RemoveProperty
 	self.HasProperty = MapEditor.PropertyManager.HasProperty
 	self.IterateProperties = MapEditor.PropertyManager.IterateProperties
+	self.PropertyChanged = MapEditor.PropertyManager.PropertyChanged
 	self.Marshal = MapEditor.PropertyManager.Marshal
 	
 	self.properties = {}
@@ -44,6 +45,18 @@ function MapEditor.PropertyManager:IterateProperties(func)
 	for index , propertyName in pairs(self.propertyNames) do
 		func(self.properties[propertyName])
 	end
+end
+
+function MapEditor.PropertyManager:PropertyChanged(args)
+	if self.OnPropertyChange then
+		self:OnPropertyChange(args)
+	end
+	
+	if self.GetId then
+		args.objectId = self:GetId()
+	end
+	
+	Events:Fire("PropertyChange" , args)
 end
 
 function MapEditor.PropertyManager:Marshal()
@@ -124,12 +137,10 @@ function MapEditor.PropertyManager:Unmarshal(properties)
 			warn("Property doesn't exist: "..tostring(name))
 		end
 		
-		if self.OnPropertyChange then
-			self:OnPropertyChange{
-				name = property.name ,
-				newValue = property.value ,
-			}
-		end
+		self:PropertyChanged{
+			name = property.name ,
+			newValue = property.value ,
+		}
 	end
 end
 
