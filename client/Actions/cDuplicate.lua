@@ -17,9 +17,7 @@ function Actions.Duplicate:__init()
 	
 	-- Duplicate the source objects. Unselect the source objects and select the new objects.
 	for index , objectSource in ipairs(self.objectsToDuplicateFrom) do
-		local distance = Vector3.Distance(Camera:GetPosition() , objectSource:GetPosition())
-		local direction = Camera:GetAngle() * Vector3(1 , 1 , 1)
-		local position = objectSource:GetPosition() + direction * (distance * 0.01)
+		local position = objectSource:GetPosition()
 		
 		local newObject = Objects[objectSource.type](position , objectSource:GetAngle())
 		objectSource:IterateProperties(function(property)
