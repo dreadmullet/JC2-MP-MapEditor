@@ -3,4 +3,6 @@ MapEditor.Preferences = {
 	camSensitivityRot = 0.005 ,
 	camSensitivityZoom = 0.07 ,
 	camType = "Noclip" ,
+	snapPosition = 0 ,
+	snapAngle = 0 ,
 }

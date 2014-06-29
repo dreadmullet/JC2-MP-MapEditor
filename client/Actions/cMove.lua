@@ -74,5 +74,14 @@ function Actions.Move:OnProcess(objectInfo , mouse , pivot)
 		end
 	end
 	
-	objectInfo.endTransform.position = objectInfo.startTransform.position + delta
+	local endPosition = objectInfo.startTransform.position + delta
+	
+	local snap = MapEditor.Preferences.snapPosition
+	if snap ~= 0 then
+		endPosition.x = math.floor(endPosition.x / snap + 0.5) * snap
+		endPosition.y = math.floor(endPosition.y / snap + 0.5) * snap
+		endPosition.z = math.floor(endPosition.z / snap + 0.5) * snap
+	end
+	
+	objectInfo.endTransform.position = endPosition
 end

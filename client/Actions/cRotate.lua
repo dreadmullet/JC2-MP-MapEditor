@@ -83,12 +83,21 @@ function Actions.Rotate:OnProcess(objectInfo , mouse , pivot)
 		axis = Camera:GetAngle() * Vector3.Forward
 	end
 	
-	local angle = Angle.AngleAxis(mouseAngle.yaw * self.sensitivity , -axis)
+	local delta = Angle.AngleAxis(mouseAngle.yaw * self.sensitivity , -axis)
 	
-	objectInfo.endTransform.angle = angle * objectInfo.startTransform.angle
+	local endAngle = delta * objectInfo.startTransform.angle
+	
+	local snap = math.rad(MapEditor.Preferences.snapAngle)
+	if snap ~= 0 then
+		endAngle.yaw = math.floor(endAngle.yaw / snap + 0.5) * snap
+		endAngle.pitch = math.floor(endAngle.pitch / snap + 0.5) * snap
+		endAngle.roll = math.floor(endAngle.roll / snap + 0.5) * snap
+	end
+	
+	objectInfo.endTransform.angle = endAngle
 	
 	local relativePosition = objectInfo.startTransform.position - pivot
-	objectInfo.endTransform.position = pivot + angle * relativePosition
+	objectInfo.endTransform.position = pivot + delta * relativePosition
 end
 
 function Actions.Rotate:OnRender(mouse , pivot)

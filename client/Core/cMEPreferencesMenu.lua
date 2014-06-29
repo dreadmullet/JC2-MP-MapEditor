@@ -38,7 +38,7 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	slider:SetDock(GwenPosition.Fill)
 	slider:SetRange(0.1 , 1)
 	slider:SetValue(MapEditor.Preferences.camSensitivityMove)
-	slider:Subscribe("ValueChanged" , self , self.CamSensitivityMoveSliderChanged)
+	slider:Subscribe("Blur" , self , self.CamSensitivityMoveSliderChanged)
 	self.camSensitivityMoveSlider = slider
 	
 	local label = Label.Create(base)
@@ -61,7 +61,7 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	slider:SetDock(GwenPosition.Fill)
 	slider:SetRange(0.002 , 0.015)
 	slider:SetValue(MapEditor.Preferences.camSensitivityRot)
-	slider:Subscribe("ValueChanged" , self , self.CamSensitivityRotSliderChanged)
+	slider:Subscribe("Blur" , self , self.CamSensitivityRotSliderChanged)
 	self.camSensitivityRotSlider = slider
 	
 	local label = Label.Create(base)
@@ -88,11 +88,49 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	label:SetWidth(textWidth)
 	
 	local comboBox = ComboBox.Create(base)
-	-- comboBox:SetMargin(Vector2(0 , 0) , Vector2(0 , 0))
 	comboBox:SetDock(GwenPosition.Fill)
 	comboBox:AddItem("Noclip")
 	comboBox:AddItem("Orbit")
-	comboBox:Subscribe("Selection" , self , self.CameraTypeChanged)
+	comboBox:SelectItemByName(MapEditor.Preferences.camType)
+	comboBox:Subscribe("Blur" , self , self.CameraTypeChanged)
+	
+	-- Position snap
+	
+	local base = BaseWindow.Create(self.window)
+	base:SetMargin(Vector2(2 , 1) , Vector2(4 , 1))
+	base:SetDock(GwenPosition.Top)
+	base:SetHeight(18)
+	
+	local label = Label.Create(base)
+	label:SetDock(GwenPosition.Left)
+	label:SetAlignment(GwenPosition.CenterV)
+	label:SetTextSize(textSize)
+	label:SetText("Position snap")
+	label:SetWidth(textWidth)
+	
+	local textBox = TextBoxNumeric.Create(base)
+	textBox:SetDock(GwenPosition.Fill)
+	textBox:SetText(string.format("%f" , MapEditor.Preferences.snapPosition))
+	textBox:Subscribe("Blur" , self , self.SnapPositionChanged)
+	
+	-- Angle snap
+	
+	local base = BaseWindow.Create(self.window)
+	base:SetMargin(Vector2(2 , 1) , Vector2(4 , 1))
+	base:SetDock(GwenPosition.Top)
+	base:SetHeight(18)
+	
+	local label = Label.Create(base)
+	label:SetDock(GwenPosition.Left)
+	label:SetAlignment(GwenPosition.CenterV)
+	label:SetTextSize(textSize)
+	label:SetText("Angle snap")
+	label:SetWidth(textWidth)
+	
+	local textBox = TextBoxNumeric.Create(base)
+	textBox:SetDock(GwenPosition.Fill)
+	textBox:SetText(string.format("%f" , MapEditor.Preferences.snapAngle))
+	textBox:Subscribe("Blur" , self , self.SnapAngleChanged)
 	
 	-- Bind menu
 	
@@ -162,6 +200,14 @@ function MapEditor.PreferencesMenu:CameraTypeChanged(comboBox)
 	if MapEditor.map then
 		MapEditor.map:SetCameraType(name , Camera:GetPosition() , Camera:GetAngle())
 	end
+end
+
+function MapEditor.PreferencesMenu:SnapPositionChanged(textBox)
+	MapEditor.Preferences.snapPosition = textBox:GetValue()
+end
+
+function MapEditor.PreferencesMenu:SnapAngleChanged(textBox)
+	MapEditor.Preferences.snapAngle = textBox:GetValue()
 end
 
 -- Events
