@@ -78,6 +78,7 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	-- * "Radius", radius (number)
 	-- * "Bounds", bounds ({Vector3 , Vector3})
 	self.selectionStrategy = {type = "Icon" , icon = Icons.Default}
+	self.prettyType = Utility.PrettifyVariableName(self.type)
 	self.labelColor = Color(208 , 208 , 208 , 192)
 end
 
@@ -164,7 +165,7 @@ function MapEditor.Object:Render()
 	if MapEditor.Preferences.drawLabels then
 		local screenPosition , success = Render:WorldToScreen(labelSourcePosition)
 		if success then
-			local text = string.format("%i %s" , self.id , self.type)
+			local text = string.format("%i %s" , self.id , self.prettyType)
 			local fontSize = 10
 			local textSize = Render:GetTextSize(text , fontSize)
 			screenPosition.x = screenPosition.x - textSize.x * 0.5
