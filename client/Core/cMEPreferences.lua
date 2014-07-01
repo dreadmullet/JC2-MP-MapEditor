@@ -5,4 +5,5 @@ MapEditor.Preferences = {
 	camType = "Noclip" ,
 	snapPosition = 0 ,
 	snapAngle = 0 ,
+	drawLabels = true ,
 }

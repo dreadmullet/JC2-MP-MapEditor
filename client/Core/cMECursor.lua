@@ -1,6 +1,6 @@
 class("Cursor" , MapEditor)
 
-function MapEditor.Cursor:__init(initialPosition) ; EGUSM.SubscribeUtility.__init(self)
+function MapEditor.Cursor:__init(initialPosition)
 	self.position = initialPosition or Vector3(0 , 208 , 0)
 	self.angle = Angle()
 	self.cursorModel = nil
@@ -9,8 +9,6 @@ function MapEditor.Cursor:__init(initialPosition) ; EGUSM.SubscribeUtility.__ini
 		path = "Models/Cursor"
 	}
 	OBJLoader.Request(args , self , function(self , model) self.cursorModel = model end)
-	
-	self:EventSubscribe("Render")
 end
 
 -- Events

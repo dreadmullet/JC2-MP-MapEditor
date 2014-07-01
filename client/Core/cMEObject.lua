@@ -3,6 +3,7 @@ class("Object" , MapEditor)
 -- Static
 
 MapEditor.Object.iconRadius = 1
+MapEditor.Object.shadowColor = Color(0 , 0 , 0 , 192)
 
 MapEditor.Object.memberNames = {
 	"id" ,
@@ -77,15 +78,12 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	-- * "Radius", radius (number)
 	-- * "Bounds", bounds ({Vector3 , Vector3})
 	self.selectionStrategy = {type = "Icon" , icon = Icons.Default}
+	self.labelColor = Color(208 , 208 , 208 , 192)
 end
 
 function MapEditor.Object:Destroy()
 	if self.OnDestroy then
 		self:OnDestroy()
-	end
-	
-	if self.cursor then
-		self.cursor:Destroy()
 	end
 end
 
@@ -96,6 +94,7 @@ function MapEditor.Object:Recreate()
 end
 
 function MapEditor.Object:Render()
+	local labelSourcePosition = Copy(self.position)
 	if self.selectionStrategy.type == "Icon" then
 		local transform = Transform3()
 		transform:Translate(self.position)
@@ -113,6 +112,8 @@ function MapEditor.Object:Render()
 		end
 		
 		Render:ResetTransform()
+		
+		labelSourcePosition.y = labelSourcePosition.y - MapEditor.Object.iconRadius
 	elseif self.selectionStrategy.type == "Radius" then
 		local transform = Transform3()
 		transform:Translate(self.position)
@@ -126,6 +127,8 @@ function MapEditor.Object:Render()
 		end
 		
 		Render:ResetTransform()
+		
+		labelSourcePosition.y = labelSourcePosition.y - self.selectionStrategy.radius
 	elseif self.selectionStrategy.type == "Bounds" then
 		MapEditor.Utility.DrawBounds{
 			position = self.position ,
@@ -145,10 +148,31 @@ function MapEditor.Object:Render()
 				color = Color.LawnGreen ,
 			}
 		end
+		
+		labelSourcePosition.y = labelSourcePosition.y - self.selectionStrategy.bounds[2].y
+	end
+	
+	if self.cursor then
+		self.cursor:Render()
 	end
 	
 	if self.OnRender then
 		self:OnRender()
+	end
+	
+	-- Draw label.
+	if MapEditor.Preferences.drawLabels then
+		local screenPosition , success = Render:WorldToScreen(labelSourcePosition)
+		if success then
+			local text = string.format("%i %s" , self.id , self.type)
+			local fontSize = 10
+			local textSize = Render:GetTextSize(text , fontSize)
+			screenPosition.x = screenPosition.x - textSize.x * 0.5
+			screenPosition.y = screenPosition.y + 2
+			
+			Render:DrawText(screenPosition + Vector2.One , text , MapEditor.Object.shadowColor , fontSize)
+			Render:DrawText(screenPosition , text , self.labelColor , fontSize)
+		end
 	end
 end
 

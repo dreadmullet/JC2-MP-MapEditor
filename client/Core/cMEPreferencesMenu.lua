@@ -132,6 +132,25 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	textBox:SetText(string.format("%f" , MapEditor.Preferences.snapAngle))
 	textBox:Subscribe("Blur" , self , self.SnapAngleChanged)
 	
+	-- Draw labels
+	
+	local base = BaseWindow.Create(self.window)
+	base:SetMargin(Vector2(2 , 1) , Vector2(4 , 1))
+	base:SetDock(GwenPosition.Top)
+	base:SetHeight(18)
+	
+	local label = Label.Create(base)
+	label:SetDock(GwenPosition.Left)
+	label:SetAlignment(GwenPosition.CenterV)
+	label:SetTextSize(textSize)
+	label:SetText("Draw object labels")
+	label:SetWidth(textWidth)
+	
+	local button = Button.Create(base)
+	button:SetDock(GwenPosition.Fill)
+	button:SetText(tostring(MapEditor.Preferences.drawLabels))
+	button:Subscribe("Press" , self , self.DrawLabelsChanged)
+	
 	-- Bind menu
 	
 	local label = Label.Create(self.window)
@@ -208,6 +227,12 @@ end
 
 function MapEditor.PreferencesMenu:SnapAngleChanged(textBox)
 	MapEditor.Preferences.snapAngle = textBox:GetValue()
+end
+
+function MapEditor.PreferencesMenu:DrawLabelsChanged(button)
+	MapEditor.Preferences.drawLabels = not MapEditor.Preferences.drawLabels
+	
+	button:SetText(tostring(MapEditor.Preferences.drawLabels))
 end
 
 -- Events
