@@ -38,7 +38,7 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	slider:SetDock(GwenPosition.Fill)
 	slider:SetRange(0.1 , 1)
 	slider:SetValue(MapEditor.Preferences.camSensitivityMove)
-	slider:Subscribe("Blur" , self , self.CamSensitivityMoveSliderChanged)
+	slider:Subscribe("ValueChanged" , self , self.CamSensitivityMoveSliderChanged)
 	self.camSensitivityMoveSlider = slider
 	
 	local label = Label.Create(base)
@@ -61,7 +61,7 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	slider:SetDock(GwenPosition.Fill)
 	slider:SetRange(0.002 , 0.015)
 	slider:SetValue(MapEditor.Preferences.camSensitivityRot)
-	slider:Subscribe("Blur" , self , self.CamSensitivityRotSliderChanged)
+	slider:Subscribe("ValueChanged" , self , self.CamSensitivityRotSliderChanged)
 	self.camSensitivityRotSlider = slider
 	
 	local label = Label.Create(base)
@@ -92,7 +92,7 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	comboBox:AddItem("Noclip")
 	comboBox:AddItem("Orbit")
 	comboBox:SelectItemByName(MapEditor.Preferences.camType)
-	comboBox:Subscribe("Blur" , self , self.CameraTypeChanged)
+	comboBox:Subscribe("Selection" , self , self.CameraTypeChanged)
 	
 	-- Position snap
 	
