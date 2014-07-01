@@ -69,6 +69,7 @@ function Objects.Array:__init(...)
 	
 	self.selectionStrategy = {type = "Icon" , icon = Icons.Array}
 	
+	self.sourceObject = nil
 	-- These two are used to update our object transforms when the original object's transform
 	-- changes.
 	self.lastObjectPosition = Vector3()
@@ -78,11 +79,16 @@ function Objects.Array:__init(...)
 end
 
 function Objects.Array:CreateObject()
-	local sourceObject = self:GetProperty("sourceObject").value
+	if self.sourceObject == nil then
+		return nil
+	end
 	
 	-- The key here is to create the object but don't add it to the map's objects.
-	local newObject = Objects[sourceObject.type](sourceObject:GetPosition() , sourceObject:GetAngle())
-	sourceObject:IterateProperties(function(property)
+	local newObject = Objects[self.sourceObject.type](
+		self.sourceObject:GetPosition() ,
+		self.sourceObject:GetAngle()
+	)
+	self.sourceObject:IterateProperties(function(property)
 		newObject:SetProperty(property.name , property.value)
 	end)
 	
@@ -90,13 +96,12 @@ function Objects.Array:CreateObject()
 end
 
 function Objects.Array:UpdateObjectTransforms()
-	local sourceObject = self:GetProperty("sourceObject").value
-	if sourceObject == MapEditor.NoObject then
+	if self.sourceObject == nil then
 		return
 	end
 	
-	local position = sourceObject:GetPosition()
-	local angle = sourceObject:GetAngle()
+	local position = self.sourceObject:GetPosition()
+	local angle = self.sourceObject:GetAngle()
 	local offsetPosition = Vector3(
 		self:GetProperty("offsetX").value ,
 		self:GetProperty("offsetY").value ,
@@ -134,8 +139,7 @@ function Objects.Array:UpdateObjectTransforms()
 end
 
 function Objects.Array:OnRecreate()
-	-- Make sure we have a valid source object.
-	if self:GetProperty("sourceObject").value == MapEditor.NoObject then
+	if self.sourceObject == nil then
 		return
 	end
 	
@@ -156,15 +160,14 @@ function Objects.Array:OnDestroy()
 end
 
 function Objects.Array:OnRender()
-	local sourceObject = self:GetProperty("sourceObject").value
-	if sourceObject ~= MapEditor.NoObject then
+	if self.sourceObject ~= nil then
 		if
-			sourceObject:GetPosition() ~= self.lastObjectPosition or
-			sourceObject:GetAngle() ~= self.lastObjectAngle
+			self.sourceObject:GetPosition() ~= self.lastObjectPosition or
+			self.sourceObject:GetAngle() ~= self.lastObjectAngle
 		then
 			self:UpdateObjectTransforms()
-			self.lastObjectPosition = sourceObject:GetPosition()
-			self.lastObjectAngle = sourceObject:GetAngle()
+			self.lastObjectPosition = self.sourceObject:GetPosition()
+			self.lastObjectAngle = self.sourceObject:GetAngle()
 		end
 	end
 	
@@ -181,9 +184,14 @@ function Objects.Array:OnPropertyChange(args)
 		end
 		self.objects = {}
 		-- If there is a new source object, recreate all of our objects.
-		self:OnRecreate()
+		if args.newValue ~= MapEditor.NoObject then
+			self.sourceObject = args.newValue
+			self:OnRecreate()
+		else
+			self.sourceObject = nil
+		end
 	elseif args.name == "count" then
-		if self:GetProperty("sourceObject").value ~= MapEditor.NoObject then
+		if self.sourceObject ~= nil then
 			if args.newValue > #self.objects then
 				-- Add more objects.
 				for n = #self.objects + 1 , args.newValue do
@@ -208,8 +216,7 @@ end
 -- Events
 
 function Objects.Array:PropertyChange(args)
-	local sourceObject = self:GetProperty("sourceObject").value
-	local isOurObject = sourceObject ~= MapEditor.NoObject and sourceObject:GetId() == args.objectId
+	local isOurObject = self.sourceObject ~= nil and self.sourceObject:GetId() == args.objectId
 	if isOurObject == false then
 		return
 	end
