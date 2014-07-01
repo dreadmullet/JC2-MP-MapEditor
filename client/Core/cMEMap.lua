@@ -316,6 +316,7 @@ MapEditor.Map.Load = function(marshalledSource)
 		averageObjectPosition = averageObjectPosition + object.position
 	end
 	averageObjectPosition = averageObjectPosition / objectCount
+	map.objectIdCounter = highestId + 1
 	-- Unmarshal Object properties. This is done here because some properties are Objects, so all
 	-- Objects must be loaded first.
 	for objectIdSometimes , objectData in pairs(marshalledSource.objects) do
@@ -327,8 +328,6 @@ MapEditor.Map.Load = function(marshalledSource)
 	if objectCount > 0 then
 		map.camera:SetPosition(averageObjectPosition)
 	end
-	
-	map.objectIdCounter = highestId + 1
 	
 	MapEditor.mapMenu.state = "Saved map"
 	
