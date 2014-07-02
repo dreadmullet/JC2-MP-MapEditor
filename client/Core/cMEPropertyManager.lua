@@ -56,6 +56,8 @@ function MapEditor.PropertyManager:PropertyChanged(args)
 		args.objectId = self:GetId()
 	end
 	
+	args.newValue = nil
+	
 	Events:Fire("PropertyChange" , args)
 end
 
