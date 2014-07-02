@@ -112,12 +112,12 @@ function MapEditor.NoclipCamera:CalcView()
 	)
 	self.angle.pitch = math.clamp(self.angle.pitch , -self.maxPitch , self.maxPitch)
 	if self.speedChangeBuffer ~= 0 then
-		self.speedChangeBuffer = self.speedChangeBuffer * deltaTime
+		self.speedChangeBuffer = self.speedChangeBuffer
 		-- wut
 		self.speed = (
 			self.speed *
 			0.1 *
-			math.pow(10 , 1 + self.speedChangeBuffer * 15)
+			math.pow(10 , 1 + self.speedChangeBuffer * 0.4)
 		)
 		self.speed = math.clamp(self.speed , self.minSpeed , self.maxSpeed)
 	end
