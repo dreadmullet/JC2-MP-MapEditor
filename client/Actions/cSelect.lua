@@ -60,7 +60,7 @@ function Actions.Select:Undo()
 		object:SetSelected(not object:GetIsSelected())
 	end
 	
-	MapEditor.map:SelectionChanged()
+	MapEditor.map:UpdatePropertiesMenu()
 end
 
 function Actions.Select:Redo()
@@ -68,5 +68,5 @@ function Actions.Select:Redo()
 		object:SetSelected(not object:GetIsSelected())
 	end
 	
-	MapEditor.map:SelectionChanged()
+	MapEditor.map:UpdatePropertiesMenu()
 end

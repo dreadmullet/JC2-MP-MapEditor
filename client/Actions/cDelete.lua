@@ -69,7 +69,7 @@ function Actions.Delete:Undo()
 		propertyInfo.property:SetValue(propertyInfo.originalValue , propertyInfo.index)
 	end
 	
-	MapEditor.map:SelectionChanged()
+	MapEditor.map:UpdatePropertiesMenu()
 end
 
 function Actions.Delete:Redo()
@@ -83,5 +83,5 @@ function Actions.Delete:Redo()
 		propertyInfo.property:SetValue(MapEditor.NoObject , propertyInfo.index)
 	end
 	
-	MapEditor.map:SelectionChanged()
+	MapEditor.map:UpdatePropertiesMenu()
 end

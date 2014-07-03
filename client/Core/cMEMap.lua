@@ -206,7 +206,7 @@ function MapEditor.Map:Redo()
 	end
 end
 
-function MapEditor.Map:SelectionChanged()
+function MapEditor.Map:UpdatePropertiesMenu()
 	local objects = {}
 	self.selectedObjects:IterateObjects(function(object)
 		table.insert(objects , object)

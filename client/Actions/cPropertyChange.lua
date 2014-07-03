@@ -94,8 +94,7 @@ function Actions.PropertyChange:Undo()
 		self.objectChooseButton:SetText(self.oldButtonText)
 	end
 	
-	-- TODO: Rename this to UpdatePropertiesMenu or something
-	MapEditor.map:SelectionChanged()
+	MapEditor.map:UpdatePropertiesMenu()
 end
 
 function Actions.PropertyChange:Redo()
@@ -105,7 +104,7 @@ function Actions.PropertyChange:Redo()
 		self.objectChooseButton:SetText(self.newButtonText)
 	end
 	
-	MapEditor.map:SelectionChanged()
+	MapEditor.map:UpdatePropertiesMenu()
 end
 
 -- Calls Copy unless our type is an Object.

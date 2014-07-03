@@ -31,7 +31,7 @@ function Actions.Duplicate:__init()
 		newObject:SetSelected(true)
 	end
 	
-	MapEditor.map:SelectionChanged()
+	MapEditor.map:UpdatePropertiesMenu()
 	
 	self:Confirm()
 end
@@ -49,7 +49,7 @@ function Actions.Duplicate:Undo()
 		objectSource:SetSelected(true)
 	end
 	
-	MapEditor.map:SelectionChanged()
+	MapEditor.map:UpdatePropertiesMenu()
 end
 
 function Actions.Duplicate:Redo()
@@ -65,5 +65,5 @@ function Actions.Duplicate:Redo()
 		objectSource:SetSelected(false)
 	end
 	
-	MapEditor.map:SelectionChanged()
+	MapEditor.map:UpdatePropertiesMenu()
 end

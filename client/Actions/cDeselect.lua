@@ -28,7 +28,7 @@ function Actions.Deselect:Undo()
 		object:SetSelected(true)
 	end
 	
-	MapEditor.map:SelectionChanged()
+	MapEditor.map:UpdatePropertiesMenu()
 end
 
 function Actions.Deselect:Redo()
@@ -36,5 +36,5 @@ function Actions.Deselect:Redo()
 		object:SetSelected(false)
 	end
 	
-	MapEditor.map:SelectionChanged()
+	MapEditor.map:UpdatePropertiesMenu()
 end
