@@ -74,15 +74,6 @@ function Objects.Array:__init(...)
 	self.lastObjectPosition = Vector3()
 	self.lastObjectAngle = Angle()
 	
-	-- Hmm, meta arrays are confusing. Here's an example for putting lights on two sides of a road:
-	-- * Array1's sourceObject is a Light, and it copies it down the right side of a road.
-	-- * Array2's sourceObject is Array1. Its X offset is the width of the road.
-	-- * Array3 is a meta array. It is one of many meta arrays created by Array2. Its sourceObject is
-	--    the original Light. Its metaParent is Array1. It works just like Array1, but every object
-	--    is offset (both position and angle) relative to Array1 (the metaParent).
-	self.isMeta = false
-	self.metaParent = nil
-	
 	self:EventSubscribe("PropertyChange")
 end
 
@@ -96,12 +87,6 @@ function Objects.Array:CreateObject()
 		self.sourceObject:GetPosition() ,
 		self.sourceObject:GetAngle()
 	)
-	
-	-- If our source object is also an Array, then the new object is a meta array.
-	if self.sourceObject.type == self.type then
-		newObject.isMeta = true
-		newObject.metaParent = self.sourceObject
-	end
 	
 	-- Copy over the properties.
 	self.sourceObject:IterateProperties(function(property)
@@ -118,20 +103,6 @@ function Objects.Array:UpdateObjectTransforms()
 	
 	local position = self.sourceObject:GetPosition()
 	local angle = self.sourceObject:GetAngle()
-	
-	if self.isMeta then
-		local deltaPosition = self:GetPosition() - self.metaParent:GetPosition()
-		local a1 , a2 = self:GetAngle() , self.metaParent:GetAngle()
-		-- This seems janky
-		local deltaAngle = Angle(
-			a1.yaw - a2.yaw ,
-			a1.pitch - a2.pitch ,
-			a1.roll - a2.roll
-		)
-		
-		position = position + deltaPosition
-		angle = angle * deltaAngle
-	end
 	
 	local offsetPosition = Vector3(
 		self:GetProperty("offsetX").value ,
@@ -240,18 +211,6 @@ function Objects.Array:OnPropertyChange(args)
 		
 		self:UpdateObjectTransforms()
 	else
-		self:UpdateObjectTransforms()
-	end
-end
-
-function Objects.Array:OnPositionChange()
-	if self.isMeta then
-		self:UpdateObjectTransforms()
-	end
-end
-
-function Objects.Array:OnAngleChange()
-	if self.isMeta then
 		self:UpdateObjectTransforms()
 	end
 end
