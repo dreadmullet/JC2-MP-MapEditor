@@ -31,11 +31,11 @@ function Objects.StaticObject:UpdateBounds()
 	-- the first time.
 	local hasBounds = not(b1 == Vector3.Zero and b2 == Vector3.Zero)
 	if hasBounds and b1:IsNaN() == false and b2:IsNaN() == false then
-		b1 = b1 - self.position
-		b2 = b2 - self.position
+		b1 = b1 - self:GetPosition()
+		b2 = b2 - self:GetPosition()
 		self.selectionStrategy = {type = "Bounds" , bounds = {b1 , b2}}
 		-- Apply our angle.
-		self.staticObject:SetAngle(self.angle)
+		self.staticObject:SetAngle(self:GetAngle())
 		
 		self.isUpdatingBounds = false
 	end
@@ -44,7 +44,7 @@ end
 function Objects.StaticObject:OnRecreate()
 	-- The angle is default until we get the object's neutral bounding box.
 	self.staticObject = ClientStaticObject.Create{
-		position = self.position ,
+		position = self:GetPosition() ,
 		angle = Angle() ,
 		model = self:GetProperty("model").value ,
 	}

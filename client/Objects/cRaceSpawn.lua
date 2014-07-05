@@ -14,13 +14,13 @@ function Objects.RaceSpawn:__init(...) ; MapEditor.Object.__init(self , ...)
 		bounds = {Vector3(-0.95 , 0 , -2.25) , Vector3(0.95 , 1.45 , 2.25)} ,
 	}
 	
-	self.cursor = MapEditor.Cursor(self.position)
+	self.cursor = MapEditor.Cursor(self:GetPosition())
 end
 
 function Objects.RaceSpawn:OnRender()
 	for index , vehicleInfo in ipairs(self:GetProperty("vehicles").value) do
 		if vehicleInfo ~= MapEditor.NoObject then
-			Render:DrawLine(self.position , vehicleInfo.position , Color.Gray)
+			Render:DrawLine(self:GetPosition() , vehicleInfo.position , Color.Gray)
 		end
 	end
 end

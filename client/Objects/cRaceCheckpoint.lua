@@ -34,8 +34,8 @@ function Objects.RaceCheckpoint:OnRecreate()
 	self.ring = ClientParticleSystem.Create(
 		AssetLocation.Game ,
 		{
-			position = self.position ,
-			angle = self.angle ,
+			position = self:GetPosition() ,
+			angle = self:GetAngle() ,
 			path = "fx_race_firering_01.psm" ,
 		}
 	)
