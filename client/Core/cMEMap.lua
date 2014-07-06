@@ -59,6 +59,7 @@ function MapEditor.Map:__init(initialPosition , mapType)
 			"Delete object" ,
 			"Floor object" ,
 			"Duplicate object" ,
+			"Parent object" ,
 		}
 	}
 	
@@ -313,7 +314,7 @@ MapEditor.Map.Load = function(marshalledSource)
 		map:AddObject(object)
 		
 		objectCount = objectCount + 1
-		averageObjectPosition = averageObjectPosition + object.position
+		averageObjectPosition = averageObjectPosition + object:GetPosition()
 	end
 	averageObjectPosition = averageObjectPosition / objectCount
 	map.objectIdCounter = highestId + 1
@@ -385,6 +386,8 @@ function MapEditor.Map:ControlDown(args)
 				self:SetAction(Actions.Floor)
 			elseif args.name == "Duplicate object" then
 				self:SetAction(Actions.Duplicate)
+			elseif args.name == "Parent object" then
+				self:SetAction(Actions.Parent)
 			end
 		end
 	end

@@ -1,8 +1,11 @@
 class("PropertiesMenu" , MapEditor)
 
 -- Y is relative to height.
-MapEditor.PropertiesMenu.position = Vector2(5 , 0.25)
-MapEditor.PropertiesMenu.size = Vector2(340 , 210)
+MapEditor.PropertiesMenu.position = Vector2(5 , 0.24)
+MapEditor.PropertiesMenu.size = Vector2(340 , 270)
+MapEditor.PropertiesMenu.yellow = Color(255 , 218 , 96)
+MapEditor.PropertiesMenu.zebra1 = Color(0 , 0 , 0 , 64)
+MapEditor.PropertiesMenu.zebra2 = Color(120 , 120 , 120 , 64)
 
 function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtility.__init(self)
 	self.Destroy = MapEditor.PropertiesMenu.Destroy
@@ -47,6 +50,77 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	self.textSize = 12
 	
 	self:ResolutionChange({size = Render.Size})
+	
+	--
+	-- Create object controls
+	--
+	
+	self.objects = {}
+	for index , propertyManager in ipairs(self.propertyManagers) do
+		if propertyManager.GetId then
+			table.insert(self.objects , propertyManager)
+		end
+	end
+	if #self.objects ~= 0 then
+		local base = BaseWindow.Create(self.scrollControl)
+		-- base:SetColor(MapEditor.PropertiesMenu.zebra1)
+		base:SetPadding(Vector2(2 , 4) , Vector2(2 , 4))
+		base:SetDock(GwenPosition.Top)
+		local countAndParentBase = base
+		
+		-- "X objects selected" label
+		local label = Label.Create()
+		label:SetMargin(Vector2(0 , 0) , Vector2(16 , 0))
+		if #self.objects == 1 then
+			label:SetText(string.format("%i object selected" , #self.objects))
+		else
+			label:SetText(string.format("%i objects selected" , #self.objects))
+		end
+		label:SizeToContents()
+		countAndParentBase:SetHeight(label:GetHeight() + 8)
+		label:SetParent(countAndParentBase)
+		label:SetDock(GwenPosition.Left)
+		
+		-- Get the common parent of all selected objects.
+		local commonParent = nil
+		for index , object in ipairs(self.objects) do
+			if commonParent then
+				if MapEditor.Object.Compare(commonParent , object:GetParent()) == false then
+					commonParent = nil
+					break
+				end
+			else
+				commonParent = object:GetParent()
+			end
+		end
+		
+		-- "Parent" label
+		local label = Label.Create(countAndParentBase)
+		label:SetDock(GwenPosition.Left)
+		label:SetText("Parent: ")
+		label:SizeToContents()
+		if commonParent == nil then
+			label:SetTextColor(MapEditor.PropertiesMenu.yellow)
+		end
+		
+		-- Parent label ("Light (id 13)")
+		local label = Label.Create(countAndParentBase)
+		label:SetDock(GwenPosition.Fill)
+		if commonParent and commonParent ~= MapEditor.NoObject then
+			label:SetText(string.format("%s (id %i)" , commonParent.type , commonParent:GetId()))
+		else
+			label:SetText("(none)")
+		end
+		
+		-- Spacer
+		local base = BaseWindow.Create(self.scrollControl)
+		base:SetDock(GwenPosition.Top)
+		base:SetHeight(16)
+	end
+	
+	--
+	-- Create property controls
+	--
 	
 	-- Gather a list of common property names.
 	-- Key: Property name (string)
@@ -135,9 +209,9 @@ function MapEditor.PropertiesMenu:CreatePropertyControl(propertyProprietor , ind
 	base:SetHeight(0)
 	
 	if index % 2 == 0 then
-		base:SetColor(Color(120 , 120 , 120 , 64))
+		base:SetColor(MapEditor.PropertiesMenu.zebra1)
 	else
-		base:SetColor(Color(0 , 0 , 0 , 64))
+		base:SetColor(MapEditor.PropertiesMenu.zebra2)
 	end
 	
 	local label = Label.Create(base)
@@ -150,7 +224,7 @@ function MapEditor.PropertiesMenu:CreatePropertyControl(propertyProprietor , ind
 	
 	-- Make the label a yellow color if not all PropertyManagers have a common value.
 	if propertyProprietor.hasCommonValue == false then
-		label:SetTextColor(Color(255 , 218 , 96))
+		label:SetTextColor(MapEditor.PropertiesMenu.yellow)
 	end
 	
 	self:CreateEditControl(propertyProprietor , base)

@@ -177,6 +177,7 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	bindMenu:AddControl("Delete object" ,                    "X")
 	bindMenu:AddControl("Floor object" ,                     "F")
 	bindMenu:AddControl("Duplicate object" ,                 "C")
+	bindMenu:AddControl("Parent object" ,                    "P")
 	bindMenu:AddControl("Undo" ,                             "Z")
 	bindMenu:AddControl("Redo" ,                             "Y")
 	

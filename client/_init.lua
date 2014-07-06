@@ -6,6 +6,7 @@ Icons = {}
 
 -- Having properties that are Object be nil is bad for tables.
 MapEditor.NoObject = {}
+setmetatable(MapEditor.NoObject , {__tostring = function() return "No Object" end})
 
 MapEditor.IsObjectType = function(type)
 	return type == "Object" or Objects[type] ~= nil

@@ -5,7 +5,7 @@ class("Object" , MapEditor)
 MapEditor.Object.iconRadius = 1
 MapEditor.Object.shadowColor = Color(0 , 0 , 0 , 192)
 
-MapEditor.Object.memberNames = {
+MapEditor.Object.members = {
 	"id" ,
 	"type" ,
 	"position" ,
@@ -49,7 +49,7 @@ end
 -- Instance
 
 function MapEditor.Object:__init(initialPosition , initialAngle)
-	MapEditor.Marshallable.__init(self , MapEditor.Object.memberNames)
+	MapEditor.Marshallable.__init(self , MapEditor.Object.members)
 	MapEditor.PropertyManager.__init(self)
 	
 	self.Destroy = MapEditor.Object.Destroy
@@ -57,13 +57,21 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	self.Render = MapEditor.Object.Render
 	self.SetPosition = MapEditor.Object.SetPosition
 	self.SetAngle = MapEditor.Object.SetAngle
+	self.SetParent = MapEditor.Object.SetParent
 	self.SetSelected = MapEditor.Object.SetSelected
 	self.GetId = MapEditor.Object.GetId
 	self.GetPosition = MapEditor.Object.GetPosition
 	self.GetAngle = MapEditor.Object.GetAngle
+	self.GetParent = MapEditor.Object.GetParent
 	self.GetIsSelected = MapEditor.Object.GetIsSelected
 	self.GetIsScreenPointWithin = MapEditor.Object.GetIsScreenPointWithin
 	self.GetScreenPoints = MapEditor.Object.GetScreenPoints
+	self.GetCanHaveParent = MapEditor.Object.GetCanHaveParent
+	self.IterateChildren = MapEditor.Object.IterateChildren
+	self.AddChild = MapEditor.Object.AddChild
+	self.RemoveChild = MapEditor.Object.RemoveChild
+	self.Marshal = MapEditor.Object.Marshal
+	self.__tostring = MapEditor.Object.__tostring
 	
 	self.id = MapEditor.map.objectIdCounter
 	MapEditor.map.objectIdCounter = MapEditor.map.objectIdCounter + 1
@@ -71,7 +79,9 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	self.position = initialPosition or Vector3(0 , 208 , 0)
 	self.angle = initialAngle or Angle(0 , 0 , 0)
 	self.isClientSide = false
+	self.parent = MapEditor.NoObject
 	
+	self.children = {}
 	self.isSelected = false
 	-- Available types and their variables:
 	-- * "Icon",   icon   (Image)
@@ -201,6 +211,27 @@ function MapEditor.Object:SetAngle(angle)
 	end
 end
 
+function MapEditor.Object:SetParent(object)
+	-- Return if our parent won't change.
+	if MapEditor.Object.Compare(self.parent , object) then
+		return
+	end
+	-- Make sure we can parent the object.
+	if self:GetCanHaveParent(object) == false then
+		Chat:Print("Cannot parent "..tostring(self).." to "..tostring(object) , Color.Red)
+		return
+	end
+	-- If we already have a parent, remove us from their children.
+	if self.parent ~= MapEditor.NoObject then
+		self.parent:RemoveChild(self)
+	end
+	-- Set our new parent and add us to their children. Also set our new position.
+	self.parent = object
+	if self.parent ~= MapEditor.NoObject then
+		self.parent:AddChild(self)
+	end
+end
+
 function MapEditor.Object:SetSelected(selected)
 	if self.isSelected == selected then
 		return
@@ -231,6 +262,10 @@ end
 
 function MapEditor.Object:GetAngle()
 	return self.angle
+end
+
+function MapEditor.Object:GetParent()
+	return self.parent
 end
 
 function MapEditor.Object:GetIsSelected()
@@ -345,4 +380,52 @@ function MapEditor.Object:GetScreenPoints()
 	end
 	
 	return points
+end
+
+function MapEditor.Object:GetCanHaveParent(object)
+	-- Return true if object is none.
+	if object == MapEditor.NoObject then
+		return true
+	end
+	-- Return false if the object is one of our children or ourselves.
+	local parentBuffer = object
+	while parentBuffer ~= MapEditor.NoObject do
+		if MapEditor.Object.Compare(parentBuffer , self) then
+			return false
+		end
+		
+		parentBuffer = parentBuffer:GetParent()
+	end
+	
+	return true
+end
+
+function MapEditor.Object:IterateChildren(func)
+	for n = #self.children , 1 , -1 do
+		func(self.children[n])
+	end
+end
+
+function MapEditor.Object:AddChild(object)
+	table.insert(self.children , object)
+end
+
+function MapEditor.Object:RemoveChild(object)
+	for index , child in ipairs(self.children) do
+		if MapEditor.Object.Compare(child , object) then
+			table.remove(self.children , index)
+			break
+		end
+	end
+end
+
+-- TODO: Haaaaaack, make the marshalling system better
+function MapEditor.Object:Marshal()
+	local t = MapEditor.Marshallable.Marshal(self)
+	t.parent = self.parent:GetId()
+	return t
+end
+
+function MapEditor.Object:__tostring()
+	return string.format("%s (id %i)" , self.type , self.id)
 end
