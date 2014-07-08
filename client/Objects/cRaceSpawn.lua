@@ -18,6 +18,10 @@ function Objects.RaceSpawn:__init(...) ; MapEditor.Object.__init(self , ...)
 end
 
 function Objects.RaceSpawn:OnRender()
+	self.cursor.position = self:GetPosition()
+	self.cursor.angle = self:GetAngle()
+	self.cursor:Render()
+	
 	for index , vehicleInfo in ipairs(self:GetProperty("vehicles").value) do
 		if vehicleInfo ~= MapEditor.NoObject then
 			Render:DrawLine(self:GetPosition() , vehicleInfo.position , Color.Gray)

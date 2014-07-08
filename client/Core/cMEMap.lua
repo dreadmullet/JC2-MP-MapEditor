@@ -1,6 +1,6 @@
 class("Map" , MapEditor)
 
-MapEditor.Map.version = 1
+MapEditor.Map.version = 2
 
 function MapEditor.Map:__init(initialPosition , mapType)
 	EGUSM.SubscribeUtility.__init(self)
@@ -302,32 +302,42 @@ MapEditor.Map.Load = function(marshalledSource)
 	local map = MapEditor.Map(Vector3(-6550 , 215 , -3290) , marshalledSource.type)
 	
 	-- Unmarshal Objects.
+	for index , objectData in pairs(marshalledSource.objects) do
+		-- Note: Adding 'object' variable to objectData for convenience.
+		objectData.object = MapEditor.Object.Unmarshal(objectData)
+		map:AddObject(objectData.object)
+	end
+	-- Set parents.
+	for index , objectData in pairs(marshalledSource.objects) do
+		if objectData.parent then
+			local parent = map:GetObject(objectData.parent)
+			objectData.object:SetParent(parent)
+		end
+	end
+	-- Calculate highestId and averageObjectPosition.
 	local highestId = 1
 	local averageObjectPosition = Vector3(0 , 0 , 0)
 	local objectCount = 0
-	for objectIdSometimes , objectData in pairs(marshalledSource.objects) do
+	for index , objectData in pairs(marshalledSource.objects) do
 		if objectData.id > highestId then
 			highestId = objectData.id
 		end
 		
-		local object = MapEditor.Object.Unmarshal(objectData)
-		map:AddObject(object)
-		
+		averageObjectPosition = averageObjectPosition + objectData.object:GetPosition()
 		objectCount = objectCount + 1
-		averageObjectPosition = averageObjectPosition + object:GetPosition()
 	end
 	averageObjectPosition = averageObjectPosition / objectCount
-	map.objectIdCounter = highestId + 1
 	-- Unmarshal Object properties. This is done here because some properties are Objects, so all
 	-- Objects must be loaded first.
-	for objectIdSometimes , objectData in pairs(marshalledSource.objects) do
-		MapEditor.PropertyManager.Unmarshal(map:GetObject(objectData.id) , objectData.properties)
+	for index , objectData in pairs(marshalledSource.objects) do
+		MapEditor.PropertyManager.Unmarshal(objectData.object , objectData.properties)
 	end
 	-- Unmarshal map properties here, for the same reason as above.
 	MapEditor.PropertyManager.Unmarshal(map , marshalledSource.properties)
 	
 	if objectCount > 0 then
 		map.camera:SetPosition(averageObjectPosition)
+		map.objectIdCounter = highestId + 1
 	end
 	
 	MapEditor.mapMenu.state = "Saved map"

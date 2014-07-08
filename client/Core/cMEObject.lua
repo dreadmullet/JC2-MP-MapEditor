@@ -8,8 +8,8 @@ MapEditor.Object.shadowColor = Color(0 , 0 , 0 , 192)
 MapEditor.Object.members = {
 	"id" ,
 	"type" ,
-	"position" ,
-	"angle" ,
+	"localPosition" ,
+	"localAngle" ,
 	"isClientSide" ,
 }
 
@@ -19,13 +19,13 @@ MapEditor.Object.Unmarshal = function(o)
 		error("Object class not found: "..tostring(o.type))
 	end
 	
-	local position = Vector3(o.position[1] , o.position[2] , o.position[3])
-	local angle = Angle(o.angle[1] , o.angle[2] , o.angle[3] , o.angle[4])
+	local localPosition = Vector3(o.localPosition[1] , o.localPosition[2] , o.localPosition[3])
+	local localAngle = Angle(o.localAngle[1] , o.localAngle[2] , o.localAngle[3] , o.localAngle[4])
 	
-	local object = objectClass(position , angle)
+	local object = objectClass(localPosition , localAngle)
 	object.id = o.id
 	
-	-- Properties are done in PropertyManager.Unmarshal later on.
+	-- Properties and children are done in PropertyManager.Unmarshal later on.
 	
 	return object
 end
@@ -57,11 +57,15 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	self.Render = MapEditor.Object.Render
 	self.SetPosition = MapEditor.Object.SetPosition
 	self.SetAngle = MapEditor.Object.SetAngle
+	self.SetLocalPosition = MapEditor.Object.SetLocalPosition
+	self.SetLocalAngle = MapEditor.Object.SetLocalAngle
 	self.SetParent = MapEditor.Object.SetParent
 	self.SetSelected = MapEditor.Object.SetSelected
 	self.GetId = MapEditor.Object.GetId
 	self.GetPosition = MapEditor.Object.GetPosition
 	self.GetAngle = MapEditor.Object.GetAngle
+	self.GetLocalPosition = MapEditor.Object.GetLocalPosition
+	self.GetLocalAngle = MapEditor.Object.GetLocalAngle
 	self.GetParent = MapEditor.Object.GetParent
 	self.GetIsSelected = MapEditor.Object.GetIsSelected
 	self.GetIsScreenPointWithin = MapEditor.Object.GetIsScreenPointWithin
@@ -70,16 +74,21 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	self.IterateChildren = MapEditor.Object.IterateChildren
 	self.AddChild = MapEditor.Object.AddChild
 	self.RemoveChild = MapEditor.Object.RemoveChild
+	self.RecalculateTransform = MapEditor.Object.RecalculateTransform
 	self.Marshal = MapEditor.Object.Marshal
 	self.__tostring = MapEditor.Object.__tostring
 	
 	self.id = MapEditor.map.objectIdCounter
 	MapEditor.map.objectIdCounter = MapEditor.map.objectIdCounter + 1
 	self.type = class_info(self).name
-	self.position = initialPosition or Vector3(0 , 208 , 0)
-	self.angle = initialAngle or Angle(0 , 0 , 0)
+	self.localPosition = initialPosition or Vector3(0 , 208 , 0)
+	self.localAngle = initialAngle or Angle(0 , 0 , 0)
 	self.isClientSide = false
 	self.parent = MapEditor.NoObject
+	
+	-- position and angle are global and are calculated in RecalculateTransform when necessary.
+	self.position = self.localPosition
+	self.angle = self.localAngle
 	
 	self.children = {}
 	self.isSelected = false
@@ -163,10 +172,6 @@ function MapEditor.Object:Render()
 		labelSourcePosition.y = labelSourcePosition.y - self.selectionStrategy.bounds[2].y
 	end
 	
-	if self.cursor then
-		self.cursor:Render()
-	end
-	
 	if self.OnRender then
 		self:OnRender()
 	end
@@ -180,38 +185,56 @@ function MapEditor.Object:Render()
 			local textSize = Render:GetTextSize(text , fontSize)
 			screenPosition.x = screenPosition.x - textSize.x * 0.5
 			screenPosition.y = screenPosition.y + 2
+			local shadowPosition = screenPosition + Vector2.One
 			
-			Render:DrawText(screenPosition + Vector2.One , text , MapEditor.Object.shadowColor , fontSize)
+			Render:DrawText(shadowPosition , text , MapEditor.Object.shadowColor , fontSize)
 			Render:DrawText(screenPosition , text , self.labelColor , fontSize)
 		end
 	end
 end
 
 function MapEditor.Object:SetPosition(position)
-	self.position = position
-	
-	if self.cursor then
-		self.cursor.position = position
+	if self.parent ~= MapEditor.NoObject then
+		self.localPosition = self.parent.angle:Inverse() * (position - self.parent.position)
+	else
+		self.localPosition = position
 	end
 	
-	if self.OnPositionChange then
-		self:OnPositionChange(position)
-	end
+	self:RecalculateTransform()
 end
 
 function MapEditor.Object:SetAngle(angle)
-	self.angle = angle
-	
-	if self.cursor then
-		self.cursor.angle = angle
+	if self.parent ~= MapEditor.NoObject then
+		self.localAngle = self.parent.angle:Inverse() * angle
+	else
+		self.localAngle = angle
 	end
 	
-	if self.OnAngleChange then
-		self:OnAngleChange(angle)
+	self:RecalculateTransform()
+end
+
+function MapEditor.Object:SetLocalPosition(localPosition)
+	self.localPosition = localPosition
+	
+	self:RecalculateTransform()
+	
+	if self.OnPositionChange then
+		self:OnPositionChange(self.position)
 	end
 end
 
-function MapEditor.Object:SetParent(object)
+function MapEditor.Object:SetLocalAngle(localAngle)
+	self.localAngle = localAngle
+	
+	self:RecalculateTransform()
+	
+	if self.OnAngleChange then
+		self:OnAngleChange(self.angle)
+	end
+end
+
+-- keepGlobalTransform is optional.
+function MapEditor.Object:SetParent(object , keepGlobalTransform)
 	-- Return if our parent won't change.
 	if MapEditor.Object.Compare(self.parent , object) then
 		return
@@ -225,11 +248,25 @@ function MapEditor.Object:SetParent(object)
 	if self.parent ~= MapEditor.NoObject then
 		self.parent:RemoveChild(self)
 	end
-	-- Set our new parent and add us to their children. Also set our new position.
+	-- If keepGlobalTransform is true, our global position and angle won't change after parenting.
+	if keepGlobalTransform then
+		if object ~= MapEditor.NoObject then
+			local inverseParentAngle = object.angle:Inverse()
+			local deltaPosition = self.position - object.position
+			self:SetLocalAngle(inverseParentAngle * self.angle)
+			self:SetLocalPosition(inverseParentAngle * deltaPosition)
+		else
+			self:SetLocalAngle(self.angle)
+			self:SetLocalPosition(self.position)
+		end
+	end
+	-- Set our new parent and add us to their children.
 	self.parent = object
 	if self.parent ~= MapEditor.NoObject then
 		self.parent:AddChild(self)
 	end
+	-- Recalculate our transform (as well as our children's).
+	self:RecalculateTransform()
 end
 
 function MapEditor.Object:SetSelected(selected)
@@ -262,6 +299,14 @@ end
 
 function MapEditor.Object:GetAngle()
 	return self.angle
+end
+
+function MapEditor.Object:GetLocalPosition()
+	return self.localPosition
+end
+
+function MapEditor.Object:GetLocalAngle()
+	return self.localAngle
 end
 
 function MapEditor.Object:GetParent()
@@ -419,10 +464,24 @@ function MapEditor.Object:RemoveChild(object)
 	end
 end
 
+function MapEditor.Object:RecalculateTransform()
+	if self.parent ~= MapEditor.NoObject then
+		self.angle = self.parent.angle * self.localAngle
+		self.position = self.parent.position + self.parent.angle * self.localPosition
+	else
+		self.angle = self.localAngle
+		self.position = self.localPosition
+	end
+	-- Call RecalculateTransform on our children.
+	self:IterateChildren(MapEditor.Object.RecalculateTransform)
+end
+
 -- TODO: Haaaaaack, make the marshalling system better
 function MapEditor.Object:Marshal()
-	local t = MapEditor.Marshallable.Marshal(self)
-	t.parent = self.parent:GetId()
+	local t = MapEditor.PropertyManager.Marshal(self)
+	if self.parent ~= MapEditor.NoObject then
+		t.parent = self.parent:GetId()
+	end
 	return t
 end
 
