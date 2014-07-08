@@ -32,8 +32,10 @@ function Actions.Load:ReceiveMap(marshalledSource)
 		MapEditor.map:Destroy()
 	end
 	
-	MapEditor.map = MapEditor.Map.Load(marshalledSource)
-	MapEditor.map.name = self.mapName
+	MapEditor.Map.Load(marshalledSource)
+	if MapEditor.map ~= nil then
+		MapEditor.map.name = self.mapName
+	end
 	
 	self:Destroy()
 end
