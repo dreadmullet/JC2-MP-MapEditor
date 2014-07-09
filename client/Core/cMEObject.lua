@@ -217,10 +217,6 @@ function MapEditor.Object:SetLocalPosition(localPosition)
 	self.localPosition = localPosition
 	
 	self:RecalculateTransform()
-	
-	if self.OnPositionChange then
-		self:OnPositionChange(self.position)
-	end
 end
 
 function MapEditor.Object:SetLocalAngle(localAngle)
@@ -471,6 +467,10 @@ function MapEditor.Object:RecalculateTransform()
 	else
 		self.angle = self.localAngle
 		self.position = self.localPosition
+	end
+	
+	if self.OnPositionChange then
+		self:OnPositionChange(self.position)
 	end
 	-- Call RecalculateTransform on our children.
 	self:IterateChildren(MapEditor.Object.RecalculateTransform)
