@@ -223,10 +223,6 @@ function MapEditor.Object:SetLocalAngle(localAngle)
 	self.localAngle = localAngle
 	
 	self:RecalculateTransform()
-	
-	if self.OnAngleChange then
-		self:OnAngleChange(self.angle)
-	end
 end
 
 -- keepGlobalTransform is optional.
@@ -468,9 +464,12 @@ function MapEditor.Object:RecalculateTransform()
 		self.angle = self.localAngle
 		self.position = self.localPosition
 	end
-	
+	-- Call transform change callbacks.
 	if self.OnPositionChange then
 		self:OnPositionChange(self.position)
+	end
+	if self.OnAngleChange then
+		self:OnAngleChange(self.angle)
 	end
 	-- Call RecalculateTransform on our children.
 	self:IterateChildren(MapEditor.Object.RecalculateTransform)
