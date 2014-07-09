@@ -63,34 +63,66 @@ MapEditor.LoadFromMarshalledMap = function(map)
 	end
 	
 	-- Convert object position/angle to actual Vector3s and Angles.
-	for objectIdSometimes , object in pairs(map.objects) do
+	-- Populate objectIdToObject.
+	for index , object in pairs(map.objects) do
 		if object.id >= objectIdCounter then
 			objectIdCounter = object.id + 1
 		end
 		
 		objectIdToObject[object.id] = object
 		
-		object.position = Vector3(
-			object.position[1] ,
-			object.position[2] ,
-			object.position[3]
+		object.localPosition = Vector3(
+			object.localPosition[1] ,
+			object.localPosition[2] ,
+			object.localPosition[3]
 		)
-		object.angle = Angle(
-			object.angle[1] ,
-			object.angle[2] ,
-			object.angle[3] ,
-			object.angle[4]
+		object.localAngle = Angle(
+			object.localAngle[1] ,
+			object.localAngle[2] ,
+			object.localAngle[3] ,
+			object.localAngle[4]
 		)
+		
+		object.children = {}
 	end
 	
+	-- Change parent ids to actual objects and populate object children.
 	-- Call ProcessProperties on all object properties, as well as the map properties.
-	for objectIdSometimes , object in pairs(map.objects) do
+	for index , object in pairs(map.objects) do
+		if object.parent then
+			object.parent = objectIdToObject[object.parent]
+			table.insert(object.parent.children , object)
+		end
+		
 		ProcessProperties(object.properties)
 	end
 	ProcessProperties(map.properties)
 	
-	-- After-processing of certain objects.
-	for objectIdSometimes , object in pairs(map.objects) do
+	-- Calculate global position and angle: start at any top-level objects (those without parents) 
+	-- and recursively iterate through their children to calculate their global transforms.
+	local RecursivelyCalculateTransform
+	RecursivelyCalculateTransform = function(object)
+		if object.parent then
+			object.angle = object.parent.angle * object.localAngle
+			object.position = object.parent.position + object.parent.angle * object.localPosition
+		else
+			object.angle = object.localAngle
+			object.position = object.localPosition
+		end
+		
+		for index , child in ipairs(object.children) do
+			RecursivelyCalculateTransform(child)
+		end
+	end
+	for index , object in pairs(map.objects) do
+		local isTopLevel = object.parent == nil
+		if isTopLevel then
+			RecursivelyCalculateTransform(object)
+		end
+	end
+	
+	-- Post-processing of certain objects.
+	for index , object in pairs(map.objects) do
 		if object.type == "Array" then
 			local sourceObject = object.properties.sourceObject
 			if sourceObject then
@@ -141,6 +173,22 @@ MapEditor.LoadFromMarshalledMap = function(map)
 					map.objects[newObject.id] = newObject
 				end
 			end
+		end
+	end
+	
+	-- Change parent and children to use ids.
+	-- Remove local position/angle and parent/children from objects. Once client-side map editor code
+	-- has moving stuff, it should probably only send local position/angle, but I'm keeping it simple
+	-- for now.
+	for index , object in pairs(map.objects) do
+		object.localPosition = nil
+		object.localAngle = nil
+		
+		if object.parent then
+			object.parent = object.parent.id
+		end
+		for index , child in ipairs(object.children) do
+			object.children[index] = child.id
 		end
 	end
 	
