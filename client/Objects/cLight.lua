@@ -55,7 +55,7 @@ function Objects.Light:OnDestroy()
 	self.light:Remove()
 end
 
-function Objects.Light:OnPositionChange(position)
+function Objects.Light:OnTransformChange(position , angle)
 	self.light:SetPosition(position)
 end
 

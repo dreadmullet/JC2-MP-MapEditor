@@ -464,12 +464,9 @@ function MapEditor.Object:RecalculateTransform()
 		self.angle = self.localAngle
 		self.position = self.localPosition
 	end
-	-- Call transform change callbacks.
-	if self.OnPositionChange then
-		self:OnPositionChange(self.position)
-	end
-	if self.OnAngleChange then
-		self:OnAngleChange(self.angle)
+	-- Call transform change callback.
+	if self.OnTransformChange then
+		self:OnTransformChange(self.position , self.angle)
 	end
 	-- Call RecalculateTransform on our children.
 	self:IterateChildren(MapEditor.Object.RecalculateTransform)

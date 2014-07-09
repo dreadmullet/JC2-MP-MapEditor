@@ -64,11 +64,9 @@ function Objects.StaticObject:OnRender()
 	end
 end
 
-function Objects.StaticObject:OnPositionChange(position)
+function Objects.StaticObject:OnTransformChange(position , angle)
 	self.staticObject:SetPosition(position)
-end
-
-function Objects.StaticObject:OnAngleChange(angle)
+	
 	if self.isUpdatingBounds == false then
 		self.staticObject:SetAngle(angle)
 	end

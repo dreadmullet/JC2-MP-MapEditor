@@ -69,6 +69,6 @@ function Objects.RaceCheckpoint:OnRender()
 	end
 end
 
-function Objects.RaceCheckpoint:OnPositionChange(position)
+function Objects.RaceCheckpoint:OnTransformChange(position , angle)
 	self.ring:SetPosition(position)
 end
