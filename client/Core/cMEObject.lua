@@ -457,6 +457,9 @@ function MapEditor.Object:RemoveChild(object)
 end
 
 function MapEditor.Object:RecalculateTransform()
+	local previousPosition = self.position
+	local previousAngle = self.angle
+	
 	if self.parent ~= MapEditor.NoObject then
 		self.angle = self.parent.angle * self.localAngle
 		self.position = self.parent.position + self.parent.angle * self.localPosition
@@ -464,9 +467,21 @@ function MapEditor.Object:RecalculateTransform()
 		self.angle = self.localAngle
 		self.position = self.localPosition
 	end
-	-- Call transform change callback.
-	if self.OnTransformChange then
-		self:OnTransformChange(self.position , self.angle)
+	-- If the transform changed, call OnTransformChange and fire ObjectTransformChange.
+	if
+		Utility.CompareVectors(self.position , previousPosition) == false or
+		Utility.CompareAngles(self.angle , previousAngle) == false
+	then
+		if self.OnTransformChange then
+			self:OnTransformChange(self.position , self.angle)
+		end
+		
+		local args = {
+			objectId = self.id ,
+			position = self.position ,
+			angle = self.angle
+		}
+		Events:Fire("ObjectTransformChange" , args)
 	end
 	-- Call RecalculateTransform on our children.
 	self:IterateChildren(MapEditor.Object.RecalculateTransform)

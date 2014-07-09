@@ -94,3 +94,19 @@ Utility.PrettifyVariableName = function(name)
 	
 	return table.concat(words , " ")
 end
+
+Utility.CompareVectors = function(v1 , v2)
+	return (
+		v1.x == v2.x and
+		v1.y == v2.y and
+		v1.z == v2.z
+	)
+end
+
+Utility.CompareAngles = function(a1 , a2)
+	return (
+		a1.yaw == a2.yaw and
+		a1.pitch == a2.pitch and
+		a1.roll == a2.roll
+	)
+end
