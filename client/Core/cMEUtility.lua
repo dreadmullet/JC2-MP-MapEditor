@@ -3,31 +3,18 @@ MapEditor.Utility = {}
 MapEditor.Utility.DrawBounds = function(args)
 	local b1 = args.bounds[1]
 	local b2 = args.bounds[2]
-	local lines = {
-		-- Top square
-		{Vector3(b1.x , b2.y , b1.z) , Vector3(b2.x , b2.y , b1.z)} ,
-		{Vector3(b1.x , b2.y , b2.z) , Vector3(b2.x , b2.y , b2.z)} ,
-		{Vector3(b1.x , b2.y , b1.z) , Vector3(b1.x , b2.y , b2.z)} ,
-		{Vector3(b2.x , b2.y , b1.z) , Vector3(b2.x , b2.y , b2.z)} ,
-		-- Bottom square
-		{Vector3(b1.x , b1.y , b1.z) , Vector3(b2.x , b1.y , b1.z)} ,
-		{Vector3(b1.x , b1.y , b2.z) , Vector3(b2.x , b1.y , b2.z)} ,
-		{Vector3(b1.x , b1.y , b1.z) , Vector3(b1.x , b1.y , b2.z)} ,
-		{Vector3(b2.x , b1.y , b1.z) , Vector3(b2.x , b1.y , b2.z)} ,
-		-- Sides
-		{Vector3(b1.x , b1.y , b1.z) , Vector3(b1.x , b2.y , b1.z)} ,
-		{Vector3(b2.x , b1.y , b1.z) , Vector3(b2.x , b2.y , b1.z)} ,
-		{Vector3(b1.x , b1.y , b2.z) , Vector3(b1.x , b2.y , b2.z)} ,
-		{Vector3(b2.x , b1.y , b2.z) , Vector3(b2.x , b2.y , b2.z)} ,
-	}
 	
 	local transform = Transform3()
 	transform:Translate(args.position)
 	transform:Rotate(args.angle)
+	transform:Translate(b1)
+	transform:Scale(b2 - b1)
 	Render:SetTransform(transform)
 	
-	for index , line in ipairs(lines) do
-		Render:DrawLine(line[1] , line[2] , args.color or Color.White)
+	if args.isSelected == true then
+		MapEditor.Utility.boundsModelSelected:Draw()
+	else
+		MapEditor.Utility.boundsModel:Draw()
 	end
 	
 	Render:ResetTransform()
@@ -51,4 +38,54 @@ MapEditor.Utility.DrawArea = function(position , size , thickness , color)
 	Draw(topLeft , bottomLeft , color)
 	Draw(topRight , bottomRight , color)
 	Draw(bottomLeft , bottomRight , color)
+end
+
+-- Create  models used for DrawBounds.
+
+do
+	local currentColor
+	
+	local V = function(x , y , z)
+		return Vertex(Vector3(x , y , z) , currentColor)
+	end
+	
+	currentColor = Color.Gray
+	MapEditor.Utility.boundsModel = Model.Create{
+		-- Top
+		V(0 , 1 , 0) , V(1 , 1 , 0) ,
+		V(0 , 1 , 1) , V(1 , 1 , 1) ,
+		V(0 , 1 , 0) , V(0 , 1 , 1) ,
+		V(1 , 1 , 0) , V(1 , 1 , 1) ,
+		-- Bottom
+		V(0 , 0 , 0) , V(1 , 0 , 0) ,
+		V(0 , 0 , 1) , V(1 , 0 , 1) ,
+		V(0 , 0 , 0) , V(0 , 0 , 1) ,
+		V(1 , 0 , 0) , V(1 , 0 , 1) ,
+		-- Sides
+		V(0 , 0 , 0) , V(0 , 1 , 0) ,
+		V(1 , 0 , 0) , V(1 , 1 , 0) ,
+		V(0 , 0 , 1) , V(0 , 1 , 1) ,
+		V(1 , 0 , 1) , V(1 , 1 , 1) ,
+	}
+	MapEditor.Utility.boundsModel:SetTopology(Topology.LineList)
+	
+	currentColor = Color.LawnGreen
+	MapEditor.Utility.boundsModelSelected = Model.Create{
+		-- Top
+		V(0 , 1 , 0) , V(1 , 1 , 0) ,
+		V(0 , 1 , 1) , V(1 , 1 , 1) ,
+		V(0 , 1 , 0) , V(0 , 1 , 1) ,
+		V(1 , 1 , 0) , V(1 , 1 , 1) ,
+		-- Bottom
+		V(0 , 0 , 0) , V(1 , 0 , 0) ,
+		V(0 , 0 , 1) , V(1 , 0 , 1) ,
+		V(0 , 0 , 0) , V(0 , 0 , 1) ,
+		V(1 , 0 , 0) , V(1 , 0 , 1) ,
+		-- Sides
+		V(0 , 0 , 0) , V(0 , 1 , 0) ,
+		V(1 , 0 , 0) , V(1 , 1 , 0) ,
+		V(0 , 0 , 1) , V(0 , 1 , 1) ,
+		V(1 , 0 , 1) , V(1 , 1 , 1) ,
+	}
+	MapEditor.Utility.boundsModelSelected:SetTopology(Topology.LineList)
 end

@@ -155,19 +155,8 @@ function MapEditor.Object:Render()
 			angle = self.angle ,
 			bounds = self.selectionStrategy.bounds ,
 			color = Color.Gray ,
+			isSelected = self.isSelected ,
 		}
-		
-		if self.isSelected then
-			local boundsEnlarged = {}
-			boundsEnlarged[1] = self.selectionStrategy.bounds[1] * 1.1
-			boundsEnlarged[2] = self.selectionStrategy.bounds[2] * 1.1
-			MapEditor.Utility.DrawBounds{
-				position = self.position ,
-				angle = self.angle ,
-				bounds = boundsEnlarged ,
-				color = Color.LawnGreen ,
-			}
-		end
 		
 		labelSourcePosition.y = labelSourcePosition.y - self.selectionStrategy.bounds[2].y
 	end
@@ -179,7 +168,7 @@ function MapEditor.Object:Render()
 	-- Draw label.
 	if MapEditor.Preferences.drawLabels then
 		local screenPosition , success = Render:WorldToScreen(labelSourcePosition)
-		if success then
+		if success and screenPosition:IsNaN() == false then
 			local text = string.format("%i %s" , self.id , self.prettyType)
 			local fontSize = 10
 			local textSize = Render:GetTextSize(text , fontSize)
