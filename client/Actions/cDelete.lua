@@ -3,17 +3,26 @@ class("Delete" , Actions)
 function Actions.Delete:__init()
 	MapEditor.Action.__init(self)
 	
-	self.objects = {}
+	self.objectsInfo = {}
 	-- If we delete an Object that is referenced elsewhere, those properties get reset.
 	-- Each element is like, {property = Property , originalValue = blar , index = optional}
 	self.properties = {}
 	
 	MapEditor.map.selectedObjects:IterateObjects(function(object)
-		table.insert(self.objects , object)
+		local oldChildren = {}
+		object:IterateChildren(function(child)
+			table.insert(oldChildren , child)
+		end)
+		local objectInfo = {
+			object = object ,
+			oldParent = object:GetParent() ,
+			oldChildren = oldChildren ,
+		}
+		table.insert(self.objectsInfo , objectInfo)
 	end)
 	
 	-- Cancel if there aren't any selected objects.
-	if #self.objects == 0 then
+	if #self.objectsInfo == 0 then
 		self:Cancel()
 		return
 	end
@@ -24,8 +33,8 @@ function Actions.Delete:__init()
 		local IsInObjects = function(propertyValue)
 			if propertyValue ~= MapEditor.NoObject then
 				local objectId = propertyValue:GetId()
-				for index , object in ipairs(self.objects) do
-					if object:GetId() == objectId then
+				for index , objectInfo in ipairs(self.objectsInfo) do
+					if objectInfo.object:GetId() == objectId then
 						return true
 					end
 				end
@@ -63,20 +72,18 @@ function Actions.Delete:__init()
 end
 
 function Actions.Delete:Undo()
-	for index , object in ipairs(self.objects) do
+	for index , objectInfo in ipairs(self.objectsInfo) do
+		local object = objectInfo.object
 		-- Recreate the object.
 		object:Recreate()
 		MapEditor.map:AddObject(object)
 		MapEditor.map.selectedObjects:AddObject(object)
 		-- Reparent the object's children.
-		object:IterateChildren(function(child)
-			child:SetParent(object)
-		end)
-		-- Readd the object to its parent's children.
-		local parent = object:GetParent()
-		if parent ~= MapEditor.NoObject then
-			parent:AddChild(object)
+		for index , child in pairs(objectInfo.oldChildren) do
+			child:SetParent(object , true)
 		end
+		-- Reparent the object.
+		object:SetParent(objectInfo.oldParent , true)
 	end
 	
 	for index , propertyInfo in ipairs(self.properties) do
@@ -87,17 +94,16 @@ function Actions.Delete:Undo()
 end
 
 function Actions.Delete:Redo()
-	for index , object in ipairs(self.objects) do
+	for index , objectInfo in ipairs(self.objectsInfo) do
+		local object = objectInfo.object
 		-- Remove the object from its parent's children.
 		local parent = object:GetParent()
 		if parent ~= MapEditor.NoObject then
-			parent:RemoveChild(object)
+			object:SetParent(MapEditor.NoObject , true)
 		end
 		-- Unparent the object's children.
 		object:IterateChildren(function(child)
-			child:SetParent(MapEditor.NoObject)
-			-- Hack. SetParent will remove the child, so add it back so that undo works.
-			table.insert(object.children , child)
+			child:SetParent(MapEditor.NoObject , true)
 		end)
 		-- Destroy the object.
 		object:Destroy()
