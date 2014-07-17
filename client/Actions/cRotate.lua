@@ -9,12 +9,7 @@ function Actions.Rotate:__init()
 	
 	self.controlDisplayer.name = "Rotate"
 	
-	self.gizmoModel = nil
-	
-	local args = {
-		path = "Models/Rotate gizmo"
-	}
-	OBJLoader.Request(args , self , function(self , model) self.gizmoModel = model end)
+	self.gizmoModel = MapEditor.models["Rotate gizmo"]
 end
 
 function Actions.Rotate:OnProcess(objectInfo , mouse , pivot)

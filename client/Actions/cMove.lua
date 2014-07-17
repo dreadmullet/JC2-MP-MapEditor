@@ -8,12 +8,7 @@ function Actions.Move:__init()
 	self.controlDisplayer.name = "Move"
 	self.controlDisplayer:AddControl("Snap to surface")
 	
-	self.gizmoModel = nil
-	
-	local args = {
-		path = "Models/Move gizmo"
-	}
-	OBJLoader.Request(args , self , function(self , model) self.gizmoModel = model end)
+	self.gizmoModel = MapEditor.models["Move gizmo"]
 end
 
 function Actions.Move:OnProcess(objectInfo , mouse , pivot)
