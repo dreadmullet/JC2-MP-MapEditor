@@ -122,6 +122,7 @@ end
 function MapEditor.PropertyManager:Unmarshal(properties)
 	for name , propertyData in pairs(properties) do
 		local property = self:GetProperty(name)
+		local defaultValue = property.value
 		if property then
 			local isTable = propertyData[1] == 1
 			local typeHash = propertyData[2]
@@ -142,6 +143,7 @@ function MapEditor.PropertyManager:Unmarshal(properties)
 		self:PropertyChanged{
 			name = property.name ,
 			newValue = property.value ,
+			oldValue = defaultValue ,
 		}
 	end
 end

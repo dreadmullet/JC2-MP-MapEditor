@@ -1,13 +1,10 @@
+----------------------------------------------------------------------------------------------------
+-- Array
+----------------------------------------------------------------------------------------------------
+
 class("Array" , Objects)
 
-function Objects.Array:__init(...)
-	EGUSM.SubscribeUtility.__init(self)
-	MapEditor.Object.__init(self , ...)
-	
-	self:AddProperty{
-		name = "sourceObject" ,
-		type = "Object" ,
-	}
+function Objects.Array:__init(...) ; MapEditor.Object.__init(self , ...)
 	self:AddProperty{
 		name = "count" ,
 		type = "number" ,
@@ -67,42 +64,12 @@ function Objects.Array:__init(...)
 	
 	self.selectionStrategy = {type = "Icon" , icon = Icons.Array}
 	
-	self.objects = {}
-	self.sourceObject = nil
-	-- These two are used to update our object transforms when the original object's transform
-	-- changes.
-	self.lastObjectPosition = Vector3()
-	self.lastObjectAngle = Angle()
-	
-	self:EventSubscribe("PropertyChange")
+	self.baseDuplicateManager = ArrayDuplicateManager(self , nil , self)
 end
 
-function Objects.Array:CreateObject()
-	if self.sourceObject == nil then
-		return nil
-	end
-	
-	-- The key here is to create the object but don't add it to the map's objects.
-	local newObject = Objects[self.sourceObject.type](
-		self.sourceObject:GetPosition() ,
-		self.sourceObject:GetAngle()
-	)
-	
-	-- Copy over the properties.
-	self.sourceObject:IterateProperties(function(property)
-		newObject:SetProperty(property.name , property.value)
-	end)
-	
-	return newObject
-end
-
-function Objects.Array:UpdateObjectTransforms()
-	if self.sourceObject == nil then
-		return
-	end
-	
-	local position = self.sourceObject:GetPosition()
-	local angle = self.sourceObject:GetAngle()
+function Objects.Array:UpdateDuplicateTransforms(duplicateManager)
+	local position = duplicateManager.sourceObject:GetPosition()
+	local angle = duplicateManager.sourceObject:GetAngle()
 	
 	local offsetPosition = Vector3(
 		self:GetProperty("offsetX").value ,
@@ -133,98 +100,179 @@ function Objects.Array:UpdateObjectTransforms()
 		angle = offsetAngle * angle
 	end
 	
-	for index , object in ipairs(self.objects) do
+	for index , object in ipairs(duplicateManager.duplicates) do
 		Next()
-		object:SetPosition(position)
-		object:SetAngle(angle)
+		object:SetLocalPosition(position)
+		object:SetLocalAngle(angle)
 	end
-end
-
-function Objects.Array:OnRecreate()
-	if self.sourceObject == nil then
-		return
-	end
-	
-	for n = 1 , self:GetProperty("count").value do
-		local object = self:CreateObject()
-		table.insert(self.objects , object)
-	end
-	
-	self:UpdateObjectTransforms()
 end
 
 function Objects.Array:OnDestroy()
-	-- Remove all of our duplicate objects.
-	for index , object in ipairs(self.objects) do
-		object:Destroy()
-	end
-	self.objects = {}
+	self.baseDuplicateManager:Destroy()
+end
+
+function Objects.Array:OnRecreate()
+	self.baseDuplicateManager = ArrayDuplicateManager(self , nil , self)
 end
 
 function Objects.Array:OnRender()
-	if self.sourceObject ~= nil then
-		if
-			self.sourceObject:GetPosition() ~= self.lastObjectPosition or
-			self.sourceObject:GetAngle() ~= self.lastObjectAngle
-		then
-			self:UpdateObjectTransforms()
-			self.lastObjectPosition = self.sourceObject:GetPosition()
-			self.lastObjectAngle = self.sourceObject:GetAngle()
-		end
-	end
-	
-	for index , object in ipairs(self.objects) do
-		object:Render()
-	end
+	self.baseDuplicateManager:Render()
 end
 
 function Objects.Array:OnPropertyChange(args)
-	if args.name == "sourceObject" then
-		-- Remove all of our duplicate objects.
-		for index , object in ipairs(self.objects) do
-			object:Destroy()
+	if args.name == "count" then
+		local delta = args.newValue - args.oldValue
+		self.baseDuplicateManager:UpdateCount(delta)
+	else
+		for objectId , duplicateManager in pairs(self.baseDuplicateManager.duplicateManagers) do
+			self:UpdateDuplicateTransforms(duplicateManager)
 		end
-		self.objects = {}
-		-- If there is a new source object, recreate all of our objects.
-		if args.newValue ~= MapEditor.NoObject then
-			self.sourceObject = args.newValue
-			self:OnRecreate()
-		else
-			self.sourceObject = nil
-		end
-	elseif args.name == "count" then
-		if self.sourceObject ~= nil then
-			if args.newValue > #self.objects then
-				-- Add more objects.
-				for n = #self.objects + 1 , args.newValue do
-					local object = self:CreateObject()
-					table.insert(self.objects , object)
-				end
-			elseif args.newValue < #self.objects then
-				-- Remove some objects.
-				for n = #self.objects , args.newValue + 1 , -1 do
-					self.objects[n]:Destroy()
-					table.remove(self.objects , n)
+	end
+end
+
+----------------------------------------------------------------------------------------------------
+-- ArrayDuplicateManager
+----------------------------------------------------------------------------------------------------
+
+class("ArrayDuplicateManager")
+
+function ArrayDuplicateManager:__init(array , parentManager , sourceObject)
+	EGUSM.SubscribeUtility.__init(self)
+	
+	self.Destroy = ArrayDuplicateManager.Destroy
+	
+	self.array = array
+	self.parentManager = parentManager
+	self.sourceObject = sourceObject
+	
+	self.duplicates = {}
+	self.duplicateManagers = {}
+	self.isArray = parentManager == nil
+	self.isTopLevel = MapEditor.Object.Compare(self.sourceObject:GetParent() , self.array)
+	
+	if self.isArray == false then
+		local count = self.array:GetProperty("count").value
+		self:UpdateCount(count)
+	end
+	
+	self.sourceObject:IterateChildren(function(child)
+		self:AddChild(child)
+	end)
+	
+	self:EventSubscribe("ObjectTransformChange")
+	self:EventSubscribe("ObjectParentChange")
+	self:EventSubscribe("PropertyChange")
+end
+
+function ArrayDuplicateManager:Destroy()
+	for index , duplicate in ipairs(self.duplicates) do
+		duplicate:Destroy()
+	end
+	for objectId , duplicateManager in pairs(self.duplicateManagers) do
+		duplicateManager:Destroy()
+	end
+	
+	self:UnsubscribeAll()
+end
+
+function ArrayDuplicateManager:Render()
+	for index , duplicate in ipairs(self.duplicates) do
+		duplicate:Render()
+	end
+	for objectId , duplicateManager in pairs(self.duplicateManagers) do
+		duplicateManager:Render()
+	end
+end
+
+function ArrayDuplicateManager:DuplicateSourceObject()
+	local newObject = Objects[self.sourceObject.type]()
+	
+	self.sourceObject:IterateProperties(function(property)
+		newObject:SetProperty(property.name , property.value)
+	end)
+	
+	return newObject
+end
+
+function ArrayDuplicateManager:AddChild(child)
+	self.duplicateManagers[child.id] = ArrayDuplicateManager(self.array , self , child)
+end
+
+function ArrayDuplicateManager:UpdateCount(delta)
+	if self.isArray == false then
+		if delta > 0 then
+			-- Add some objects.
+			for n = 1 , delta do
+				local newObject = self:DuplicateSourceObject()
+				table.insert(self.duplicates , newObject)
+				
+				if self.isTopLevel then
+					newObject:SetLocalPosition(self.sourceObject:GetPosition())
+					newObject:SetLocalAngle(self.sourceObject:GetAngle())
+				else
+					newObject:SetParent(self.parentManager.duplicates[#self.duplicates])
+					newObject:SetLocalPosition(self.sourceObject:GetLocalPosition())
+					newObject:SetLocalAngle(self.sourceObject:GetLocalAngle())
 				end
 			end
+			
+			if self.isTopLevel then
+				self.array:UpdateDuplicateTransforms(self)
+			end
+		elseif delta < 0 then
+			-- Remove some objects.
+			for n = 1 , -delta do
+				local lastDuplicate = self.duplicates[#self.duplicates]
+				lastDuplicate:Destroy()
+				table.remove(self.duplicates , #self.duplicates)
+			end
 		end
-		
-		self:UpdateObjectTransforms()
-	else
-		self:UpdateObjectTransforms()
+	end
+	
+	for objectId , duplicateManager in pairs(self.duplicateManagers) do
+		duplicateManager:UpdateCount(delta)
 	end
 end
 
 -- Events
 
-function Objects.Array:PropertyChange(args)
-	local isOurObject = self.sourceObject ~= nil and self.sourceObject:GetId() == args.objectId
-	if isOurObject == false then
+function ArrayDuplicateManager:ObjectTransformChange(args)
+	-- Make sure this is our source object.
+	if args.objectId ~= self.sourceObject.id then
 		return
 	end
 	
-	-- If this is our source object, mirror the changed property on all of our duplicate objects.
-	for index , object in ipairs(self.objects) do
-		object:SetProperty(args.name , self.sourceObject:GetProperty(args.name).value)
+	if self.isTopLevel then
+		self.array:UpdateDuplicateTransforms(self)
+	else
+		for index , duplicate in ipairs(self.duplicates) do
+			duplicate:SetLocalPosition(self.sourceObject:GetLocalPosition())
+			duplicate:SetLocalAngle(self.sourceObject:GetLocalAngle())
+		end
+	end
+end
+
+function ArrayDuplicateManager:ObjectParentChange(args)
+	-- An object was parented to our source object, so add a duplicate manager for that object.
+	if args.newParentId == self.sourceObject.id then
+		local object = MapEditor.Object.GetById(args.objectId)
+		self:AddChild(object)
+	-- An object was unparented to our source object, so remove the duplicate manager we (hopefully)
+	-- have for that object.
+	elseif args.oldParentId == self.sourceObject.id then
+		self.duplicateManagers[args.objectId]:Destroy()
+		self.duplicateManagers[args.objectId] = nil
+	end
+end
+
+function ArrayDuplicateManager:PropertyChange(args)
+	-- Make sure this is our source object.
+	if args.objectId ~= self.sourceObject.id then
+		return
+	end
+	
+	-- Mirror the changed property on all of our duplicates.
+	for index , duplicate in ipairs(self.duplicates) do
+		duplicate:SetProperty(args.name , self.sourceObject:GetProperty(args.name).value)
 	end
 end

@@ -48,6 +48,7 @@ function MapEditor.Property:SetValue(value , index)
 		end
 	end
 	
+	local oldValue = self.value
 	local isSame = false
 	if index then
 		if self.value[index] == copiedValue then
@@ -65,6 +66,7 @@ function MapEditor.Property:SetValue(value , index)
 		self.propertyManager:PropertyChanged{
 			name = self.name ,
 			newValue = self.value ,
+			oldValue = oldValue ,
 		}
 	end
 end

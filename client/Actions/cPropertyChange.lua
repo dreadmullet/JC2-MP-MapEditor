@@ -64,6 +64,8 @@ function Actions.PropertyChange:Apply()
 			property.value = self.value
 		end
 		
+		propertyChangeArgs.oldValue = self.previousValues[index]
+		
 		property.propertyManager:PropertyChanged(propertyChangeArgs)
 	end
 end
@@ -73,6 +75,7 @@ function Actions.PropertyChange:Undo()
 		local propertyChangeArgs = {
 			name = property.name ,
 			newValue = self.previousValues[index] ,
+			oldValue = self.value ,
 		}
 		
 		if property.type == "table" then

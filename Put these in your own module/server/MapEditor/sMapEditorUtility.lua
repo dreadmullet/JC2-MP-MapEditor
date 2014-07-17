@@ -98,7 +98,7 @@ MapEditor.LoadFromMarshalledMap = function(map)
 	end
 	ProcessProperties(map.properties)
 	
-	-- Calculate global position and angle: start at any top-level objects (those without parents) 
+	-- Calculates global position and angle: start at any top-level objects (those without parents) 
 	-- and recursively iterate through their children to calculate their global transforms.
 	local RecursivelyCalculateTransform
 	RecursivelyCalculateTransform = function(object)
@@ -122,12 +122,15 @@ MapEditor.LoadFromMarshalledMap = function(map)
 	end
 	
 	-- Post-processing of certain objects.
-	for index , object in pairs(map.objects) do
+	-- newObjects is used because we can't add to map.objects while in the loop or it may skip some
+	-- objects.
+	local newObjects = {}
+	local PostProcessObject
+	PostProcessObject = function(object)
 		if object.type == "Array" then
-			local sourceObject = object.properties.sourceObject
-			if sourceObject then
-				local position = sourceObject.position
-				local angle = sourceObject.angle
+			for index , arrayChild in ipairs(object.children) do
+				local position = arrayChild.position
+				local angle = arrayChild.angle
 				local offsetPosition = Vector3(
 					object.properties.offsetX ,
 					object.properties.offsetY ,
@@ -160,19 +163,53 @@ MapEditor.LoadFromMarshalledMap = function(map)
 				for n = 1 , object.properties.count do
 					Next()
 					
-					local newObject = {
-						id = objectIdCounter ,
-						type = sourceObject.type ,
-						position = position ,
-						angle = angle ,
-						isClientSide = sourceObject.isClientSide ,
-						properties = sourceObject.properties ,
-					}
-					objectIdCounter = objectIdCounter + 1
+					local CopyObject
+					CopyObject = function(sourceObject , parent)
+						local newObject = {
+							id = objectIdCounter ,
+							type = sourceObject.type ,
+							isClientSide = sourceObject.isClientSide ,
+							properties = sourceObject.properties ,
+							parent = parent ,
+							children = {} ,
+						}
+						
+						if parent then
+							newObject.angle = parent.angle * sourceObject.localAngle
+							newObject.position = parent.position + parent.angle * sourceObject.localPosition
+						else
+							newObject.position = position
+							newObject.angle = angle
+						end
+						
+						objectIdCounter = objectIdCounter + 1
+						
+						table.insert(newObjects , newObject)
+						
+						for index , child in ipairs(sourceObject.children) do
+							table.insert(newObject.children , CopyObject(child , newObject))
+						end
+						
+						return newObject
+					end
 					
-					map.objects[newObject.id] = newObject
+					CopyObject(arrayChild , nil)
 				end
 			end
+		end
+	end
+	for index , object in pairs(map.objects) do
+		PostProcessObject(object)
+	end
+	
+	-- Apply newObjects. The while loop is because, in post processing, the new object can create
+	-- more new objects, which themselves can create new objects. Fun stuff.
+	while #newObjects > 0 do
+		local newObjectsCopy = newObjects
+		newObjects = {}
+		for index , newObject in ipairs(newObjectsCopy) do
+			map.objects[newObject.id] = newObject
+			PostProcessObject(newObject)
 		end
 	end
 	

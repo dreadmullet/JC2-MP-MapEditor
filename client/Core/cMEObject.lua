@@ -4,7 +4,7 @@ class("Object" , MapEditor)
 
 MapEditor.Object.iconRadius = 1
 MapEditor.Object.shadowColor = Color(0 , 0 , 0 , 192)
-
+MapEditor.Object.objects = {}
 MapEditor.Object.members = {
 	"id" ,
 	"type" ,
@@ -22,8 +22,7 @@ MapEditor.Object.Unmarshal = function(o)
 	local localPosition = Vector3(o.localPosition[1] , o.localPosition[2] , o.localPosition[3])
 	local localAngle = Angle(o.localAngle[1] , o.localAngle[2] , o.localAngle[3] , o.localAngle[4])
 	
-	local object = objectClass(localPosition , localAngle)
-	object.id = o.id
+	local object = objectClass(localPosition , localAngle , o.id)
 	
 	-- Properties and children are done in PropertyManager.Unmarshal later on.
 	
@@ -46,9 +45,15 @@ MapEditor.Object.Compare = function(o1 , o2)
 	end
 end
 
+-- Why not MapEditor.map:GetObject(id)? Because some objects are not part of the map. Array
+-- duplicates, for example.
+MapEditor.Object.GetById = function(id)
+	return MapEditor.Object.objects[id]
+end
+
 -- Instance
 
-function MapEditor.Object:__init(initialPosition , initialAngle)
+function MapEditor.Object:__init(initialPosition , initialAngle , id)
 	MapEditor.Marshallable.__init(self , MapEditor.Object.members)
 	MapEditor.PropertyManager.__init(self)
 	
@@ -78,7 +83,7 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	self.Marshal = MapEditor.Object.Marshal
 	self.__tostring = MapEditor.Object.__tostring
 	
-	self.id = MapEditor.map.objectIdCounter
+	self.id = id or MapEditor.map.objectIdCounter
 	MapEditor.map.objectIdCounter = MapEditor.map.objectIdCounter + 1
 	self.type = class_info(self).name
 	self.localPosition = initialPosition or Vector3(0 , 208 , 0)
@@ -99,15 +104,21 @@ function MapEditor.Object:__init(initialPosition , initialAngle)
 	self.selectionStrategy = {type = "Icon" , icon = Icons.Default}
 	self.prettyType = Utility.PrettifyVariableName(self.type)
 	self.labelColor = Color(208 , 208 , 208 , 192)
+	
+	MapEditor.Object.objects[self.id] = self
 end
 
 function MapEditor.Object:Destroy()
 	if self.OnDestroy then
 		self:OnDestroy()
 	end
+	
+	MapEditor.Object.objects[self.id] = nil
 end
 
 function MapEditor.Object:Recreate()
+	MapEditor.Object.objects[self.id] = self
+	
 	if self.OnRecreate then
 		self:OnRecreate()
 	end
@@ -242,12 +253,24 @@ function MapEditor.Object:SetParent(object , keepGlobalTransform)
 		end
 	end
 	-- Set our new parent and add us to their children.
+	local oldParent = self.parent
 	self.parent = object
 	if self.parent ~= MapEditor.NoObject then
 		self.parent:AddChild(self)
 	end
 	-- Recalculate our transform (as well as our children's).
 	self:RecalculateTransform()
+	-- Fire the ObjectParentChange event.
+	local args = {
+		objectId = self:GetId() ,
+	}
+	if oldParent ~= MapEditor.NoObject then
+		args.oldParentId = oldParent:GetId()
+	end
+	if self.parent ~= MapEditor.NoObject then
+		args.newParentId = self.parent:GetId()
+	end
+	Events:Fire("ObjectParentChange" , args)
 end
 
 function MapEditor.Object:SetSelected(selected)
@@ -468,7 +491,7 @@ function MapEditor.Object:RecalculateTransform()
 		local args = {
 			objectId = self.id ,
 			position = self.position ,
-			angle = self.angle
+			angle = self.angle ,
 		}
 		Events:Fire("ObjectTransformChange" , args)
 	end
