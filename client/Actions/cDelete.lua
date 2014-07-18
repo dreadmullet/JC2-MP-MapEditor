@@ -97,8 +97,7 @@ function Actions.Delete:Redo()
 	for index , objectInfo in ipairs(self.objectsInfo) do
 		local object = objectInfo.object
 		-- Remove the object from its parent's children.
-		local parent = object:GetParent()
-		if parent ~= MapEditor.NoObject then
+		if object:GetParent() ~= MapEditor.NoObject then
 			object:SetParent(MapEditor.NoObject , true)
 		end
 		-- Unparent the object's children.
