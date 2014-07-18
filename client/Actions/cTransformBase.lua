@@ -19,6 +19,18 @@ function Actions.TransformBase:__init()
 	--    }
 	self.objects = {}
 	MapEditor.map.selectedObjects:IterateObjects(function(object)
+		-- If a child and its parent are moved or rotated at the same time, weird things happen. Make
+		-- sure that any selected children of selected objects get removed.
+		local isAParentSelected = false
+		object:IterateParentChain(function(parent)
+			if parent:GetIsSelected() == true then
+				isAParentSelected = true
+			end
+		end)
+		if isAParentSelected == true then
+			return
+		end
+		
 		self.objects[object:GetId()] = {
 			object =         object ,
 			startTransform = {position = object:GetPosition() , angle = object:GetAngle()} ,

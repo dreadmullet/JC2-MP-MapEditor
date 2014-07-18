@@ -77,6 +77,7 @@ function MapEditor.Object:__init(initialPosition , initialAngle , id)
 	self.GetScreenPoints = MapEditor.Object.GetScreenPoints
 	self.GetCanHaveParent = MapEditor.Object.GetCanHaveParent
 	self.IterateChildren = MapEditor.Object.IterateChildren
+	self.IterateParentChain = MapEditor.Object.IterateParentChain
 	self.AddChild = MapEditor.Object.AddChild
 	self.RemoveChild = MapEditor.Object.RemoveChild
 	self.RecalculateTransform = MapEditor.Object.RecalculateTransform
@@ -452,6 +453,13 @@ end
 function MapEditor.Object:IterateChildren(func)
 	for n = #self.children , 1 , -1 do
 		func(self.children[n])
+	end
+end
+
+function MapEditor.Object:IterateParentChain(func)
+	if self.parent ~= MapEditor.NoObject then
+		func(self.parent)
+		self.parent:IterateParentChain(func)
 	end
 end
 
