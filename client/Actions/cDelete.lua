@@ -78,12 +78,15 @@ function Actions.Delete:Undo()
 		object:Recreate()
 		MapEditor.map:AddObject(object)
 		MapEditor.map.selectedObjects:AddObject(object)
-		-- Reparent the object's children.
-		for index , child in pairs(objectInfo.oldChildren) do
-			child:SetParent(object , true)
-		end
 		-- Reparent the object.
 		object:SetParent(objectInfo.oldParent , true)
+	end
+	-- Children are reparented here instead of in the above loop because otherwise the children
+	-- could get reparented while they are still destroyed. Array didn't like that, at least.
+	for index , objectInfo in ipairs(self.objectsInfo) do
+		for index , child in pairs(objectInfo.oldChildren) do
+			child:SetParent(objectInfo.object , true)
+		end
 	end
 	
 	for index , propertyInfo in ipairs(self.properties) do
