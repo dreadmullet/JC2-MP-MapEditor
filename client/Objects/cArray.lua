@@ -166,6 +166,7 @@ end
 
 function ArrayDuplicateManager:Destroy()
 	for index , duplicate in ipairs(self.duplicates) do
+		duplicate:SetParent(MapEditor.NoObject)
 		duplicate:Destroy()
 	end
 	for objectId , duplicateManager in pairs(self.duplicateManagers) do
