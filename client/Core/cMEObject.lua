@@ -82,6 +82,7 @@ function MapEditor.Object:__init(initialPosition , initialAngle , id)
 	self.AddChild = MapEditor.Object.AddChild
 	self.RemoveChild = MapEditor.Object.RemoveChild
 	self.RecalculateTransform = MapEditor.Object.RecalculateTransform
+	self.CreateCopy = MapEditor.Object.CreateCopy
 	self.Marshal = MapEditor.Object.Marshal
 	self.__tostring = MapEditor.Object.__tostring
 	
@@ -516,6 +517,16 @@ function MapEditor.Object:RecalculateTransform()
 	end
 	-- Call RecalculateTransform on our children.
 	self:IterateChildren(MapEditor.Object.RecalculateTransform)
+end
+
+function MapEditor.Object:CreateCopy()
+	local newObject = Objects[self.type]()
+	
+	self:IterateProperties(function(property)
+		newObject:SetProperty(property.name , property.value)
+	end)
+	
+	return newObject
 end
 
 -- TODO: Haaaaaack, make the marshalling system better

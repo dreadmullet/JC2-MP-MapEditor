@@ -185,16 +185,6 @@ function ArrayDuplicateManager:Render()
 	end
 end
 
-function ArrayDuplicateManager:DuplicateSourceObject()
-	local newObject = Objects[self.sourceObject.type]()
-	
-	self.sourceObject:IterateProperties(function(property)
-		newObject:SetProperty(property.name , property.value)
-	end)
-	
-	return newObject
-end
-
 function ArrayDuplicateManager:AddChild(child)
 	self.duplicateManagers[child.id] = ArrayDuplicateManager(self.array , self , child)
 end
@@ -204,7 +194,7 @@ function ArrayDuplicateManager:UpdateCount(delta)
 		if delta > 0 then
 			-- Add some objects.
 			for n = 1 , delta do
-				local newObject = self:DuplicateSourceObject()
+				local newObject = self.sourceObject:CreateCopy()
 				table.insert(self.duplicates , newObject)
 				
 				if self.isTopLevel then
