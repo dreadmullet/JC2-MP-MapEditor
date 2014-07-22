@@ -56,14 +56,23 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	--
 	
 	self.objects = {}
+	self.objectTypeToObjects = {}
+	-- Populate the two tables above from our property managers.
 	for index , propertyManager in ipairs(self.propertyManagers) do
 		if propertyManager.GetId then
 			table.insert(self.objects , propertyManager)
+			local objectArray = self.objectTypeToObjects[propertyManager.type]
+			if objectArray == nil then
+				self.objectTypeToObjects[propertyManager.type] = {propertyManager}
+			else
+				table.insert(objectArray , propertyManager)
+			end
 		end
 	end
+	-- If we are showing the properties of objects (instead of...the only thing it could be right now
+	-- is the Map), show some object-specific things.
 	if #self.objects ~= 0 then
 		local base = BaseWindow.Create(self.scrollControl)
-		-- base:SetColor(MapEditor.PropertiesMenu.zebra1)
 		base:SetPadding(Vector2(2 , 4) , Vector2(2 , 4))
 		base:SetDock(GwenPosition.Top)
 		local countAndParentBase = base
@@ -112,10 +121,30 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 			label:SetText("(none)")
 		end
 		
+		-- If any of our objects have a static CreatePropertyMenuAuxControls function, call it on
+		-- them, so they can have their own buttons or whatever.
+		for objectType , objectArray in pairs(self.objectTypeToObjects) do
+			local func = Objects[objectType].CreatePropertyMenuAuxControls
+			if func then
+				local base = BaseWindow.Create(self.scrollControl)
+				base:SetMargin(Vector2(2 , 4) , Vector2(2 , 4))
+				base:SetDock(GwenPosition.Top)
+				base:SetHeight(20)
+				
+				local label = Label.Create(base)
+				label:SetDock(GwenPosition.Left)
+				label:SetAlignment(GwenPosition.CenterV)
+				label:SetText(objectType..":  ")
+				label:SizeToContents()
+				
+				func(base)
+			end
+		end
+		
 		-- Spacer
 		local base = BaseWindow.Create(self.scrollControl)
 		base:SetDock(GwenPosition.Top)
-		base:SetHeight(16)
+		base:SetHeight(12)
 	end
 	
 	--

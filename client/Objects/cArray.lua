@@ -130,6 +130,16 @@ function Objects.Array:OnPropertyChange(args)
 	end
 end
 
+function Objects.Array.CreatePropertyMenuAuxControls(base)
+	local button = Button.Create(base)
+	button:SetDock(GwenPosition.Left)
+	button:SetText("Apply")
+	button:SetWidth(80)
+	button:Subscribe("Press" , function()
+		MapEditor.map:SetAction(Actions.ApplyArray)
+	end)
+end
+
 ----------------------------------------------------------------------------------------------------
 -- ArrayDuplicateManager
 ----------------------------------------------------------------------------------------------------
