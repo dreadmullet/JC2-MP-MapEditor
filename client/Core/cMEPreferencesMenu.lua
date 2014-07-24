@@ -37,7 +37,6 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	local slider = HorizontalSlider.Create(base)
 	slider:SetDock(GwenPosition.Fill)
 	slider:SetRange(0.1 , 1)
-	slider:SetValue(MapEditor.Preferences.camSensitivityMove)
 	slider:Subscribe("ValueChanged" , self , self.CamSensitivityMoveSliderChanged)
 	self.camSensitivityMoveSlider = slider
 	
@@ -47,8 +46,6 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	label:SetTextSize(textSize)
 	label:SetWidth(textWidth)
 	self.camSensitivityMoveLabel = label
-	
-	self:CamSensitivityMoveSliderChanged()
 	
 	-- Camera rotation sensitivity slider
 	
@@ -60,7 +57,6 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	local slider = HorizontalSlider.Create(base)
 	slider:SetDock(GwenPosition.Fill)
 	slider:SetRange(0.002 , 0.015)
-	slider:SetValue(MapEditor.Preferences.camSensitivityRot)
 	slider:Subscribe("ValueChanged" , self , self.CamSensitivityRotSliderChanged)
 	self.camSensitivityRotSlider = slider
 	
@@ -70,8 +66,6 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	label:SetTextSize(textSize)
 	label:SetWidth(textWidth)
 	self.camSensitivityRotLabel = label
-	
-	self:CamSensitivityRotSliderChanged()
 	
 	-- Camera type
 	
@@ -89,10 +83,11 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	
 	local comboBox = ComboBox.Create(base)
 	comboBox:SetDock(GwenPosition.Fill)
-	comboBox:AddItem("Noclip")
-	comboBox:AddItem("Orbit")
-	comboBox:SelectItemByName(MapEditor.Preferences.camType)
+	comboBox:AddItem("Noclip" , "Noclip")
+	comboBox:AddItem("Orbit" , "Orbit")
+	comboBox:SelectItemByName("Noclip")
 	comboBox:Subscribe("Selection" , self , self.CameraTypeChanged)
+	self.camTypeComboBox = comboBox
 	
 	-- Position snap
 	
@@ -110,8 +105,8 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	
 	local textBox = TextBoxNumeric.Create(base)
 	textBox:SetDock(GwenPosition.Fill)
-	textBox:SetText(string.format("%f" , MapEditor.Preferences.snapPosition))
 	textBox:Subscribe("Blur" , self , self.SnapPositionChanged)
+	self.positionSnapTextBox = textBox
 	
 	-- Angle snap
 	
@@ -129,8 +124,8 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	
 	local textBox = TextBoxNumeric.Create(base)
 	textBox:SetDock(GwenPosition.Fill)
-	textBox:SetText(string.format("%f" , MapEditor.Preferences.snapAngle))
 	textBox:Subscribe("Blur" , self , self.SnapAngleChanged)
+	self.angleSnapTextBox = textBox
 	
 	-- Draw labels
 	
@@ -148,8 +143,8 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	
 	local button = Button.Create(base)
 	button:SetDock(GwenPosition.Fill)
-	button:SetText(tostring(MapEditor.Preferences.drawLabels))
 	button:Subscribe("Press" , self , self.DrawLabelsChanged)
+	self.drawLabelsButton = button
 	
 	-- Bind menu
 	
@@ -165,6 +160,8 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	scrollControl:SetDock(GwenPosition.Fill)
 	scrollControl:SetScrollable(false , true)
 	scrollControl:SetAutoHideBars(false)
+	
+	self:UpdateValues()
 	
 	-- TODO: These should probably be split into different sections.
 	local bindMenu = BindMenu.Create(scrollControl)
@@ -196,6 +193,26 @@ end
 
 function MapEditor.PreferencesMenu:GetVisible()
 	return self.window:GetVisible()
+end
+
+function MapEditor.PreferencesMenu:UpdateValues()
+	self.camSensitivityMoveSlider:SetValue(MapEditor.Preferences.camSensitivityMove)
+	self.camSensitivityMoveLabel:SetText(
+		string.format("Camera movement sensitivity: %.1f" , MapEditor.Preferences.camSensitivityMove)
+	)
+	
+	self.camSensitivityRotSlider:SetValue(MapEditor.Preferences.camSensitivityRot)
+	self.camSensitivityRotLabel:SetText(
+		string.format("Camera rotation sensitivity: %.3f" , MapEditor.Preferences.camSensitivityRot)
+	)
+	
+	self.camTypeComboBox:SelectItemByName(MapEditor.Preferences.camType)
+	
+	self.positionSnapTextBox:SetText(string.format("%f" , MapEditor.Preferences.snapPosition))
+	
+	self.angleSnapTextBox:SetText(string.format("%f" , MapEditor.Preferences.snapAngle))
+	
+	self.drawLabelsButton:SetText(tostring(MapEditor.Preferences.drawLabels))
 end
 
 -- GWEN events
