@@ -87,6 +87,7 @@ function Actions.Rotate:OnProcess(objectInfo , mouse , pivot)
 		endAngle.yaw = math.floor(endAngle.yaw / snap + 0.5) * snap
 		endAngle.pitch = math.floor(endAngle.pitch / snap + 0.5) * snap
 		endAngle.roll = math.floor(endAngle.roll / snap + 0.5) * snap
+		delta = endAngle * -objectInfo.startTransform.angle
 	end
 	
 	objectInfo.endTransform.angle = endAngle
