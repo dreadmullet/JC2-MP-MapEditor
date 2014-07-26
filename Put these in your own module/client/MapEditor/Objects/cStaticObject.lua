@@ -38,12 +38,16 @@ function MapEditor.Objects.StaticObject:SetEnabled(enabled)
 	if self.isEnabled then
 		local model = self.data.properties.model
 		
-		-- Get the collision either from a hardcoded list or just calculate it. Most models can be
-		-- calculated just fine.
-		local collision = self.collisionFixes[model]
-		if collision == nil then
-			collision = model:gsub("-" , "_lod1-"):gsub("%.lod" , "_col.pfx")
+		local collision
+		if self.data.properties.collisionEnabled == true then
+			-- Get the collision either from a hardcoded list or just calculate it. Most models can be
+			-- calculated just fine.
+			collision = self.collisionFixes[model]
+			if collision == nil then
+				collision = model:gsub("-" , "_lod1-"):gsub("%.lod" , "_col.pfx")
+			end
 		end
+		
 		self.staticObject = ClientStaticObject.Create{
 			position = self.position ,
 			angle = self.angle ,
