@@ -18,7 +18,7 @@ function Objects.RaceRespawnPoint:__init(...) ; MapEditor.Object.__init(self , .
 	self.cursorModel = MapEditor.models["Cursor"]
 end
 
-function Objects.Marker:OnRender()
+function Objects.RaceRespawnPoint:OnRender()
 	-- Render cursor model.
 	local transform = Transform3()
 	transform:Translate(self:GetPosition())
