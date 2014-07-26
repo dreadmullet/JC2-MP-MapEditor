@@ -3,14 +3,14 @@ class("StaticObject" , MapEditor.Objects)
 function MapEditor.Objects.StaticObject:__init(...) ; MapEditor.Object.__init(self , ...)
 	self.staticObject = nil
 	self.isEnabled = false
-	self.requiredRangeSqr = 500 * 500
+	self.visibleRangeSqr = self.data.properties.visibleRange * self.data.properties.visibleRange
 	
 	self:SetEnabled(false)
 end
 
 function MapEditor.Objects.StaticObject:OnUpdate()
 	local distanceSqr = Vector3.DistanceSqr(Camera:GetPosition() , self.position)
-	local isWithinRange = distanceSqr <= self.requiredRangeSqr
+	local isWithinRange = distanceSqr <= self.visibleRangeSqr
 	
 	if self.isEnabled then
 		if isWithinRange == false then

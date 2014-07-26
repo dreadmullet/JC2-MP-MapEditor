@@ -9,6 +9,11 @@ function Objects.StaticObject:__init(...) ; MapEditor.Object.__init(self , ...)
 		default = "" ,
 	}
 	self:AddProperty{
+		name = "visibleRange" ,
+		type = "number" ,
+		default = "500" ,
+	}
+	self:AddProperty{
 		name = "collisionEnabled" ,
 		type = "boolean" ,
 		default = true ,
