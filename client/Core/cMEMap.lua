@@ -1,7 +1,5 @@
 class("Map" , MapEditor)
 
-MapEditor.Map.version = 2
-
 function MapEditor.Map:__init(initialPosition , mapType)
 	EGUSM.SubscribeUtility.__init(self)
 	local memberNames = {
@@ -293,7 +291,7 @@ end
 -- Static functions
 
 MapEditor.Map.Load = function(marshalledSource)
-	if MapEditor.Map.version ~= marshalledSource.version then
+	if MapEditor.version ~= marshalledSource.version then
 		-- TODO: something that is not this
 		Chat:Print("Map cannot be loaded because it has a different file version" , Color.DarkRed)
 		return

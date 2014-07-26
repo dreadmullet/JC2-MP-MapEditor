@@ -1,7 +1,11 @@
 JSON = require("JSON")
 
+MapEditor.MapsList = {}
+
+MapEditor.MapsList.mapsDirectory = "Maps/"
+
 Network:Subscribe("RequestMapList" , function(unused , player)
-	local fileNames = io.files("Maps/")
+	local fileNames = io.files(MapEditor.MapsList.mapsDirectory)
 	local mapNames = {}
 	
 	for index , fileName in ipairs(fileNames) do
@@ -16,9 +20,9 @@ end)
 Network:Subscribe("SaveMap" , function(args , player)
 	print(player:GetName().." is saving map: "..args.name)
 	
-	io.createdir("Maps/")
+	io.createdir(MapEditor.MapsList.mapsDirectory)
 	
-	local file = io.open("Maps/"..args.name..".map" , "w")
+	local file = io.open(MapEditor.MapsList.mapsDirectory..args.name..".map" , "w")
 	file:write(JSON:encode_pretty(args.marshalledSource))
 	file:close()
 	
@@ -28,7 +32,7 @@ end)
 Network:Subscribe("RequestMap" , function(args , player)
 	print(player:GetName().." is loading map: "..args.name)
 	
-	local path = "Maps/"..args.name..".map"
+	local path = MapEditor.MapsList.mapsDirectory..args.name..".map"
 	local file , openError = io.open(path , "r")
 	if openError then
 		Network:Send(player , "ReceiveMap" , nil)
@@ -39,6 +43,32 @@ Network:Subscribe("RequestMap" , function(args , player)
 	file:close()
 	
 	local marshalledSource = JSON:decode(entireFile)
+	-- If the map's version differs from our version, convert it.
+	if marshalledSource.version ~= MapEditor.version then
+		marshalledSource = MapEditor.VersionConversion.Convert(marshalledSource)
+	end
 	
 	Network:Send(player , "ReceiveMap" , marshalledSource)
+end)
+
+Console:Subscribe("convertallmaps" , function()
+	local fileNames = io.files(MapEditor.MapsList.mapsDirectory)
+	for index , fileName in ipairs(fileNames) do
+		local file , openError = io.open(MapEditor.MapsList.mapsDirectory..fileName)
+		if openError == nil then
+			local entireFile = file:read("*a")
+			local marshalledSource = JSON:decode(entireFile)
+			-- If the map's version differs from our version, convert it.
+			if marshalledSource.version ~= MapEditor.version then
+				print("Converting "..fileName)
+				marshalledSource = MapEditor.VersionConversion.Convert(marshalledSource)
+				file:close()
+				file , openError = io.open(MapEditor.MapsList.mapsDirectory..fileName , "w")
+				if openError == nil then
+					file:write(JSON:encode_pretty(marshalledSource))
+				end
+			end
+		end
+		file:close()
+	end
 end)
