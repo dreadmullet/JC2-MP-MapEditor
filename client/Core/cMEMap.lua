@@ -23,6 +23,7 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	-- This is used for the filename and is set when saving or loading.
 	self.name = nil
 	self.isEnabled = true
+	self.version = MapEditor.version
 	
 	self.undoableActions = {}
 	self.redoableActions = {}
