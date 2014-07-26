@@ -1,7 +1,10 @@
 class("RaceCheckpoint" , Objects)
 
 function Objects.RaceCheckpoint:__init(...) ; MapEditor.Object.__init(self , ...)
-	-- Array of vehicle model ids.
+	self:AddProperty{
+		name = "nextCheckpoint" ,
+		type = "RaceCheckpoint" ,
+	}
 	self:AddProperty{
 		name = "validVehicles" ,
 		type = "table" ,
@@ -19,8 +22,9 @@ function Objects.RaceCheckpoint:__init(...) ; MapEditor.Object.__init(self , ...
 		default = true ,
 	}
 	self:AddProperty{
-		name = "nextCheckpoint" ,
-		type = "RaceCheckpoint" ,
+		name = "respawnPoints" ,
+		type = "table" ,
+		subtype = "RaceRespawnPoint" ,
 	}
 	
 	self.selectionStrategy = {type = "Radius" , radius = 10}

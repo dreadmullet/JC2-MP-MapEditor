@@ -1,6 +1,7 @@
 MapTypes.Racing = {
 	objects = {
 		"RaceCheckpoint" ,
+		"RaceRespawnPoint" ,
 		"RaceSpawn" ,
 		"RaceVehicleInfo" ,
 	} ,
