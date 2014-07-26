@@ -1,5 +1,3 @@
-MapEditor.version = 2
-
 MapEditor.LoadFromFile = function(path)
 	local file , openError = io.open(path , "r")
 	
@@ -23,9 +21,9 @@ end
 MapEditor.LoadFromMarshalledMap = function(map)
 	if map.version ~= MapEditor.version then
 		local errorMessage = string.format(
-			"Map version mismatch: expected version %i, map is version %i" ,
-			MapEditor.version ,
-			map.version
+			"Map version mismatch: expected version %s, map is version %s" ,
+			tostring(MapEditor.version) ,
+			tostring(map.version)
 		)
 		error(errorMessage)
 		return
