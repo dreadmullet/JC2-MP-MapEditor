@@ -4,10 +4,13 @@ function Objects.RaceRespawnPoint:__init(...) ; MapEditor.Object.__init(self , .
 	self:AddProperty{
 		name = "modelId" ,
 		type = "number" ,
+		description = "Vehicle model id that players must have to use this respawn point. -1 is "..
+			" on-foot. 0 removes this restriction." ,
 	}
 	self:AddProperty{
 		name = "speed" ,
 		type = "number" ,
+		description = "Speed in km/h that vehicles will spawn at." ,
 	}
 	
 	self.selectionStrategy = {

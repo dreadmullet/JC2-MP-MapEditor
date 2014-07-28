@@ -8,6 +8,8 @@ function Objects.Array:__init(...) ; MapEditor.Object.__init(self , ...)
 	self:AddProperty{
 		name = "count" ,
 		type = "number" ,
+		description = "How many of this object's children to duplicate. (Don't add too many "..
+		"zeroes. You have been warned.)" ,
 	}
 	-- Global position offsets
 	self:AddProperty{

@@ -10,42 +10,53 @@ MapTypes.Racing = {
 			name = "title" ,
 			type = "string" ,
 			default = "Untitled Course" ,
+			description = "This is how your course name will be displayed to users." ,
 		} ,
 		{
 			name = "firstCheckpoint" ,
 			type = "RaceCheckpoint" ,
+			description = "If your course is a circuit, you need to set this." ,
 		} ,
 		{
 			name = "laps" ,
 			type = "number" ,
 			default = 1 ,
+			description = "If your course is a circuit, this is a suggestion of the number of laps; "..
+				"it scales a little with the number of players (percent of starting slots filled, "..
+				"to be specific)." ,
 		} ,
-		-- TODO: Need tooltips; "-1 is random weather, 2 is max"
 		{
 			name = "weatherSeverity" ,
 			type = "number" ,
 			default = -1 ,
+			description = "Values are between 0 and 2 (see the JC2-MP wiki on weather). -1 is "..
+				"random, but prefers clear weather." ,
 		} ,
 		{
 			name = "parachuteEnabled" ,
 			type = "boolean" ,
 			default = true ,
+			description = "If the parachute is disabled, players won't be able to use it." ,
 		} ,
 		{
 			name = "grappleEnabled" ,
 			type = "boolean" ,
 			default = true ,
+			description = "If the grapple is disabled, players won't be able to use it." ,
 		} ,
-		-- Needs a groupbox as well
 		{
 			name = "forceCollision" ,
 			type = "number" ,
 			default = 0 ,
+			description = "Suggestion to the race manager to force vehicle collision on or off. 0 "..
+				"is no suggestion, 1 is force on, 2 is no collision. [This needs a drop-down box]" ,
 		} ,
 		{
 			name = "authors" ,
 			type = "table" ,
-			subtype = "string"
+			subtype = "string" ,
+			description = "Don't forget to put your name here if you want people to know who made "..
+				"the course." ,
 		} ,
 	} ,
 	Validate = function(map)

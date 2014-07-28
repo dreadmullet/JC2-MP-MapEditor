@@ -7,11 +7,15 @@ function Objects.StaticObject:__init(...) ; MapEditor.Object.__init(self , ...)
 		name = "model" ,
 		type = "string" ,
 		default = "" ,
+		description = "There is no convenient way to choose models yet, sorry. You'll have to use "..
+			"an external list for now."
 	}
 	self:AddProperty{
 		name = "visibleRange" ,
 		type = "number" ,
 		default = "500" ,
+		description = "This is the range that the model appears at. Set this to a reduced value "..
+			"for unimportant objects to reduce framerate slowdown." ,
 	}
 	self:AddProperty{
 		name = "collisionEnabled" ,

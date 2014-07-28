@@ -7,6 +7,7 @@ function Objects.RaceSpawn:__init(...) ; MapEditor.Object.__init(self , ...)
 		type = "table" ,
 		subtype = "RaceVehicleInfo" ,
 		default = {} ,
+		description = "Race Vehicle Infos that this spawn can have." ,
 	}
 	
 	self.selectionStrategy = {

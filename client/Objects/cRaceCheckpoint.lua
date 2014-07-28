@@ -10,21 +10,29 @@ function Objects.RaceCheckpoint:__init(...) ; MapEditor.Object.__init(self , ...
 		type = "table" ,
 		subtype = "number" ,
 		default = {} ,
+		description = "Model ids of the vehicles that can activate this checkpoint. Be sure to set "..
+			"this so people can't activate checkpoints while out of their car. -1 is on-foot." ,
 	}
 	self:AddProperty{
 		name = "allowAllVehicles" ,
 		type = "boolean" ,
 		default = false ,
+		description = "If true, Valid Vehicles doesn't apply, so any vehicle will work, even "..
+			"on-foot." ,
 	}
 	self:AddProperty{
 		name = "isRespawnable" ,
 		type = "boolean" ,
 		default = true ,
+		description = "Make sure to disable respawning for checkpoints that are inside of poles or "..
+			"before a jump that requires speed." ,
 	}
 	self:AddProperty{
 		name = "respawnPoints" ,
 		type = "table" ,
 		subtype = "RaceRespawnPoint" ,
+		description = "You can add your own respawn points in case the checkpoint's default one is "..
+			"inadequate." ,
 	}
 	
 	self.selectionStrategy = {type = "Radius" , radius = 10}
