@@ -6,6 +6,7 @@ MapEditor.PropertiesMenu.size = Vector2(340 , 270)
 MapEditor.PropertiesMenu.yellow = Color(255 , 218 , 96)
 MapEditor.PropertiesMenu.zebra1 = Color(0 , 0 , 0 , 64)
 MapEditor.PropertiesMenu.zebra2 = Color(120 , 120 , 120 , 64)
+MapEditor.PropertiesMenu.descriptionBoxMinHeight = 38
 
 function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtility.__init(self)
 	self.Destroy = MapEditor.PropertiesMenu.Destroy
@@ -23,6 +24,12 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	-- These controls are enabled/disabled on SetEnabled, and are also removed when they're removed
 	-- from a table property.
 	self.controls = {}
+	
+	-- These are the BaseWindows that contain the property controls, used to present the description
+	-- when they're hovered over.
+	self.propertyRows = {}
+	-- Contains base, titleLabel, and textLabel.
+	self.description = {}
 	
 	--
 	-- Create window
@@ -46,6 +53,30 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	scrollControl:SetDock(GwenPosition.Fill)
 	scrollControl:SetScrollable(false , true)
 	self.scrollControl = scrollControl
+	
+	local base = Rectangle.Create(self.window)
+	base:SetPadding(Vector2(3 , 3) , Vector2(3 , 3))
+	base:SetColor(Color(128 , 128 , 128 , 64))
+	base:SetDock(GwenPosition.Bottom)
+	base:SetHeight(MapEditor.PropertiesMenu.descriptionBoxMinHeight)
+	self.description.base = base
+	
+	local base = BaseWindow.Create(base)
+	base:SetDock(GwenPosition.Fill)
+	base:SetVisible(false)
+	self.description.subBase = base
+	
+	local label = Label.Create(self.description.subBase)
+	label:SetDock(GwenPosition.Top)
+	label:SetHeight(18)
+	label:SetTextColor(Color(208 , 208 , 208))
+	self.description.titleLabel = label
+	
+	local label = Label.Create(self.description.subBase)
+	label:SetDock(GwenPosition.Fill)
+	label:SetTextColor(Color(250 , 240 , 172))
+	label:SetWrap(true)
+	self.description.textLabel = label
 	
 	self.textSize = 12
 	
@@ -227,6 +258,7 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	-- Event subs
 	--
 	
+	self:EventSubscribe("PostTick")
 	self:EventSubscribe("ResolutionChange")
 	self:EventSubscribe("SetMenusEnabled")
 end
@@ -236,6 +268,8 @@ function MapEditor.PropertiesMenu:CreatePropertyControl(propertyProprietor , ind
 	base:SetPadding(Vector2(2 , 2) , Vector2(2 , 2))
 	base:SetDock(GwenPosition.Top)
 	base:SetHeight(0)
+	base:SetDataObject("propertyProprietor" , propertyProprietor)
+	table.insert(self.propertyRows , base)
 	
 	if index % 2 == 0 then
 		base:SetColor(MapEditor.PropertiesMenu.zebra1)
@@ -611,6 +645,38 @@ function MapEditor.PropertiesMenu:TableColorChoose(button)
 end
 
 -- Events
+
+function MapEditor.PropertiesMenu:PostTick()
+	for index , base in ipairs(self.propertyRows) do
+		local relativePos = base:AbsoluteToRelative(Mouse:GetPosition())
+		if
+			relativePos.x >= 0 and
+			relativePos.x <= base:GetWidth() and
+			relativePos.y >= 0 and
+			relativePos.y <= base:GetHeight()
+		then
+			local propertyProprietor = base:GetDataObject("propertyProprietor")
+			
+			local title = Utility.PrettifyVariableName(propertyProprietor.name)
+			self.description.titleLabel:SetText(title)
+			
+			self.description.textLabel:SetText(propertyProprietor.description)
+			self.description.textLabel:SizeToContents()
+			
+			local baseHeight = math.max(
+				MapEditor.PropertiesMenu.descriptionBoxMinHeight ,
+				self.description.textLabel:GetHeight() + 26
+			)
+			self.description.base:SetHeight(baseHeight)
+			self.description.subBase:SetVisible(true)
+			
+			return
+		end
+	end
+	
+	self.description.base:SetHeight(MapEditor.PropertiesMenu.descriptionBoxMinHeight)
+	self.description.subBase:SetVisible(false)
+end
 
 function MapEditor.PropertiesMenu:ResolutionChange(args)
 	local position = MapEditor.PropertiesMenu.position

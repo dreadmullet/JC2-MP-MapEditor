@@ -21,6 +21,7 @@ function MapEditor.Property:__init(args)
 	self.name = args.name
 	self.type = args.type
 	self.subtype = args.subtype
+	self.description = args.description or "[No description.]"
 	
 	self.value = args.default or MapEditor.Property.GetDefaultValue(self.type)
 	

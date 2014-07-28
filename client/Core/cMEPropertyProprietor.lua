@@ -13,9 +13,10 @@ function MapEditor.PropertyProprietor:__init(properties)
 	-- This is copied from commonValue, or if it's nil, it's a sane default value.
 	self.value = nil
 	self.hasCommonValue = false
+	self.description = nil
+	
 	-- If commonValue ends up nil, there is a conflict. Otherwise, all Propertys have the same value.
 	commonValue = nil
-	
 	for index , property in ipairs(self.properties) do
 		if property.type == "table" then
 			if commonValue == nil then
@@ -52,6 +53,15 @@ function MapEditor.PropertyProprietor:__init(properties)
 					end
 				end
 			end
+		end
+	end
+	-- Get self.description.
+	for index , property in ipairs(self.properties) do
+		if self.description == nil then
+			self.description = property.description
+		elseif property.description ~= self.description then
+			self.description = "[Property descriptions differ]"
+			break
 		end
 	end
 	
