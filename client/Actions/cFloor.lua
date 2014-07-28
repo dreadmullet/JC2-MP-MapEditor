@@ -28,9 +28,13 @@ function Actions.Floor:Redo()
 			objectInfo.object:GetPosition() ,
 			-Vector3.Up ,
 			0.001 ,
-			50
+			60
 		)
-		if result.distance < 50 then
+		
+		-- Clamp y to sea level.
+		result.position.y = math.max(200 , result.position.y)
+		
+		if result.distance < 60 then
 			objectInfo.object:SetPosition(result.position)
 		end
 	end
