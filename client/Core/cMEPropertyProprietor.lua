@@ -146,8 +146,14 @@ end
 
 function MapEditor.PropertyProprietor:SetTableValue(index , value)
 	-- Don't do anything if nothing changed.
-	if self.value[index] == value then
-		return false
+	if self.isObject then
+		if MapEditor.Object.Compare(self.value[index] , value) then
+			return false
+		end
+	else
+		if self.value[index] == value then
+			return false
+		end
 	end
 	
 	self:SyncTables()
