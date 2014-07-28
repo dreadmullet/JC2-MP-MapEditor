@@ -55,6 +55,7 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	self.scrollControl = scrollControl
 	
 	local base = Rectangle.Create(self.window)
+	base:SetMargin(Vector2(0 , 3) , Vector2(0 , 0))
 	base:SetPadding(Vector2(3 , 3) , Vector2(3 , 3))
 	base:SetColor(Color(128 , 128 , 128 , 64))
 	base:SetDock(GwenPosition.Bottom)
