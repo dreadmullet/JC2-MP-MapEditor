@@ -25,5 +25,11 @@ MapEditor.VersionConversion.ConversionFunctions = {
 		-- Nothing to do here. Only some object properties were added, which get fixed automatically
 		-- on the client.
 		return marshalledSource
-	end
+	end ,
+	[3] = function(marshalledSource)
+		-- Nothing to do here. Two properties were added to Racing. I know it's awkward to increase
+		-- the version just because of a small map type change. Maybe there should be two versions in
+		-- each map: the map version and the map type (Racing) version.
+		return marshalledSource
+	end ,
 }

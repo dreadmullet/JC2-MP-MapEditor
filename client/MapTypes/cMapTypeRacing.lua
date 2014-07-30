@@ -26,6 +26,20 @@ MapTypes.Racing = {
 				"to be specific)." ,
 		} ,
 		{
+			name = "minStartHour" ,
+			type = "number" ,
+			default = 0 ,
+			description = "These two values form the range of the time of day that the race can "..
+				"start at. Using a min of 22 and a max of 5 works for night time." ,
+		} ,
+		{
+			name = "maxStartHour" ,
+			type = "number" ,
+			default = 24 ,
+			description = "These two values form the range of the time of day that the race can "..
+				"start at. Using a min of 22 and a max of 5 works for night time." ,
+		} ,
+		{
 			name = "weatherSeverity" ,
 			type = "number" ,
 			default = -1 ,

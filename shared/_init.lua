@@ -4,4 +4,4 @@ math.sqrt3 = math.sqrt(3)
 
 MapEditor = {}
 
-MapEditor.version = 3
+MapEditor.version = 4
