@@ -1,5 +1,3 @@
-JSON = require("JSON")
-
 MapEditor.MapsList = {}
 
 MapEditor.MapsList.mapsDirectory = "Maps/"
