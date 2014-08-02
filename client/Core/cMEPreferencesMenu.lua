@@ -146,6 +146,50 @@ function MapEditor.PreferencesMenu:CreateWindow()
 	button:Subscribe("Press" , self , self.DrawLabelsChanged)
 	self.drawLabelsButton = button
 	
+	-- Time of day
+	
+	local base = BaseWindow.Create(self.window)
+	base:SetMargin(Vector2(2 , 2) , Vector2(2 , 4))
+	base:SetDock(GwenPosition.Top)
+	base:SetHeight(16)
+	
+	local slider = HorizontalSlider.Create(base)
+	slider:SetDock(GwenPosition.Fill)
+	slider:SetRange(0 , 23)
+	slider:SetClampToNotches(true)
+	slider:SetNotchCount(24)
+	slider:Subscribe("ValueChanged" , self , self.TimeOfDaySliderChanged)
+	self.timeOfDaySlider = slider
+	
+	local label = Label.Create(base)
+	label:SetDock(GwenPosition.Left)
+	label:SetAlignment(GwenPosition.CenterV)
+	label:SetTextSize(textSize)
+	label:SetWidth(textWidth)
+	self.timeOfDayLabel = label
+	
+	-- Weather
+	
+	local base = BaseWindow.Create(self.window)
+	base:SetMargin(Vector2(2 , 2) , Vector2(2 , 4))
+	base:SetDock(GwenPosition.Top)
+	base:SetHeight(16)
+	
+	local slider = HorizontalSlider.Create(base)
+	slider:SetDock(GwenPosition.Fill)
+	slider:SetRange(0 , 2)
+	slider:SetClampToNotches(true)
+	slider:SetNotchCount(21)
+	slider:Subscribe("ValueChanged" , self , self.WeatherSliderChanged)
+	self.weatherSlider = slider
+	
+	local label = Label.Create(base)
+	label:SetDock(GwenPosition.Left)
+	label:SetAlignment(GwenPosition.CenterV)
+	label:SetTextSize(textSize)
+	label:SetWidth(textWidth)
+	self.weatherLabel = label
+	
 	-- Bind menu
 	
 	local label = Label.Create(self.window)
@@ -213,6 +257,14 @@ function MapEditor.PreferencesMenu:UpdateValues()
 	self.angleSnapTextBox:SetText(string.format("%f" , MapEditor.Preferences.snapAngle))
 	
 	self.drawLabelsButton:SetText(tostring(MapEditor.Preferences.drawLabels))
+	
+	self.timeOfDaySlider:SetValue(MapEditor.Preferences.timeOfDay)
+	self.timeOfDayLabel:SetText(string.format("Time of day: %i" , MapEditor.Preferences.timeOfDay))
+	
+	self.weatherSlider:SetValue(MapEditor.Preferences.weatherSeverity)
+	self.weatherLabel:SetText(
+		string.format("Weather severity: %.1f" , MapEditor.Preferences.weatherSeverity)
+	)
 end
 
 -- GWEN events
@@ -251,6 +303,22 @@ function MapEditor.PreferencesMenu:DrawLabelsChanged(button)
 	MapEditor.Preferences.drawLabels = not MapEditor.Preferences.drawLabels
 	
 	button:SetText(tostring(MapEditor.Preferences.drawLabels))
+end
+
+function MapEditor.PreferencesMenu:TimeOfDaySliderChanged()
+	local value = self.timeOfDaySlider:GetValue()
+	MapEditor.Preferences.timeOfDay = value
+	self.timeOfDayLabel:SetText(string.format("Time of day: %i" , value))
+	
+	Network:Send("SetTimeOfDay" , MapEditor.Preferences.timeOfDay)
+end
+
+function MapEditor.PreferencesMenu:WeatherSliderChanged()
+	local value = self.weatherSlider:GetValue()
+	MapEditor.Preferences.weatherSeverity = value
+	self.weatherLabel:SetText(string.format("Weather severity: %.1f" , value))
+	
+	Network:Send("SetWeather" , MapEditor.Preferences.weatherSeverity)
 end
 
 -- Events

@@ -6,4 +6,6 @@ MapEditor.Preferences = {
 	snapPosition = 0 ,
 	snapAngle = 0 ,
 	drawLabels = true ,
+	timeOfDay = 12 ,
+	weatherSeverity = 0 ,
 }
