@@ -90,7 +90,7 @@ function MapEditor.Map:SetEnabled(enabled)
 	Mouse:SetVisible(self.isEnabled)
 	
 	self.camera.isEnabled = self.isEnabled
-	self.camera.isInputEnabled = self.isEnabled
+	self.camera.isInputEnabled = false
 	
 	if self.isEnabled then
 		self:IterateObjects(function(object)
