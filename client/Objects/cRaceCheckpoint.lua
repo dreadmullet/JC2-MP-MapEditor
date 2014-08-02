@@ -16,7 +16,7 @@ function Objects.RaceCheckpoint:__init(...) ; MapEditor.Object.__init(self , ...
 	self:AddProperty{
 		name = "allowAllVehicles" ,
 		type = "boolean" ,
-		default = false ,
+		default = true ,
 		description = "If true, Valid Vehicles doesn't apply, so any vehicle will work, even "..
 			"on-foot." ,
 	}
