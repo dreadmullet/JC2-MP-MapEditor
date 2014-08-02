@@ -38,6 +38,7 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	local window = Window.Create()
 	window:SetTitle("Properties menu")
 	window:SetSize(MapEditor.PropertiesMenu.size)
+	window:SetClosable(false)
 	window:Subscribe("Resize" , function() MapEditor.PropertiesMenu.size = self.window:GetSize() end)
 	window:Subscribe(
 		"Render" ,
