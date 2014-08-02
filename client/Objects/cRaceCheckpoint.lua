@@ -64,20 +64,17 @@ function Objects.RaceCheckpoint:OnRender()
 	local nextCheckpoint = self:GetProperty("nextCheckpoint").value
 	if nextCheckpoint ~= MapEditor.NoObject then
 		local position = self:GetPosition()
-		local direction = (nextCheckpoint:GetPosition() - position):Normalized()
 		local distance = Vector3.Distance(nextCheckpoint:GetPosition() , position)
-		local lineLength = 30
-		local lineSpacing = 15
-		local speed = 30
-		local offset = (self.timer:GetSeconds() * speed) % (lineLength + lineSpacing)
+		local direction = (nextCheckpoint:GetPosition() - position):Normalized()
+		local angle = Angle.FromVectors(Vector3.Forward , direction)
 		
-		for n = -lineLength , distance - lineLength , lineLength + lineSpacing do
-			Render:DrawLine(
-				position + direction * math.clamp(n + offset , 0 , distance) ,
-				position + direction * math.min(distance , n + offset + lineLength) ,
-				Color.Orange
-			)
-		end
+		local transform = Transform3()
+		transform:Translate(position)
+		transform:Rotate(angle)
+		transform:Scale(distance)
+		Render:SetTransform(transform)
+		MapEditor.models.dashedLine:Draw()
+		Render:ResetTransform()
 	end
 end
 
