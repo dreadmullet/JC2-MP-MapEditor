@@ -2,7 +2,7 @@ class("PropertiesMenu" , MapEditor)
 
 -- Y is relative to height.
 MapEditor.PropertiesMenu.position = Vector2(5 , 0.24)
-MapEditor.PropertiesMenu.size = Vector2(340 , 270)
+MapEditor.PropertiesMenu.size = Vector2(350 , 300)
 MapEditor.PropertiesMenu.yellow = Color(255 , 218 , 96)
 MapEditor.PropertiesMenu.zebra1 = Color(0 , 0 , 0 , 64)
 MapEditor.PropertiesMenu.zebra2 = Color(120 , 120 , 120 , 64)
@@ -669,7 +669,7 @@ function MapEditor.PropertiesMenu:PostTick()
 			self.description.textLabel:SizeToContents()
 			
 			local baseHeight = math.max(
-				MapEditor.PropertiesMenu.descriptionBoxMinHeight ,
+				self.description.base:GetHeight() ,
 				self.description.textLabel:GetHeight() + 26
 			)
 			self.description.base:SetHeight(baseHeight)
@@ -679,7 +679,6 @@ function MapEditor.PropertiesMenu:PostTick()
 		end
 	end
 	
-	self.description.base:SetHeight(MapEditor.PropertiesMenu.descriptionBoxMinHeight)
 	self.description.subBase:SetVisible(false)
 end
 
