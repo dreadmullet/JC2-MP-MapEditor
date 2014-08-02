@@ -13,6 +13,13 @@ MapTypes.Racing = {
 			description = "This is how your course name will be displayed to users." ,
 		} ,
 		{
+			name = "authors" ,
+			type = "table" ,
+			subtype = "string" ,
+			description = "Don't forget to put your name here if you want people to know who made "..
+				"the course." ,
+		} ,
+		{
 			name = "firstCheckpoint" ,
 			type = "RaceCheckpoint" ,
 			description = "If your course is a circuit, you need to set this." ,
@@ -68,11 +75,12 @@ MapTypes.Racing = {
 				"is no suggestion, 1 is force on, 2 is no collision. [This needs a drop-down box]" ,
 		} ,
 		{
-			name = "authors" ,
-			type = "table" ,
-			subtype = "string" ,
-			description = "Don't forget to put your name here if you want people to know who made "..
-				"the course." ,
+			name = "allowFirstLapRecord" ,
+			type = "boolean" ,
+			default = true ,
+			description = "If your course is a circuit, it's possible that the first lap can be "..
+				"faster than all the others. In that case, set this to false, or else some people "..
+				"will be mildly angry at you." ,
 		} ,
 	} ,
 	Validate = function(map)

@@ -32,4 +32,11 @@ MapEditor.VersionConversion.ConversionFunctions = {
 		-- each map: the map version and the map type (Racing) version.
 		return marshalledSource
 	end ,
+	[4] = function(marshalledSource)
+		-- Nothing to do here. One property was added to Racing. I just realized: the marshalledSource
+		-- table has the funky property stuff going on where it stores the hash of the name and
+		-- whether it's a table, which would be annoying to work with here. Could maybe add utility
+		-- functions, like ChangePropertyName, but... bleh.
+		return marshalledSource
+	end ,
 }
