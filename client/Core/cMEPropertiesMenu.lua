@@ -516,6 +516,10 @@ function MapEditor.PropertiesMenu:AddTableElement(buttonData)
 	return base
 end
 
+function MapEditor.PropertiesMenu:SetVisible(visible)
+	self.window:SetVisible(visible)
+end
+
 function MapEditor.PropertiesMenu:Destroy()
 	self.window:Remove()
 	

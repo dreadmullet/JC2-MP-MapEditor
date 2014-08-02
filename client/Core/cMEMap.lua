@@ -28,6 +28,7 @@ function MapEditor.Map:__init(initialPosition , mapType)
 	self.undoableActions = {}
 	self.redoableActions = {}
 	self.currentAction = nil
+	self.isInGame = false
 	
 	self.selectedObjects = MapEditor.ObjectManager()
 	
@@ -73,14 +74,12 @@ function MapEditor.Map:SetEnabled(enabled)
 		return
 	end
 	
-	MapEditor.mapMenu:SetVisible(enabled)
-	self.spawnMenu:SetVisible(enabled)
-	if MapEditor.preferencesMenu:GetVisible() then
-		MapEditor.preferencesMenu:SetVisible(enabled)
-	end
+	self.isEnabled = enabled
+	
+	self:SetMenusVisible(self.isEnabled)
 	
 	for name , controlDisplayer in pairs(self.controlDisplayers) do
-		controlDisplayer:SetVisible(enabled)
+		controlDisplayer:SetVisible(self.isEnabled)
 	end
 	
 	if self.propertiesMenu then
@@ -88,12 +87,10 @@ function MapEditor.Map:SetEnabled(enabled)
 		self.propertiesMenu = nil
 	end
 	
-	Mouse:SetVisible(enabled)
+	Mouse:SetVisible(self.isEnabled)
 	
-	self.camera.isEnabled = enabled
-	self.camera.isInputEnabled = enabled
-	
-	self.isEnabled = enabled
+	self.camera.isEnabled = self.isEnabled
+	self.camera.isInputEnabled = self.isEnabled
 	
 	if self.isEnabled then
 		self:IterateObjects(function(object)
@@ -103,6 +100,17 @@ function MapEditor.Map:SetEnabled(enabled)
 		self:IterateObjects(function(object)
 			object:Destroy()
 		end)
+	end
+end
+
+function MapEditor.Map:SetMenusVisible(visible)
+	MapEditor.mapMenu:SetVisible(visible)
+	self.spawnMenu:SetVisible(visible)
+	if MapEditor.preferencesMenu:GetVisible() then
+		MapEditor.preferencesMenu:SetVisible(visible)
+	end
+	if self.propertiesMenu ~= nil then
+		self.propertiesMenu:SetVisible(visible)
 	end
 end
 
@@ -348,6 +356,12 @@ end
 function MapEditor.Map:Render()
 	if self.isEnabled == false then
 		return
+	end
+	
+	local isInGame = Game:GetState() == GUIState.Game
+	if MapEditor.isInGame ~= isInGame then
+		MapEditor.isInGame = isInGame
+		self:SetMenusVisible(isInGame)
 	end
 	
 	-- Draw map name.
