@@ -252,9 +252,10 @@ end
 function MapEditor.Map:OpenMapProperties()
 	if self.propertiesMenu then
 		self.propertiesMenu:Destroy()
+		self.propertiesMenu = nil
+	else
+		self.propertiesMenu = MapEditor.PropertiesMenu{self}
 	end
-	
-	self.propertiesMenu = MapEditor.PropertiesMenu({self})
 end
 
 function MapEditor.Map:Save()
