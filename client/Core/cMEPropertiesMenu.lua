@@ -33,6 +33,8 @@ function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtil
 	-- Contains base, titleLabel, and textLabel.
 	self.description = {}
 	
+	self.isMouseInWindow = false
+	
 	--
 	-- Create window
 	--
@@ -662,6 +664,22 @@ end
 -- Events
 
 function MapEditor.PropertiesMenu:PostTick()
+	-- If the mouse is outside the window, focus the window, which blurs textboxes and such.
+	-- Otherwise, GWEN likes to eat inputs which is extremely annoying.
+	local relativeMousePos = self.window:AbsoluteToRelative(Mouse:GetPosition())
+	local isInWindow = (
+		relativeMousePos.x >= 0 and
+		relativeMousePos.x <= self.window:GetWidth() and
+		relativeMousePos.y >= 0 and
+		relativeMousePos.y <= self.window:GetHeight()
+	)
+	if self.isMouseInWindow ~= isInWindow then
+		if isInWindow == false then
+			self.window:Focus()
+		end
+		self.isMouseInWindow = isInWindow
+	end
+	
 	for index , base in ipairs(self.propertyRows) do
 		local relativePos = base:AbsoluteToRelative(Mouse:GetPosition())
 		if
