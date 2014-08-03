@@ -70,6 +70,7 @@ function Actions.ApplyArray:__init() ; MapEditor.Action.__init(self)
 	-- Apply the deletion helper and confirm the action.
 	
 	self.objectDeletionHelper:Apply()
+	MapEditor.map:UpdatePropertiesMenu()
 	
 	self:Confirm()
 end
