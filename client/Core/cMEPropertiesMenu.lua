@@ -6,6 +6,8 @@ MapEditor.PropertiesMenu.size = Vector2(350 , 300)
 MapEditor.PropertiesMenu.yellow = Color(255 , 218 , 96)
 MapEditor.PropertiesMenu.zebra1 = Color(0 , 0 , 0 , 64)
 MapEditor.PropertiesMenu.zebra2 = Color(120 , 120 , 120 , 64)
+MapEditor.PropertiesMenu.booleanTrue = Color(94 , 212 , 92)
+MapEditor.PropertiesMenu.booleanFalse = Color(240 , 70 , 70)
 MapEditor.PropertiesMenu.descriptionBoxMinHeight = 38
 
 function MapEditor.PropertiesMenu:__init(propertyManagers) ; EGUSM.SubscribeUtility.__init(self)
@@ -351,13 +353,18 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		button:SetTextSize(self.textSize)
 		button:SetText("")
 		button:SetToggleable(true)
+		button:SetTextNormalColor(MapEditor.PropertiesMenu.booleanFalse)
+		button:SetTextPressedColor(MapEditor.PropertiesMenu.booleanTrue)
+		button:SetTextHoveredColor(MapEditor.PropertiesMenu.booleanFalse)
 		button:SetDataObject("propertyProprietor" , propertyProprietor)
 		if tableIndex then
 			button:SetToggleState(propertyProprietor.value[tableIndex])
+			button:SetText(tostring(propertyProprietor.value[tableIndex]))
 			button:SetDataNumber("tableIndex" , tableIndex)
 			button:Subscribe("Toggle" , self , self.TableBooleanChanged)
 		else
 			button:SetToggleState(propertyProprietor.value)
+			button:SetText(tostring(propertyProprietor.value))
 			button:Subscribe("Toggle" , self , self.BooleanChanged)
 		end
 		
@@ -554,12 +561,14 @@ end
 function MapEditor.PropertiesMenu:BooleanChanged(button)
 	local propertyProprietor = button:GetDataObject("propertyProprietor")
 	propertyProprietor:SetValue(button:GetToggleState())
+	button:SetText(tostring(button:GetToggleState()))
 end
 
 function MapEditor.PropertiesMenu:TableBooleanChanged(button)
 	local propertyProprietor = button:GetDataObject("propertyProprietor")
 	local tableIndex = button:GetDataNumber("tableIndex")
 	propertyProprietor:SetTableValue(tableIndex , button:GetToggleState())
+	button:SetText(tostring(button:GetToggleState()))
 end
 
 function MapEditor.PropertiesMenu:TableRemoveElement(button)
