@@ -134,9 +134,10 @@ end
 
 function Objects.Array.CreatePropertyMenuAuxControls(base)
 	local button = Button.Create(base)
+	button:SetPadding(Vector2(6 , 0) , Vector2(6 , 0))
 	button:SetDock(GwenPosition.Left)
 	button:SetText("Make permanent")
-	button:SetWidth(80)
+	button:SizeToContents()
 	button:Subscribe("Press" , function()
 		MapEditor.map:SetAction(Actions.ApplyArray)
 	end)
