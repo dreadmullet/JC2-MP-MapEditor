@@ -82,12 +82,22 @@ function MapEditor.NoclipCamera:ControlHeld(args)
 end
 
 function MapEditor.NoclipCamera:ControlDown(args)
+	if self.isEnabled == false then
+		return
+	end
+	
 	if args.name == "Noclip camera: Toggle" then
 		if MapEditor.map.currentAction == nil then
 			self.isInputEnabled = not self.isInputEnabled
 			Events:Fire("SetMenusEnabled" , not self.isInputEnabled)
 		end
-	elseif args.name == "Mouse wheel up" then
+	end
+	
+	if self.isInputEnabled == false then
+		return
+	end
+	
+	if args.name == "Mouse wheel up" then
 		self.speedChangeBuffer = args.state
 	elseif args.name == "Mouse wheel down" then
 		self.speedChangeBuffer = -args.state
