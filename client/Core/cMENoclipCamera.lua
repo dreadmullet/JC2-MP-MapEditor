@@ -43,6 +43,10 @@ function MapEditor.NoclipCamera:Destroy()
 	self:UnsubscribeAll()
 end
 
+function MapEditor.NoclipCamera:GetPosition()
+	return self.position
+end
+
 function MapEditor.NoclipCamera:SetPosition(position)
 	self.position = position
 end

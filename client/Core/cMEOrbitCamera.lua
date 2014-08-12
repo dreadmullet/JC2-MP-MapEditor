@@ -45,6 +45,10 @@ function MapEditor.OrbitCamera:Destroy()
 	self:UnsubscribeAll()
 end
 
+function MapEditor.OrbitCamera:GetPosition()
+	return self.targetPosition
+end
+
 function MapEditor.OrbitCamera:SetPosition(position)
 	self.targetPosition = position
 	self.angleBuffer.pitch = math.clamp(self.angleBuffer.pitch , -70 , 5)
