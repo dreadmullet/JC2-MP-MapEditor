@@ -3,7 +3,7 @@
 class("OrbitCamera" , MapEditor)
 
 function MapEditor.OrbitCamera:__init(position , angle) ; EGUSM.SubscribeUtility.__init(self)
-	self.Destroy = MapEditor.NoclipCamera.Destroy
+	self.Destroy = MapEditor.OrbitCamera.Destroy
 	
 	-- Public properties
 	self.targetPosition = position or Vector3(0 , 0 , 0)
@@ -39,7 +39,7 @@ function MapEditor.OrbitCamera:__init(position , angle) ; EGUSM.SubscribeUtility
 	self:EventSubscribe("PostTick")
 end
 
-function MapEditor.NoclipCamera:Destroy()
+function MapEditor.OrbitCamera:Destroy()
 	MapEditor.map.controlDisplayers.camera:Destroy()
 	
 	self:UnsubscribeAll()
