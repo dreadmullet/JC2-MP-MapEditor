@@ -140,7 +140,7 @@ end
 
 function MapEditor.Map:SetAction(actionClass , ...)
 	if self.currentAction ~= nil then
-		warn("Already have an Action!")
+		error("Already have an Action! ("..tostring(self.currentAction)..")")
 		return
 	end
 	
