@@ -5,10 +5,8 @@ function Objects.StaticObject:__init(...) ; MapEditor.Object.__init(self , ...)
 	
 	self:AddProperty{
 		name = "model" ,
-		type = "string" ,
+		type = "model" ,
 		default = "" ,
-		description = "There is no convenient way to choose models yet, sorry. You'll have to use "..
-			"an external list for now."
 	}
 	self:AddProperty{
 		name = "visibleRange" ,
@@ -25,6 +23,7 @@ function Objects.StaticObject:__init(...) ; MapEditor.Object.__init(self , ...)
 	
 	self.selectionStrategy = {type = "Icon" , icon = Icons.StaticObject}
 	
+	self.staticObject = nil
 	self.isUpdatingBounds = false
 	
 	self:OnRecreate()

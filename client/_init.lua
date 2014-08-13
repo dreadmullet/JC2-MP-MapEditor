@@ -2,6 +2,7 @@ Objects = {}
 Actions = {}
 MapTypes = {}
 Icons = {}
+ModelViewerTabs = {}
 
 -- Having properties that are Object be nil is bad for tables.
 MapEditor.NoObject = {}
@@ -46,10 +47,12 @@ Events:Subscribe("ModuleLoad" , function()
 	
 	MapEditor.MapMenu()
 	MapEditor.PreferencesMenu()
+	MapEditor.ModelViewer()
 	MapEditor.MaplessState()
 end)
 
 Events:Subscribe("ModuleUnload" , function()
+	MapEditor.modelViewer:Destroy()
 	if MapEditor.map then
 		MapEditor.map:Destroy()
 	end

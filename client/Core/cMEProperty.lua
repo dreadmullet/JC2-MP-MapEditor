@@ -13,6 +13,8 @@ MapEditor.Property.GetDefaultValue = function(type)
 		return Color(255 , 255 , 255)
 	elseif MapEditor.IsObjectType(type) then
 		return MapEditor.NoObject
+	elseif type == "model" then
+		return ""
 	end
 end
 

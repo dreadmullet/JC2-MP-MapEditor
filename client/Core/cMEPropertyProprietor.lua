@@ -118,7 +118,7 @@ function MapEditor.PropertyProprietor:CompareTables(a , b)
 	end
 end
 
-function MapEditor.PropertyProprietor:SetValue(value)
+function MapEditor.PropertyProprietor:SetValue(value , noAction)
 	-- Don't do anything if nothing changed.
 	if self.isObject then
 		if MapEditor.Object.Compare(self.value , value) then
@@ -132,8 +132,8 @@ function MapEditor.PropertyProprietor:SetValue(value)
 	
 	self.value = value
 	
-	-- Some types are already taken care of (in PropertiesMenu).
-	if not (self.isObject or self.type == "Color") then
+	-- Some special types are already taken care of (ObjectChooser and related).
+	if not noAction then
 		local args = {
 			propertyProprietor = self ,
 			value = value ,
@@ -144,7 +144,7 @@ function MapEditor.PropertyProprietor:SetValue(value)
 	return true
 end
 
-function MapEditor.PropertyProprietor:SetTableValue(index , value)
+function MapEditor.PropertyProprietor:SetTableValue(index , value , noAction)
 	-- Don't do anything if nothing changed.
 	if self.isObject then
 		if MapEditor.Object.Compare(self.value[index] , value) then
@@ -160,8 +160,8 @@ function MapEditor.PropertyProprietor:SetTableValue(index , value)
 	
 	self.value[index] = value
 	
-	-- If our type is an Object, this is already taken care of (in PropertiesMenu).
-	if self.isObject == false then
+	-- Some special types are already taken care of (ObjectChooser and related).
+	if not noAction then
 		local args = {
 			propertyProprietor = self ,
 			value = value ,

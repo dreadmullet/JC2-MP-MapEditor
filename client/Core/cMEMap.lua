@@ -144,6 +144,10 @@ function MapEditor.Map:SetAction(actionClass , ...)
 		return
 	end
 	
+	for name , controlDisplayer in pairs(self.controlDisplayers) do
+		controlDisplayer:SetVisible(false)
+	end
+	
 	local finished = false
 	local cancelled = false
 	
@@ -164,9 +168,11 @@ function MapEditor.Map:SetAction(actionClass , ...)
 		self.currentAction = nil
 	else
 		Events:Fire("SetMenusEnabled" , false)
-		
+	end
+	
+	if finished or cancelled then
 		for name , controlDisplayer in pairs(self.controlDisplayers) do
-			controlDisplayer:SetVisible(false)
+			controlDisplayer:SetVisible(true)
 		end
 	end
 end

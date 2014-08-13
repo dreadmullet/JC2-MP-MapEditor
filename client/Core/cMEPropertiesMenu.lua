@@ -406,6 +406,7 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 			label = label ,
 			base = parent ,
 			propertyControls = {} ,
+			-- TODO: Is this even necessary? Why not just increment an index value?
 			editControls = {} ,
 		}
 		
@@ -477,6 +478,45 @@ function MapEditor.PropertiesMenu:CreateEditControl(propertyProprietor , parent 
 		end
 		
 		return rectangle
+	elseif propertyType == "model" then
+		local textBox = TextBox.Create(parent)
+		textBox:SetDock(GwenPosition.Fill)
+		textBox:SetTextSize(self.textSize)
+		textBox:SetDataObject("propertyProprietor" , propertyProprietor)
+		local modelTextBox = textBox
+		
+		table.insert(self.controls , textBox)
+		
+		local button = Button.Create(parent)
+		button:SetPadding(Vector2(4 , 0) , Vector2(4 , 0))
+		button:SetMargin(Vector2(2 , 0) , Vector2(2 , 0))
+		button:SetDock(GwenPosition.Right)
+		button:SetText("Model viewer")
+		button:SizeToContents()
+		button:SetDataObject("modelTextBox" , modelTextBox)
+		table.insert(self.controls , button)
+		local chooseButton = button
+		
+		if tableIndex then
+			chooseButton:SetDataNumber("tableIndex" , tableIndex)
+			chooseButton:Subscribe("Press" , self , self.TableModelViewerButton)
+			
+			modelTextBox:SetText(propertyProprietor.value[tableIndex])
+			modelTextBox:SetDataNumber("tableIndex" , tableIndex)
+			-- Cool, I can just reuse the (Table)StringChanged function.
+			modelTextBox:Subscribe("Blur" , self , self.TableStringChanged)
+		else
+			chooseButton:Subscribe("Press" , self , self.ModelViewerButton)
+			
+			modelTextBox:SetText(propertyProprietor.value)
+			modelTextBox:Subscribe("Blur" , self , self.StringChanged)
+		end
+		modelTextBox:MoveCaretToEnd()
+		
+		chooseButton:SetDataObject("propertyProprietor" , propertyProprietor)
+		chooseButton:SetDataObject("label" , modelLabel)
+		
+		parent:SetHeight(parent:GetHeight() + button:GetHeight() + 10)
 	else
 		-- Fall back to just an "(unsupported)" label.
 		local label = Label.Create(parent)
@@ -622,8 +662,9 @@ end
 function MapEditor.PropertiesMenu:ObjectChoose(button)
 	local propertyProprietor = button:GetDataObject("propertyProprietor")
 	local args = {
+		special = "Object" ,
 		propertyProprietor = propertyProprietor ,
-		objectChooseButton = button ,
+		button = button ,
 	}
 	MapEditor.map:SetAction(Actions.PropertyChange , args)
 end
@@ -632,10 +673,11 @@ function MapEditor.PropertiesMenu:TableObjectChoose(button)
 	local propertyProprietor = button:GetDataObject("propertyProprietor")
 	local tableIndex = button:GetDataNumber("tableIndex")
 	local args = {
+		special = "Object" ,
 		propertyProprietor = propertyProprietor ,
 		index = tableIndex ,
 		tableActionType = "Set" ,
-		objectChooseButton = button ,
+		button = button ,
 	}
 	MapEditor.map:SetAction(Actions.PropertyChange , args)
 end
@@ -643,6 +685,7 @@ end
 function MapEditor.PropertiesMenu:ColorChoose(button)
 	local propertyProprietor = button:GetDataObject("propertyProprietor")
 	local args = {
+		special = "Color" ,
 		propertyProprietor = propertyProprietor ,
 		rectangle = button:GetParent() ,
 	}
@@ -653,10 +696,36 @@ function MapEditor.PropertiesMenu:TableColorChoose(button)
 	local propertyProprietor = button:GetDataObject("propertyProprietor")
 	local tableIndex = button:GetDataNumber("tableIndex")
 	local args = {
+		special = "Color" ,
 		propertyProprietor = propertyProprietor ,
 		index = tableIndex ,
 		tableActionType = "Set" ,
 		rectangle = button:GetParent() ,
+	}
+	MapEditor.map:SetAction(Actions.PropertyChange , args)
+end
+
+function MapEditor.PropertiesMenu:ModelViewerButton(button)
+	local propertyProprietor = button:GetDataObject("propertyProprietor")
+	local modelTextBox = button:GetDataObject("modelTextBox")
+	local args = {
+		special = "model" ,
+		propertyProprietor = propertyProprietor ,
+		modelTextBox = modelTextBox ,
+	}
+	MapEditor.map:SetAction(Actions.PropertyChange , args)
+end
+
+function MapEditor.PropertiesMenu:TableModelViewerButton(button)
+	local propertyProprietor = button:GetDataObject("propertyProprietor")
+	local tableIndex = button:GetDataNumber("tableIndex")
+	local modelTextBox = button:GetDataObject("modelTextBox")
+	local args = {
+		special = "model" ,
+		propertyProprietor = propertyProprietor ,
+		index = tableIndex ,
+		tableActionType = "Set" ,
+		modelTextBox = modelTextBox ,
 	}
 	MapEditor.map:SetAction(Actions.PropertyChange , args)
 end
@@ -679,7 +748,7 @@ function MapEditor.PropertiesMenu:PostTick()
 		end
 		self.isMouseInWindow = isInWindow
 	end
-	
+	-- Set the description text depending what control we are hovering over.
 	for index , base in ipairs(self.propertyRows) do
 		local relativePos = base:AbsoluteToRelative(Mouse:GetPosition())
 		if
