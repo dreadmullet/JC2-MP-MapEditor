@@ -129,7 +129,16 @@ end
 
 function MapEditor.Object:Render()
 	local labelSourcePosition = Copy(self.position)
-	if self.selectionStrategy.type == "Icon" then
+	if self.selectionStrategy.type == "Bounds" then
+		MapEditor.Utility.DrawBounds{
+			position = self.position ,
+			angle = self.angle ,
+			bounds = self.selectionStrategy.bounds ,
+			isSelected = self.isSelected ,
+		}
+		
+		labelSourcePosition.y = labelSourcePosition.y - self.selectionStrategy.bounds[2].y
+	elseif self.selectionStrategy.type == "Icon" then
 		local transform = Transform3()
 		transform:Translate(self.position)
 		transform:Rotate(Camera:GetAngle())
@@ -163,16 +172,6 @@ function MapEditor.Object:Render()
 		Render:ResetTransform()
 		
 		labelSourcePosition.y = labelSourcePosition.y - self.selectionStrategy.radius
-	elseif self.selectionStrategy.type == "Bounds" then
-		MapEditor.Utility.DrawBounds{
-			position = self.position ,
-			angle = self.angle ,
-			bounds = self.selectionStrategy.bounds ,
-			color = Color.Gray ,
-			isSelected = self.isSelected ,
-		}
-		
-		labelSourcePosition.y = labelSourcePosition.y - self.selectionStrategy.bounds[2].y
 	end
 	
 	if self.OnRender then

@@ -49,7 +49,7 @@ do
 		return Vertex(Vector3(x , y , z) , currentColor)
 	end
 	
-	currentColor = Color.Gray
+	currentColor = Color(128 , 128 , 128 , 96)
 	MapEditor.Utility.boundsModel = Model.Create{
 		-- Top
 		V(0 , 1 , 0) , V(1 , 1 , 0) ,
@@ -69,7 +69,7 @@ do
 	}
 	MapEditor.Utility.boundsModel:SetTopology(Topology.LineList)
 	
-	currentColor = Color.LawnGreen
+	currentColor = Color(64 , 255 , 64 , 192)
 	MapEditor.Utility.boundsModelSelected = Model.Create{
 		-- Top
 		V(0 , 1 , 0) , V(1 , 1 , 0) ,

@@ -191,7 +191,14 @@ end
 
 function ArrayDuplicateManager:Render()
 	for index , duplicate in ipairs(self.duplicates) do
-		duplicate:Render()
+		-- Hack: Don't call Render on StaticObjects (after they get their bounds) to improve framerate.
+		if duplicate.type == "StaticObject" then
+			if duplicate.isUpdatingBounds then
+				duplicate:Render()
+			end
+		else
+			duplicate:Render()
+		end
 	end
 	for objectId , duplicateManager in pairs(self.duplicateManagers) do
 		duplicateManager:Render()
