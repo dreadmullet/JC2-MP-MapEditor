@@ -42,6 +42,23 @@ function ModelViewerTabs.Tags:__init(modelViewer)
 	Network:Send("RequestTaggedModels" , ".")
 end
 
+function ModelViewerTabs.Tags:SetModelName(args)
+	local tags = MapEditor.modelToTags[args.model]
+	if tags == nil then
+		return
+	end
+	
+	for index , tag in ipairs(tags) do
+		local modelButtons = self.tagToModelButtons[tag]
+		if modelButtons ~= nil then
+			local modelButton = modelButtons[args.model]
+			if modelButton ~= nil then
+				modelButton:SetText(args.name)
+			end
+		end
+	end
+end
+
 -- Network events
 
 function ModelViewerTabs.Tags:ReceiveTaggedModels(taggedModels)
@@ -111,7 +128,7 @@ function ModelViewerTabs.Tags:AddModelButton(args)
 	local button = LabelClickable.Create(modelsContainer)
 	button:SetAlignment(GwenPosition.CenterV)
 	button:SetDock(GwenPosition.Top)
-	button:SetText(args.model)
+	button:SetText(MapEditor.modelNames[args.model] or args.model)
 	button:SetHeight(self.modelButtonHeight)
 	button:SetTextNormalColor(self.colors.textNormal)
 	button:SetTextHoveredColor(self.colors.textHovered)

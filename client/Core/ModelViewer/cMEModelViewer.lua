@@ -1,3 +1,5 @@
+MapEditor.modelNames = {}
+
 class("ModelViewer" , MapEditor)
 
 function MapEditor.ModelViewer:__init()
@@ -11,7 +13,7 @@ function MapEditor.ModelViewer:__init()
 	
 	-- Window
 	
-	local size = Vector2(320 , Render.Height * 0.25 + 250)
+	local size = Vector2(180 + Render.Width * 0.125 , 250 + Render.Height * 0.25)
 	local position = Vector2(Render.Width - size.x - 5 , Render.Height / 2 - size.y / 2)
 	local window = Window.Create()
 	window:SetSize(size)
@@ -57,6 +59,29 @@ function MapEditor.ModelViewer:__init()
 	
 	base:SetHeight(slightlyLargeFontSize + 2)
 	
+	-- Name textbox
+	
+	local base = BaseWindow.Create(self.window)
+	base:SetMargin(Vector2(0 , 2) , Vector2(2 , 2))
+	base:SetDock(GwenPosition.Bottom)
+	
+	local label = Label.Create(base)
+	label:SetDock(GwenPosition.Left)
+	label:SetAlignment(GwenPosition.CenterV)
+	label:SetTextSize(slightlyLargeFontSize)
+	label:SetText("Name: ")
+	label:SizeToContents()
+	label:SetWidth(labelWidth)
+	
+	local textBox = TextBox.Create(base)
+	textBox:SetDock(GwenPosition.Fill)
+	textBox:SetText("")
+	textBox:SetEnabled(false)
+	textBox:Subscribe("Blur" , self , self.NameTextBoxChanged)
+	self.nameTextBox = textBox
+	
+	base:SetHeight(slightlyLargeFontSize + 2)
+	
 	-- Model label
 	
 	local base = BaseWindow.Create(self.window)
@@ -83,6 +108,10 @@ function MapEditor.ModelViewer:__init()
 	-- Misc
 	
 	self:SetVisible(false)
+	
+	Network:Subscribe("ReceiveModelNames" , self , self.ReceiveModelNames)
+	
+	Network:Send("RequestModelNames" , ".")
 end
 
 function MapEditor.ModelViewer:Destroy()
@@ -133,6 +162,9 @@ function MapEditor.ModelViewer:SetModelPath(modelPath)
 	self.modelPath = modelPath
 	-- Get the model's tags and set the text of the tags textbox.
 	if self.modelPath ~= nil then
+		self.nameTextBox:SetEnabled(true)
+		self.nameTextBox:SetText(MapEditor.modelNames[self.modelPath] or "")
+		
 		self.tagsTextBox:SetEnabled(true)
 		local tags = MapEditor.modelToTags[self.modelPath]
 		if tags ~= nil then
@@ -142,6 +174,9 @@ function MapEditor.ModelViewer:SetModelPath(modelPath)
 			self.tagsTextBox:SetText("")
 		end
 	else
+		self.nameTextBox:SetEnabled(false)
+		self.nameTextBox:SetText("")
+		
 		self.tagsTextBox:SetEnabled(false)
 		self.tagsTextBox:SetText("")
 	end
@@ -166,10 +201,27 @@ function MapEditor.ModelViewer:SpawnStaticObject()
 	}
 end
 
+-- Network events
+
+function MapEditor.ModelViewer:ReceiveModelNames(modelNames)
+	MapEditor.modelNames = modelNames
+end
+
 -- GWEN events
 
 function MapEditor.ModelViewer:WindowClosed()
 	self:SetVisible(false)
+end
+
+function MapEditor.ModelViewer:NameTextBoxChanged()
+	local args = {model = self.modelPath , name = self.nameTextBox:GetText()}
+	
+	MapEditor.modelNames[args.model] = args.name
+	
+	self.tabs.allModels:SetModelName(args)
+	self.tabs.tags:SetModelName(args)
+	
+	Network:Send("SetModelName" , args)
 end
 
 function MapEditor.ModelViewer:TagsTextBoxChanged()

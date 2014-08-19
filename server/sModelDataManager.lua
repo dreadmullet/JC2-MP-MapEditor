@@ -1,22 +1,41 @@
 -- Manages model names and tags.
 
+MapEditor.modelNames = {}
+
 MapEditor.taggedModels = {}
 MapEditor.tagToModels = {}
 MapEditor.modelToTagEntries = {}
 
 MapEditor.ModelDataManager = {}
 
+MapEditor.ModelDataManager.modelNamesPath = "ModelNames.txt"
 MapEditor.ModelDataManager.modelTagsPath = "ModelTags.txt"
 
-MapEditor.ModelDataManager.WriteToDisk = function()
+MapEditor.ModelDataManager.WriteNamesToDisk = function()
+	local file = io.open(MapEditor.ModelDataManager.modelNamesPath , "w")
+	local jsonString = JSON:encode(MapEditor.modelNames)
+	file:write(jsonString)
+	file:close()
+end
+
+MapEditor.ModelDataManager.WriteTagsToDisk = function()
 	local file = io.open(MapEditor.ModelDataManager.modelTagsPath , "w")
 	local jsonString = JSON:encode(MapEditor.taggedModels)
-	jsonString = jsonString:gsub("%]%],%[" , "]],\n["):gsub("," , ",\n  ")
+	-- jsonString = jsonString:gsub("%]%],%[" , "]],\n["):gsub("," , ",\n  ")
 	file:write(jsonString)
 	file:close()
 end
 
 Events:Subscribe("ModuleLoad" , function()
+	-- Get MapEditor.modelNames.
+	local file , openError = io.open(MapEditor.ModelDataManager.modelNamesPath , "r")
+	if openError then
+		warn("Cannot open model names file: "..openError)
+		return
+	end
+	local entireFile = file:read("*a")
+	file:close()
+	MapEditor.modelNames = JSON:decode(entireFile)
 	-- Get MapEditor.taggedModels.
 	local file , openError = io.open(MapEditor.ModelDataManager.modelTagsPath , "r")
 	if openError then
@@ -45,6 +64,20 @@ Events:Subscribe("ModuleLoad" , function()
 			end
 		end
 	end
+end)
+
+Network:Subscribe("RequestModelNames" , function(unused , player)
+	Network:Send(player , "ReceiveModelNames" , MapEditor.modelNames)
+end)
+
+Network:Subscribe("SetModelName" , function(args , player)
+	if args.name:len() == 0 then
+		MapEditor.modelNames[args.model] = nil
+	else
+		MapEditor.modelNames[args.model] = args.name
+	end
+	
+	MapEditor.ModelDataManager.WriteNamesToDisk()
 end)
 
 Network:Subscribe("RequestTaggedModels" , function(unused , player)
@@ -85,7 +118,7 @@ Network:Subscribe("TaggedModelAdd" , function(args , player)
 		end
 	end
 	
-	MapEditor.ModelDataManager.WriteToDisk()
+	MapEditor.ModelDataManager.WriteTagsToDisk()
 end)
 
 Network:Subscribe("TaggedModelRemove" , function(args , player)
@@ -117,5 +150,5 @@ Network:Subscribe("TaggedModelRemove" , function(args , player)
 		end
 	end
 	
-	MapEditor.ModelDataManager.WriteToDisk()
+	MapEditor.ModelDataManager.WriteTagsToDisk()
 end)

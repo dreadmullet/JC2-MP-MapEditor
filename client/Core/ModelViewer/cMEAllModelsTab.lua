@@ -14,6 +14,7 @@ function ModelViewerTabs.AllModels:__init(modelViewer)
 	self.page = self.modelViewer.tabControl:AddPage("All models"):GetPage()
 	
 	self.selectedModelButton = nil
+	self.modelPathToModelButton = {}
 	
 	-- If this uses a Tree like the modelviewer script does, it uses 500MB of memory and lags like
 	-- crazy. This is because it creates thousands of controls for each model. This solution loads
@@ -46,6 +47,13 @@ function ModelViewerTabs.AllModels:__init(modelViewer)
 	end
 end
 
+function ModelViewerTabs.AllModels:SetModelName(args)
+	local button = self.modelPathToModelButton[args.model]
+	if button ~= nil then
+		button:SetText(args.name)
+	end
+end
+
 -- GWEN events
 
 function ModelViewerTabs.AllModels:ArchiveSelected(archiveButton)
@@ -60,15 +68,19 @@ function ModelViewerTabs.AllModels:ArchiveSelected(archiveButton)
 		local buttonHeight = 16
 		
 		for index , model in ipairs(models) do
+			local modelPath = archive.."/"..model
+			
 			local button = LabelClickable.Create(modelsContainer)
 			button:SetDock(GwenPosition.Top)
-			button:SetText(model)
+			button:SetText(MapEditor.modelNames[modelPath] or model)
 			button:SetHeight(buttonHeight)
 			button:SetTextNormalColor(self.colors.modelText)
 			button:SetTextHoveredColor(self.colors.modelTextHovered)
 			button:SetDataString("model" , model)
 			button:SetDataString("archive" , archive)
 			button:Subscribe("Press" , self , self.ModelSelected)
+			
+			self.modelPathToModelButton[modelPath] = button
 		end
 		
 		modelsContainer:SetHeight(#models * buttonHeight)
