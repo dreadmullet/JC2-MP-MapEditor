@@ -11,17 +11,20 @@ function MapEditor.ModelChooser:__init(callback , instance)
 	-- Add our own controls to the model viewer's window.
 	
 	local base = BaseWindow.Create(MapEditor.modelViewer.window)
+	-- This is how you make it dock at the very bottom in GWEN. Yes.
+	base:SendToBack()
 	base:SetDock(GwenPosition.Bottom)
 	self.baseControl = base
 	
 	local button = Button.Create(self.baseControl)
+	button:SetMargin(Vector2(0 , 2) , Vector2(0 , 0))
 	button:SetDock(GwenPosition.Left)
 	button:SetText("Confirm")
 	button:SetWidth(80)
 	button:Subscribe("Press" , self , self.ConfirmButtonPressed)
 	self.confirmButton = button
 	
-	self.baseControl:SetHeight(self.confirmButton:GetHeight())
+	self.baseControl:SetHeight(self.confirmButton:GetHeight() + 2)
 	
 	self.gwenSubs = {}
 	local Sub = function(control , name , ourFunc)

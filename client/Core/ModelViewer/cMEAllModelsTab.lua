@@ -6,9 +6,9 @@ function ModelViewerTabs.AllModels:__init(modelViewer)
 	self.colors = {
 		modelRow =                 Color(136 , 136 , 136 , 26) ,
 		modelText =                Color(216 , 216 , 216 , 255) ,
-		modelTextHovered =         Color(240 , 240 , 240 , 255) ,
-		modelTextSelected =        Color(240 , 234 , 172 , 255) ,
-		modelTextSelectedHovered = Color(255 , 238 , 168 , 255) ,
+		modelTextHovered =         Color(255 , 255 , 255 , 255) ,
+		modelTextSelected =        Color(240 , 234 , 160 , 255) ,
+		modelTextSelectedHovered = Color(255 , 246 , 96 , 255) ,
 	}
 	
 	self.page = self.modelViewer.tabControl:AddPage("All models"):GetPage()
@@ -49,12 +49,13 @@ end
 -- GWEN events
 
 function ModelViewerTabs.AllModels:ArchiveSelected(archiveButton)
-	self.modelViewer.archive = archiveButton:GetDataString("archive")
+	local archive = archiveButton:GetDataString("archive")
+	
 	local hasLoadedModels = archiveButton:GetDataBool("hasLoadedModels")
 	local modelsContainer = archiveButton:GetDataObject("modelsContainer")
 	
 	if hasLoadedModels == false then
-		local models = MapEditor.modelList[self.modelViewer.archive]
+		local models = MapEditor.modelList[archive]
 		
 		local buttonHeight = 16
 		
@@ -66,6 +67,7 @@ function ModelViewerTabs.AllModels:ArchiveSelected(archiveButton)
 			button:SetTextNormalColor(self.colors.modelText)
 			button:SetTextHoveredColor(self.colors.modelTextHovered)
 			button:SetDataString("model" , model)
+			button:SetDataString("archive" , archive)
 			button:Subscribe("Press" , self , self.ModelSelected)
 		end
 		
@@ -88,7 +90,9 @@ function ModelViewerTabs.AllModels:ModelSelected(modelButton)
 	modelButton:SetTextHoveredColor(self.colors.modelTextSelectedHovered)
 	self.selectedModelButton = modelButton
 	
-	self.modelViewer.model = modelButton:GetDataString("model")
+	local model = modelButton:GetDataString("model")
+	local archive = modelButton:GetDataString("archive")
 	
+	self.modelViewer:SetModelPath(archive.."/"..model)
 	self.modelViewer:SpawnStaticObject()
 end
