@@ -10,6 +10,9 @@ function MapEditor.ModelViewer:__init()
 	self.isVisible = nil
 	self.oldCameraPosition = nil
 	self.oldCameraAngle = nil
+	self.modelBounds = nil
+	self.isUpdatingBounds = false
+	self.scaleCameraOnModelChange = true
 	
 	-- Window
 	
@@ -21,6 +24,27 @@ function MapEditor.ModelViewer:__init()
 	window:SetTitle("Model viewer")
 	window:Subscribe("WindowClosed" , self , self.WindowClosed)
 	self.window = window
+	
+	-- scaleCameraOnModelChange checkbox
+	
+	local checkBoxHeight = 16
+	
+	local base = BaseWindow.Create(self.window)
+	base:SetMargin(Vector2(0 , 1) , Vector2(0 , 10))
+	base:SetDock(GwenPosition.Top)
+	base:SetHeight(checkBoxHeight)
+	
+	local checkBox = CheckBox.Create(base)
+	checkBox:SetDock(GwenPosition.Left)
+	checkBox:SetSize(Vector2(checkBoxHeight , checkBoxHeight))
+	checkBox:SetChecked(self.scaleCameraOnModelChange)
+	checkBox:Subscribe("CheckChanged" , self , self.ScaleCameraCheckBoxChanged)
+	
+	local label = Label.Create(base)
+	-- SetPosition is the goto statement of GUI coding.
+	label:SetPosition(Vector2(checkBoxHeight + 4 , 3))
+	label:SetText("Scale camera on model change")
+	label:SizeToContents()
 	
 	-- Tab control
 	
@@ -108,6 +132,8 @@ function MapEditor.ModelViewer:__init()
 	-- Misc
 	
 	self:SetVisible(false)
+	
+	Events:Subscribe("PreTick" , self , self.PreTick)
 	
 	Network:Subscribe("ReceiveModelNames" , self , self.ReceiveModelNames)
 	
@@ -199,6 +225,42 @@ function MapEditor.ModelViewer:SpawnStaticObject()
 		angle = Angle(math.tau/2 , 0 , 0) ,
 		model = model ,
 	}
+	self.modelBounds = nil
+	self.isUpdatingBounds = true
+end
+
+-- Events
+
+function MapEditor.ModelViewer:PreTick()
+	if self.isUpdatingBounds == true then
+		if self.staticObject == nil then
+			self.isUpdatingBounds = false
+			return
+		end
+		
+		if IsValid(self.staticObject) == false then
+			return
+		end
+		
+		local b1 , b2 = self.staticObject:GetBoundingBox()
+		-- The bounds are sometimes zero if the object just spawned, probably only when it's loaded for
+		-- the first time.
+		local hasBounds = not(b1 == Vector3.Zero and b2 == Vector3.Zero)
+		if hasBounds and b1:IsNaN() == false and b2:IsNaN() == false then
+			local camPosition = MapEditor.map.camera:GetPosition()
+			b1 = b1 - camPosition
+			b2 = b2 - camPosition
+			
+			self.modelBounds = {b1 , b2}
+			self.isUpdatingBounds = false
+			
+			local size = Vector3.Distance(b1 , b2)
+			MapEditor.map.camera.targetPosition = camPosition + (b1 + b2) * 0.5
+			if self.scaleCameraOnModelChange == true then
+				MapEditor.map.camera.distance = 1.75 + size * 1.2
+			end
+		end
+	end
 end
 
 -- Network events
@@ -211,6 +273,10 @@ end
 
 function MapEditor.ModelViewer:WindowClosed()
 	self:SetVisible(false)
+end
+
+function MapEditor.ModelViewer:ScaleCameraCheckBoxChanged(checkBox)
+	self.scaleCameraOnModelChange = checkBox:GetChecked()
 end
 
 function MapEditor.ModelViewer:NameTextBoxChanged()
