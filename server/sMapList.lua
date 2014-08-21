@@ -28,7 +28,7 @@ Network:Subscribe("SaveMap" , function(args , player)
 	io.createdir(MapEditor.MapsList.mapsDirectory)
 	
 	local file = io.open(MapEditor.MapsList.mapsDirectory..args.name..".map" , "w")
-	file:write(JSON:encode_pretty(args.marshalledSource))
+	file:write(JSON:encode(args.marshalledSource))
 	file:close()
 	
 	Network:Send(player , "ConfirmMapSave")
