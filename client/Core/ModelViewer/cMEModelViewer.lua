@@ -106,14 +106,13 @@ function MapEditor.ModelViewer:__init()
 	
 	base:SetHeight(slightlyLargeFontSize + 2)
 	
-	-- Model label
+	-- Model textbox
 	
 	local base = BaseWindow.Create(self.window)
 	base:SetMargin(Vector2(0 , 2) , Vector2(0 , 2))
 	base:SetDock(GwenPosition.Bottom)
 	
 	local label = Label.Create(base)
-	label:SetMargin(Vector2(0 , 0) , Vector2(2 , 0))
 	label:SetDock(GwenPosition.Left)
 	label:SetAlignment(GwenPosition.CenterV)
 	label:SetTextSize(slightlyLargeFontSize)
@@ -121,13 +120,12 @@ function MapEditor.ModelViewer:__init()
 	label:SizeToContents()
 	label:SetWidth(labelWidth)
 	
-	local label = Label.Create(base)
-	label:SetDock(GwenPosition.Fill)
-	label:SetAlignment(bit32.bor(GwenPosition.CenterV , GwenPosition.Right))
-	label:SetText("[None]")
-	self.modelLabel = label
+	local textBox = TextBox.Create(base)
+	textBox:SetDock(GwenPosition.Fill)
+	textBox:Subscribe("Blur" , self , self.ModelTextBoxChanged)
+	self.modelTextBox = textBox
 	
-	base:SetHeight(slightlyLargeFontSize)
+	base:SetHeight(slightlyLargeFontSize + 2)
 	
 	-- Misc
 	
@@ -191,6 +189,8 @@ function MapEditor.ModelViewer:SetModelPath(modelPath)
 	self.modelPath = modelPath
 	-- Get the model's tags and set the text of the tags textbox.
 	if self.modelPath ~= nil then
+		self.modelTextBox:SetText(self.modelPath)
+		
 		self.nameTextBox:SetEnabled(true)
 		self.nameTextBox:SetText(MapEditor.modelNames[self.modelPath] or "")
 		
@@ -203,6 +203,8 @@ function MapEditor.ModelViewer:SetModelPath(modelPath)
 			self.tagsTextBox:SetText("")
 		end
 	else
+		self.modelTextBox:SetText("")
+		
 		self.nameTextBox:SetEnabled(false)
 		self.nameTextBox:SetText("")
 		
@@ -216,8 +218,6 @@ function MapEditor.ModelViewer:SpawnStaticObject()
 	if model == nil then
 		return
 	end
-	
-	self.modelLabel:SetText(model)
 	
 	if self.staticObject ~= nil then
 		self.staticObject:Remove()
@@ -349,6 +349,37 @@ end
 
 function MapEditor.ModelViewer:ScaleCameraCheckBoxChanged(checkBox)
 	self.scaleCameraOnModelChange = checkBox:GetChecked()
+end
+
+function MapEditor.ModelViewer:ModelTextBoxChanged()
+	local modelPath = self.modelTextBox:GetText()
+	
+	local OnInvalidPath = function()
+		self:SetModelPath(nil)
+		self.modelTextBox:SetText("[Invalid]")
+		
+		if self.staticObject ~= nil then
+			self.staticObject:Remove()
+			self.staticObject = nil
+		end
+	end
+	
+	local result = modelPath:find("/+[^/]*$") -- Find the last '/' in modelPath.
+	if result == nil then
+		OnInvalidPath()
+		return
+	end
+	local archive = modelPath:sub(1 , result - 1)
+	local model = modelPath:sub(result + 1)
+	
+	local models = MapEditor.modelList[archive]
+	if models == nil or table.find(models , model) == nil then
+		OnInvalidPath()
+		return
+	end
+	
+	self:SetModelPath(modelPath)
+	self:SpawnStaticObject()
 end
 
 function MapEditor.ModelViewer:NameTextBoxChanged()
