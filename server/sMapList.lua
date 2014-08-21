@@ -17,6 +17,13 @@ end)
 
 Network:Subscribe("SaveMap" , function(args , player)
 	print(player:GetName().." is saving map: "..args.name)
+	-- Convert the object table's keys to strings so that the json library doesn't fill up the gaps
+	-- between ids with "null, null, null, " spam.
+	local objectsWithStringKeys = {}
+	for index , object in pairs(args.marshalledSource.objects) do
+		objectsWithStringKeys[tostring(index)] = object
+	end
+	args.marshalledSource.objects = objectsWithStringKeys
 	
 	io.createdir(MapEditor.MapsList.mapsDirectory)
 	
