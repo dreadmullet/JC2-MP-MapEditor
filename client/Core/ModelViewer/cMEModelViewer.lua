@@ -354,6 +354,11 @@ end
 function MapEditor.ModelViewer:ModelTextBoxChanged()
 	local modelPath = self.modelTextBox:GetText()
 	
+	modelPath = modelPath:gsub(".blz/" , ".bl/")
+	modelPath = modelPath:gsub(".nlz/" , ".nl/")
+	modelPath = modelPath:gsub(".fl/" ,  ".nl/")
+	modelPath = modelPath:gsub(".flz/" , ".nl/")
+	
 	local OnInvalidPath = function()
 		self:SetModelPath(nil)
 		self.modelTextBox:SetText("[Invalid]")
