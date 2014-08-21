@@ -13,6 +13,7 @@ function MapEditor.ModelViewer:__init()
 	self.modelBounds = nil
 	self.isUpdatingBounds = false
 	self.scaleCameraOnModelChange = true
+	self.isMouseInWindow = false
 	
 	-- Window
 	
@@ -232,37 +233,57 @@ function MapEditor.ModelViewer:SpawnStaticObject()
 	self.isUpdatingBounds = true
 end
 
+function MapEditor.ModelViewer:UpdateStaticObjectBounds()
+	if self.staticObject == nil then
+		self.isUpdatingBounds = false
+		return
+	end
+	
+	if IsValid(self.staticObject) == false then
+		return
+	end
+	
+	local b1 , b2 = self.staticObject:GetBoundingBox()
+	-- The bounds are sometimes zero if the object just spawned, probably only when it's loaded for
+	-- the first time.
+	local hasBounds = not(b1 == Vector3.Zero and b2 == Vector3.Zero)
+	if hasBounds and b1:IsNaN() == false and b2:IsNaN() == false then
+		local camPosition = MapEditor.map.camera:GetPosition()
+		b1 = b1 - camPosition
+		b2 = b2 - camPosition
+		
+		self.modelBounds = {b1 , b2}
+		self.isUpdatingBounds = false
+		
+		local size = Vector3.Distance(b1 , b2)
+		MapEditor.map.camera.targetPosition = camPosition + (b1 + b2) * 0.5
+		if self.scaleCameraOnModelChange == true then
+			MapEditor.map.camera.distance = 1.75 + size * 1.2
+		end
+	end
+end
+
 -- Events
 
 function MapEditor.ModelViewer:PreTick()
 	if self.isUpdatingBounds == true then
-		if self.staticObject == nil then
-			self.isUpdatingBounds = false
-			return
+		self:UpdateStaticObjectBounds()
+	end
+	
+	-- If the mouse is outside the window, focus the window, which blurs textboxes and such.
+	-- Otherwise, GWEN likes to eat inputs which is extremely annoying.
+	local relativeMousePos = self.window:AbsoluteToRelative(Mouse:GetPosition())
+	local isInWindow = (
+		relativeMousePos.x >= 0 and
+		relativeMousePos.x <= self.window:GetWidth() and
+		relativeMousePos.y >= 0 and
+		relativeMousePos.y <= self.window:GetHeight()
+	)
+	if self.isMouseInWindow ~= isInWindow then
+		if isInWindow == false then
+			self.window:Focus()
 		end
-		
-		if IsValid(self.staticObject) == false then
-			return
-		end
-		
-		local b1 , b2 = self.staticObject:GetBoundingBox()
-		-- The bounds are sometimes zero if the object just spawned, probably only when it's loaded for
-		-- the first time.
-		local hasBounds = not(b1 == Vector3.Zero and b2 == Vector3.Zero)
-		if hasBounds and b1:IsNaN() == false and b2:IsNaN() == false then
-			local camPosition = MapEditor.map.camera:GetPosition()
-			b1 = b1 - camPosition
-			b2 = b2 - camPosition
-			
-			self.modelBounds = {b1 , b2}
-			self.isUpdatingBounds = false
-			
-			local size = Vector3.Distance(b1 , b2)
-			MapEditor.map.camera.targetPosition = camPosition + (b1 + b2) * 0.5
-			if self.scaleCameraOnModelChange == true then
-				MapEditor.map.camera.distance = 1.75 + size * 1.2
-			end
-		end
+		self.isMouseInWindow = isInWindow
 	end
 end
 
@@ -385,10 +406,14 @@ function MapEditor.ModelViewer:ModelTextBoxChanged()
 	
 	self:SetModelPath(modelPath)
 	self:SpawnStaticObject()
+	
+	self.window:Blur()
 end
 
 function MapEditor.ModelViewer:NameTextBoxChanged()
 	Network:Send("SetModelName" , {model = self.modelPath , name = self.nameTextBox:GetText()})
+	
+	self.window:Blur()
 end
 
 function MapEditor.ModelViewer:TagsTextBoxChanged()
@@ -421,4 +446,6 @@ function MapEditor.ModelViewer:TagsTextBoxChanged()
 			Network:Send("TaggedModelAdd" , {tag = tag , model = self.modelPath})
 		end
 	end
+	
+	self.window:Blur()
 end
