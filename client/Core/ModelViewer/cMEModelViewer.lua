@@ -406,8 +406,6 @@ function MapEditor.ModelViewer:ModelTextBoxChanged()
 	
 	self:SetModelPath(modelPath)
 	self:SpawnStaticObject()
-	
-	self.window:Blur()
 end
 
 function MapEditor.ModelViewer:NameTextBoxChanged()
