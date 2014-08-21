@@ -1,2 +1,3 @@
 *.blend*
-maps/
+*.map
+*.course
