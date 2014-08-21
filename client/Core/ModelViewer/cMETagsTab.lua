@@ -53,7 +53,7 @@ function ModelViewerTabs.Tags:SetModelName(args)
 		if modelButtons ~= nil then
 			local modelButton = modelButtons[args.model]
 			if modelButton ~= nil then
-				modelButton:SetText(args.name)
+				modelButton:SetText(args.name or args.model)
 			end
 		end
 	end

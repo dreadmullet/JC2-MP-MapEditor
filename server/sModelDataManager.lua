@@ -73,9 +73,12 @@ end)
 Network:Subscribe("SetModelName" , function(args , player)
 	if args.name:len() == 0 then
 		MapEditor.modelNames[args.model] = nil
+		args.name = nil
 	else
 		MapEditor.modelNames[args.model] = args.name
 	end
+	
+	Network:Broadcast("ReceiveModelName" , args)
 	
 	MapEditor.ModelDataManager.WriteNamesToDisk()
 end)
@@ -118,6 +121,8 @@ Network:Subscribe("TaggedModelAdd" , function(args , player)
 		end
 	end
 	
+	Network:Broadcast("ReceiveTaggedModelAdd" , args)
+	
 	MapEditor.ModelDataManager.WriteTagsToDisk()
 end)
 
@@ -149,6 +154,8 @@ Network:Subscribe("TaggedModelRemove" , function(args , player)
 			break
 		end
 	end
+	
+	Network:Broadcast("ReceiveTaggedModelRemove" , args)
 	
 	MapEditor.ModelDataManager.WriteTagsToDisk()
 end)

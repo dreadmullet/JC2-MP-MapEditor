@@ -136,6 +136,9 @@ function MapEditor.ModelViewer:__init()
 	Events:Subscribe("PreTick" , self , self.PreTick)
 	
 	Network:Subscribe("ReceiveModelNames" , self , self.ReceiveModelNames)
+	Network:Subscribe("ReceiveModelName" , self , self.ReceiveModelName)
+	Network:Subscribe("ReceiveTaggedModelAdd" , self , self.ReceiveTaggedModelAdd)
+	Network:Subscribe("ReceiveTaggedModelRemove" , self , self.ReceiveTaggedModelRemove)
 	
 	Network:Send("RequestModelNames" , ".")
 end
@@ -269,6 +272,75 @@ function MapEditor.ModelViewer:ReceiveModelNames(modelNames)
 	MapEditor.modelNames = modelNames
 end
 
+function MapEditor.ModelViewer:ReceiveModelName(args)
+	MapEditor.modelNames[args.model] = args.name
+	
+	self.tabs.allModels:SetModelName(args)
+	self.tabs.tags:SetModelName(args)
+end
+
+function MapEditor.ModelViewer:ReceiveTaggedModelAdd(args)
+	-- Get the existingTags array.
+	local existingTags = MapEditor.modelToTags[args.model]
+	-- If it doesn't exist yet, create it.
+	if existingTags == nil then
+		existingTags = {}
+		MapEditor.modelToTags[args.model] = existingTags
+	end
+	-- Add args.tag to MapEditor.modelToTags[args.model].
+	table.insert(existingTags , args.tag)
+	-- If this is the first model with this tag, add an entry to MapEditor.taggedModels.
+	local models = MapEditor.taggedModels[args.tag]
+	if models == nil then
+		models = {}
+		local newEntry = {args.tag , models}
+		table.insert(MapEditor.taggedModels , newEntry)
+		
+		MapEditor.taggedModels[args.tag] = models
+	end
+	-- Add args.model to MapEditor.taggedModels[args.tag].
+	table.insert(models , args.model)
+	-- Add the model button to the tags tab.
+	self.tabs.tags:AddModelButton{tag = args.tag , model = args.model}
+	self.tabs.tags:UpdateTag(args.tag)
+end
+
+function MapEditor.ModelViewer:ReceiveTaggedModelRemove(args)
+	-- Get the existingTags array.
+	local existingTags = MapEditor.modelToTags[args.model]
+	-- If it doesn't exist yet, create it.
+	if existingTags == nil then
+		existingTags = {}
+		MapEditor.modelToTags[args.model] = existingTags
+	end
+	-- Remove args.tag from MapEditor.modelToTags[args.model].
+	table.remove(existingTags , index)
+	-- Remove args.model from MapEditor.taggedModels[args.tag].
+	local models = MapEditor.taggedModels[args.tag]
+	for index , model in ipairs(models) do
+		if model == args.model then
+			table.remove(models , index)
+			break
+		end
+	end
+	-- If no more models have this tag, remove the tag entry from MapEditor.taggedModels.
+	if #models == 0 then
+		MapEditor.taggedModels[args.tag] = nil
+		for index , tagEntry in ipairs(MapEditor.taggedModels) do
+			if tagEntry[1] == args.tag then
+				table.remove(MapEditor.taggedModels , index)
+				break
+			end
+		end
+	end
+	-- Remove the model button from the tags tab.
+	self.tabs.tags:RemoveModelButton{
+		tag = args.tag ,
+		model = args.model ,
+		removeTag = #models == 0 ,
+	}
+end
+
 -- GWEN events
 
 function MapEditor.ModelViewer:WindowClosed()
@@ -280,14 +352,7 @@ function MapEditor.ModelViewer:ScaleCameraCheckBoxChanged(checkBox)
 end
 
 function MapEditor.ModelViewer:NameTextBoxChanged()
-	local args = {model = self.modelPath , name = self.nameTextBox:GetText()}
-	
-	MapEditor.modelNames[args.model] = args.name
-	
-	self.tabs.allModels:SetModelName(args)
-	self.tabs.tags:SetModelName(args)
-	
-	Network:Send("SetModelName" , args)
+	Network:Send("SetModelName" , {model = self.modelPath , name = self.nameTextBox:GetText()})
 end
 
 function MapEditor.ModelViewer:TagsTextBoxChanged()
@@ -311,56 +376,12 @@ function MapEditor.ModelViewer:TagsTextBoxChanged()
 	for index = #existingTags , 1 , -1 do
 		local tag = existingTags[index]
 		if table.find(newTags , tag) == nil then
-			-- Remove the tag from MapEditor.modelToTags[self.modelPath].
-			table.remove(existingTags , index)
-			-- Remove self.modelPath from MapEditor.taggedModels[tag].
-			local models = MapEditor.taggedModels[tag]
-			for index , model in ipairs(models) do
-				if model == self.modelPath then
-					table.remove(models , index)
-					break
-				end
-			end
-			-- If no more models have this tag, remove the tag entry from MapEditor.taggedModels.
-			if #models == 0 then
-				MapEditor.taggedModels[tag] = nil
-				for index , tagEntry in ipairs(MapEditor.taggedModels) do
-					if tagEntry[1] == tag then
-						table.remove(MapEditor.taggedModels , index)
-						break
-					end
-				end
-			end
-			-- Remove the model button from the tags tab.
-			self.tabs.tags:RemoveModelButton{
-				tag = tag ,
-				model = self.modelPath ,
-				removeTag = #models == 0 ,
-			}
-			-- Tell the server-side to remove the model's tag.
 			Network:Send("TaggedModelRemove" , {tag = tag , model = self.modelPath})
 		end
 	end
 	-- Find any tags in newTags that aren't in existingTags and add them.
 	for index , tag in ipairs(newTags) do
 		if table.find(existingTags , tag) == nil then
-			-- Add the tag to MapEditor.modelToTags[self.modelPath].
-			table.insert(existingTags , tag)
-			-- If this is the first model with this tag, add an entry to MapEditor.taggedModels.
-			local models = MapEditor.taggedModels[tag]
-			if models == nil then
-				models = {}
-				local newEntry = {tag , models}
-				table.insert(MapEditor.taggedModels , newEntry)
-				
-				MapEditor.taggedModels[tag] = models
-			end
-			-- Add self.modelPath to MapEditor.taggedModels[tag].
-			table.insert(models , self.modelPath)
-			-- Add the model button to the tags tab.
-			self.tabs.tags:AddModelButton{tag = tag , model = self.modelPath}
-			self.tabs.tags:UpdateTag(tag)
-			-- Tell the server-side to add the model's tag.
 			Network:Send("TaggedModelAdd" , {tag = tag , model = self.modelPath})
 		end
 	end

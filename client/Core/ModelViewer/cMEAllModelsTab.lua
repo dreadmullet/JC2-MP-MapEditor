@@ -50,7 +50,7 @@ end
 function ModelViewerTabs.AllModels:SetModelName(args)
 	local button = self.modelPathToModelButton[args.model]
 	if button ~= nil then
-		button:SetText(args.name)
+		button:SetText(args.name or button:GetDataString("model"))
 	end
 end
 
