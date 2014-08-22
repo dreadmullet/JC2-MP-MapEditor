@@ -21,7 +21,7 @@ end
 function Actions.SaveLoadBase:CreateWindow()
 	local window = Window.Create()
 	window:SetTitle("Save/load menu")
-	window:SetSize(Vector2(270 , 230))
+	window:SetSize(Vector2(340 , 440))
 	window:Subscribe("WindowClosed" , self , Actions.SaveLoadBase.WindowClosed)
 	self.window = window
 	
