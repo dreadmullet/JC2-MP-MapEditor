@@ -55,39 +55,9 @@ function ModelViewerTabs.Tags:SetModelName(args)
 			if modelButton ~= nil then
 				modelButton:SetText(args.name or args.model)
 			end
+			
+			self:SortModelButtons(tag)
 		end
-	end
-end
-
--- Network events
-
-function ModelViewerTabs.Tags:ReceiveTaggedModels(taggedModels)
-	MapEditor.taggedModels = taggedModels
-	MapEditor.modelToTags = {}
-	
-	-- Makes it so you can do: local models = MapEditor.taggedModels["Some Tag"]
-	for index , tagEntry in ipairs(MapEditor.taggedModels) do
-		MapEditor.taggedModels[tagEntry[1]] = tagEntry[2]
-	end
-	
-	-- Makes it so you can do, local tags = MapEditor.modelToTags["SomeModel.lod"]
-	for index , tagEntry in ipairs(MapEditor.taggedModels) do
-		local tag = tagEntry[1]
-		local models = tagEntry[2]
-		
-		for index , model in ipairs(models) do
-			if MapEditor.modelToTags[model] ~= nil then
-				table.insert(MapEditor.modelToTags[model] , tag)
-			else
-				MapEditor.modelToTags[model] = {tag}
-			end
-		end
-	end
-	
-	self.tagsArea:RemoveAllChildren()
-	
-	for index , tagEntry in ipairs(MapEditor.taggedModels) do
-		self:AddTagButton{tag = tagEntry[1] , models = tagEntry[2]}
 	end
 end
 
@@ -121,6 +91,8 @@ function ModelViewerTabs.Tags:AddModelButton(args)
 		self:AddTagButton{tag = args.tag , models = {args.model}}
 		tagButton = self.tagToTagButton[args.tag]
 		tagButton:SetDataBool("hasLoadedModels" , true)
+		
+		self:SortTagButtons()
 	end
 	
 	local modelsContainer = tagButton:GetDataObject("modelsContainer")
@@ -174,6 +146,83 @@ function ModelViewerTabs.Tags:UpdateTag(tag)
 	local modelsContainer = tagButton:GetDataObject("modelsContainer")
 	modelsContainer:SetHeight(#models * self.modelButtonHeight)
 end
+
+function ModelViewerTabs.Tags:SortTagButtons()
+	local tags = {}
+	
+	for tag , tagButton in pairs(self.tagToTagButton) do
+		table.insert(tags , tag)
+	end
+	
+	table.sort(tags , function(a , b)
+		return a:lower() < b:lower()
+	end)
+	
+	for index , tag in ipairs(tags) do
+		self.tagToTagButton[tag]:BringToFront()
+	end
+end
+
+function ModelViewerTabs.Tags:SortModelButtons(tag)
+	local namedModels = {}
+	local unnamedModels = {}
+	
+	local modelButtons = self.tagToModelButtons[tag]
+	for model , modelButton in pairs(modelButtons) do
+		if MapEditor.modelNames[model] ~= nil then
+			table.insert(namedModels , model)
+		else
+			table.insert(unnamedModels , model)
+		end
+	end
+	
+	table.sort(namedModels , function(a , b)
+		return MapEditor.modelNames[a]:lower() < MapEditor.modelNames[b]:lower()
+	end)
+	
+	table.sort(unnamedModels)
+	
+	for index , model in ipairs(namedModels) do
+		modelButtons[model]:BringToFront()
+	end
+	for index , model in ipairs(unnamedModels) do
+		modelButtons[model]:BringToFront()
+	end
+end
+
+-- Network events
+
+function ModelViewerTabs.Tags:ReceiveTaggedModels(taggedModels)
+	MapEditor.taggedModels = taggedModels
+	MapEditor.modelToTags = {}
+	
+	-- Makes it so you can do: local models = MapEditor.taggedModels["Some Tag"]
+	for index , tagEntry in ipairs(MapEditor.taggedModels) do
+		MapEditor.taggedModels[tagEntry[1]] = tagEntry[2]
+	end
+	
+	-- Makes it so you can do, local tags = MapEditor.modelToTags["SomeModel.lod"]
+	for index , tagEntry in ipairs(MapEditor.taggedModels) do
+		local tag = tagEntry[1]
+		local models = tagEntry[2]
+		
+		for index , model in ipairs(models) do
+			if MapEditor.modelToTags[model] ~= nil then
+				table.insert(MapEditor.modelToTags[model] , tag)
+			else
+				MapEditor.modelToTags[model] = {tag}
+			end
+		end
+	end
+	
+	self.tagsArea:RemoveAllChildren()
+	
+	for index , tagEntry in ipairs(MapEditor.taggedModels) do
+		self:AddTagButton{tag = tagEntry[1] , models = tagEntry[2]}
+	end
+	self:SortTagButtons()
+end
+
 -- GWEN events
 
 function ModelViewerTabs.Tags:TagSelected(tagButton)
@@ -200,6 +249,8 @@ function ModelViewerTabs.Tags:TagSelected(tagButton)
 		for index , model in ipairs(models) do
 			self:AddModelButton{tag = tag , model = model}
 		end
+		
+		self:SortModelButtons(tag)
 		
 		modelsContainer:SetHeight(#models * self.modelButtonHeight)
 	end

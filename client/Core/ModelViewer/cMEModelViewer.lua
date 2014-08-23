@@ -324,6 +324,7 @@ function MapEditor.ModelViewer:ReceiveTaggedModelAdd(args)
 	-- Add the model button to the tags tab.
 	self.tabs.tags:AddModelButton{tag = args.tag , model = args.model}
 	self.tabs.tags:UpdateTag(args.tag)
+	self.tabs.tags:SortModelButtons(args.tag)
 end
 
 function MapEditor.ModelViewer:ReceiveTaggedModelRemove(args)
