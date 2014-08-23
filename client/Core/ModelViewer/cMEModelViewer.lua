@@ -15,6 +15,24 @@ function MapEditor.ModelViewer:__init()
 	self.scaleCameraOnModelChange = true
 	self.isMouseInWindow = false
 	
+	self:CreateWindow()
+	
+	self:SetVisible(false)
+	
+	Events:Subscribe("PreTick" , self , self.PreTick)
+	
+	Network:Subscribe("ReceiveModelNames" , self , self.ReceiveModelNames)
+	Network:Subscribe("ReceiveModelName" , self , self.ReceiveModelName)
+	Network:Subscribe("ReceiveTaggedModelAdd" , self , self.ReceiveTaggedModelAdd)
+	Network:Subscribe("ReceiveTaggedModelRemove" , self , self.ReceiveTaggedModelRemove)
+	
+	Network:Send("RequestModelNames" , ".")
+end
+
+function MapEditor.ModelViewer:CreateWindow()
+	local slightlyLargeFontSize = 16
+	local labelWidth = 60
+	
 	-- Window
 	
 	local size = Vector2(180 + Render.Width * 0.125 , 250 + Render.Height * 0.25)
@@ -47,6 +65,28 @@ function MapEditor.ModelViewer:__init()
 	label:SetText("Scale camera on model change")
 	label:SizeToContents()
 	
+	-- Search textbox
+	
+	local base = BaseWindow.Create(self.window)
+	base:SetMargin(Vector2(0 , 0) , Vector2(2 , 6))
+	base:SetDock(GwenPosition.Top)
+	
+	local label = Label.Create(base)
+	label:SetDock(GwenPosition.Left)
+	label:SetAlignment(GwenPosition.CenterV)
+	label:SetTextSize(slightlyLargeFontSize)
+	label:SetText("Search ")
+	label:SizeToContents()
+	label:SetWidth(labelWidth)
+	
+	local textBox = TextBox.Create(base)
+	textBox:SetDock(GwenPosition.Fill)
+	textBox:SetText("")
+	textBox:Subscribe("Blur" , self , self.SearchTextBoxChanged)
+	self.searchTextBox = textBox
+	
+	base:SetHeight(slightlyLargeFontSize + 2)
+	
 	-- Tab control
 	
 	self.tabControl = TabControl.Create(self.window)
@@ -55,11 +95,9 @@ function MapEditor.ModelViewer:__init()
 	self.tabs = {
 		allModels = ModelViewerTabs.AllModels(self) ,
 		tags = ModelViewerTabs.Tags(self) ,
+		searchResults = ModelViewerTabs.SearchResults(self) ,
 		-- recentlyUsed = ModelViewerTabs.RecentlyUsed(self) ,
 	}
-	
-	local slightlyLargeFontSize = 16
-	local labelWidth = 60
 	
 	-- Tag textbox
 	
@@ -110,7 +148,7 @@ function MapEditor.ModelViewer:__init()
 	-- Model textbox
 	
 	local base = BaseWindow.Create(self.window)
-	base:SetMargin(Vector2(0 , 2) , Vector2(0 , 2))
+	base:SetMargin(Vector2(0 , 2) , Vector2(2 , 2))
 	base:SetDock(GwenPosition.Bottom)
 	
 	local label = Label.Create(base)
@@ -127,19 +165,6 @@ function MapEditor.ModelViewer:__init()
 	self.modelTextBox = textBox
 	
 	base:SetHeight(slightlyLargeFontSize + 2)
-	
-	-- Misc
-	
-	self:SetVisible(false)
-	
-	Events:Subscribe("PreTick" , self , self.PreTick)
-	
-	Network:Subscribe("ReceiveModelNames" , self , self.ReceiveModelNames)
-	Network:Subscribe("ReceiveModelName" , self , self.ReceiveModelName)
-	Network:Subscribe("ReceiveTaggedModelAdd" , self , self.ReceiveTaggedModelAdd)
-	Network:Subscribe("ReceiveTaggedModelRemove" , self , self.ReceiveTaggedModelRemove)
-	
-	Network:Send("RequestModelNames" , ".")
 end
 
 function MapEditor.ModelViewer:Destroy()
@@ -367,6 +392,17 @@ end
 
 function MapEditor.ModelViewer:WindowClosed()
 	self:SetVisible(false)
+end
+
+function MapEditor.ModelViewer:SearchTextBoxChanged()
+	self.tabControl:SetCurrentTab(self.tabs.searchResults.tabButton)
+	
+	local text = self.searchTextBox:GetText()
+	if text:len() > 0 then
+		self.tabs.searchResults:Search(text)
+	else
+		self.tabs.searchResults:Clear()
+	end
 end
 
 function MapEditor.ModelViewer:ScaleCameraCheckBoxChanged(checkBox)
