@@ -18,7 +18,7 @@ function Actions.Move:OnProcess(objectInfo , mouse , pivot)
 		local result = Physics:Raycast(
 			Camera:GetPosition() ,
 			Render:ScreenToWorldDirection(Mouse:GetPosition()) ,
-			0.2 ,
+			0 ,
 			2000
 		)
 		delta = result.position - objectInfo.startTransform.position
